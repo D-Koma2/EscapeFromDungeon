@@ -29,44 +29,33 @@
         private void InitializeComponent()
         {
             mainPicture = new PictureBox();
-            mapPicture = new PictureBox();
             ((System.ComponentModel.ISupportInitialize)mainPicture).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)mapPicture).BeginInit();
             SuspendLayout();
             // 
             // mainPicture
             // 
+            mainPicture.BackColor = Color.Gray;
             mainPicture.Location = new Point(42, 26);
             mainPicture.Name = "mainPicture";
             mainPicture.Size = new Size(486, 337);
             mainPicture.TabIndex = 0;
             mainPicture.TabStop = false;
             // 
-            // mapPicture
-            // 
-            mapPicture.Location = new Point(122, 76);
-            mapPicture.Name = "mapPicture";
-            mapPicture.Size = new Size(351, 222);
-            mapPicture.TabIndex = 1;
-            mapPicture.TabStop = false;
-            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
+            BackColor = Color.Black;
             ClientSize = new Size(792, 514);
-            Controls.Add(mapPicture);
             Controls.Add(mainPicture);
             Name = "Form1";
             Text = "Form1";
             ((System.ComponentModel.ISupportInitialize)mainPicture).EndInit();
-            ((System.ComponentModel.ISupportInitialize)mapPicture).EndInit();
             ResumeLayout(false);
         }
 
         #endregion
 
         private PictureBox mainPicture;
-        private PictureBox mapPicture;
     }
 }
