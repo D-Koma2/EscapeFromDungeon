@@ -12,20 +12,19 @@ namespace EscapeFromDungeon
     {
         private const int barWidth = 200;
         private const int barHeight = 20;
-        private const int barX = 20;
-        private const int barY = 20;
+        private const int barX = 10;
+        private const int barY = 10;
 
-        public void DrawHPBar(PictureBox infoBox, Player player)
+        public void DrawHPBar(Graphics g, Player player)
         {
             float hpRatio = (float)player.Hp / player.MaxHp; // HP割合
 
             // HPの割合で色を決定
             Brush hpBrush;
             if (hpRatio > 0.6f) hpBrush = Brushes.Green;
-            else if (hpRatio > 0.3f) hpBrush = Brushes.Yellow;
+            else if (hpRatio > 0.3f) hpBrush = Brushes.DarkOrange;
             else hpBrush = Brushes.Red;
 
-            Graphics g = Graphics.FromImage(infoBox.Image);
             // 背景（最大HP）
             g.FillRectangle(Brushes.DarkGray, barX, barY, barWidth, barHeight);
 
@@ -40,7 +39,7 @@ namespace EscapeFromDungeon
             string hpText = $"HP: {player.Hp} / {player.MaxHp}";
             using (Font font = new Font("Arial", 10))
             {
-                g.DrawString(hpText, font, Brushes.White, barX + 120, barY + 2);
+                g.DrawString(hpText, font, Brushes.White, barX + 10, barY + 2);
             }
         }
     }

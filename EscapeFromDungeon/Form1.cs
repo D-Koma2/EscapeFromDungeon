@@ -6,7 +6,7 @@
         private Map map;
         private PictureBox mapImage, overlayImg, playerImg;
         private GameManager gameManager;
-        private System.Timers.Timer scrollTimer;
+        private DrawInfo drawInfo;
 
         public Form1()
         {
@@ -18,6 +18,7 @@
         {
             map = new Map(file);
             gameManager = new GameManager();
+            drawInfo = new DrawInfo();
 
             InitPictureBoxes();
 
@@ -76,7 +77,13 @@
             map.DrawBrightness(overlayImg);
             playerImg.Image = gameManager.player.playerImage;
             overlayImg.Invalidate();
+            StateBox.Invalidate();
             DispPoint();
+        }
+
+        private void StateBox_Paint(object sender, PaintEventArgs e)
+        {
+            drawInfo. DrawHPBar(e.Graphics, gameManager.player);
         }
 
         // デバッグ用

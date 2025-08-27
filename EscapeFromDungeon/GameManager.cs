@@ -20,6 +20,7 @@ namespace EscapeFromDungeon
             {
                 Name = "Hero",
                 Hp = 100,
+                MaxHp = 100,
                 Attack = 20,
                 Defence = 10,
                 Speed = 5,
@@ -107,9 +108,10 @@ namespace EscapeFromDungeon
 
         private void CheckEvent()
         {
+            player.Hp--;
             turnCount++;
             player.Limit--;
-            if (player.Limit == 0) Gameover();
+            if (player.Limit == 0 || player.Hp == 0) Gameover();
             if (turnCount % 33 == 0)
             {
                 Map.viewRadius--;
