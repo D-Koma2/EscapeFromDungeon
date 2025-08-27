@@ -52,6 +52,7 @@
             StateBox.Size = new Size(230, 214);
             StateBox.TabIndex = 1;
             StateBox.TabStop = false;
+            StateBox.Paint += StateBox_Paint;
             // 
             // label1
             // 

@@ -24,8 +24,21 @@ namespace EscapeFromDungeon
 
     class Character
     {
+        private int hp;
+
         public string Name { get; set; }
-        public int Hp { get; set; }
+        public int Hp
+        {
+            get => hp;
+            set
+            {
+                if (value < 0)
+                {
+                    hp = 0;
+                }
+                hp = value;
+            }
+        }
         public int MaxHp { get; set; }
         public int Attack { get; set; }
         public int Defence { get; set; }
