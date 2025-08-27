@@ -4,7 +4,7 @@
     {
         private string file = "map.csv";
         private Map map;
-        private PictureBox mapImage, overlayBox, playerImg;
+        private PictureBox mapImage, overlayImg, playerImg;
         private GameManager gameManager;
         private System.Timers.Timer scrollTimer;
 
@@ -19,8 +19,20 @@
             map = new Map(file);
             gameManager = new GameManager();
 
+            InitPictureBoxes();
+
+            map.Draw(mapImage);
+            map.DrawBrightness(overlayImg);
+            gameManager.SetMapPos(mapImage, overlayImg, playerImg);
+            DispPoint();
+        }
+
+        private void InitPictureBoxes()
+        {
+            //マップ画像の枠　入れ子の親
             mapDrawBox.Size = new Size(Map.tileSize * 13, Map.tileSize * 13);
 
+            // マップ画像　入れ子の子
             mapImage = new PictureBox
             {
                 Size = new Size(map.Width * Map.tileSize, map.Height * Map.tileSize),
@@ -31,8 +43,8 @@
 
             mapDrawBox.Controls.Add(mapImage);
 
-            // ライト用オーバーレイ
-            overlayBox = new PictureBox
+            // オーバーレイ画像
+            overlayImg = new PictureBox
             {
                 Size = mapDrawBox.Size,
                 Location = new Point(0, 0),
@@ -41,39 +53,38 @@
                 Parent = mapImage // mapImageの上に重ねる
             };
 
-            overlayBox.BringToFront(); // mapImageの上に表示
+            overlayImg.BringToFront(); // mapImageの上に表示
 
+            // プレイヤー画像
             playerImg = new PictureBox
             {
                 Size = new(Map.tileSize, Map.tileSize),
                 Location = new Point(Map.playerPos.X * Map.tileSize, Map.playerPos.Y * Map.tileSize),
                 BackColor = Color.Transparent,
                 Image = gameManager.player.playerImage,
-                Parent = overlayBox
+                Parent = overlayImg
             };
 
-            overlayBox.Controls.Add(playerImg);
+            overlayImg.Controls.Add(playerImg);
             playerImg.BringToFront(); // mapImageの上に表示
-
-            map.Draw(mapImage);
-            map.DrawBrightness(overlayBox);
-
-            gameManager.SetMapPos(mapImage, overlayBox, playerImg);
-            DispPoint();
         }
 
         private void MainForm_KeyDown(object sender, KeyEventArgs e)
         {
-            gameManager.KeyInput(e.KeyCode, mapImage, overlayBox, map);
+            gameManager.KeyInput(e.KeyCode, mapImage, overlayImg, map);
+            map.ClearBrightness(overlayImg);
+            map.DrawBrightness(overlayImg);
             playerImg.Image = gameManager.player.playerImage;
-            overlayBox.Invalidate();
+            overlayImg.Invalidate();
             DispPoint();
         }
 
+        // デバッグ用
         private void DispPoint()
         {
-            label1.Text = $"({Map.playerPos.X}, {Map.playerPos.Y}) mI:({mapImage.Location.X},{mapImage.Location.Y}) " +
-                $"ob:({overlayBox.Location.X},{overlayBox.Location.Y}) pi:({playerImg.Location.X},{playerImg.Location.Y})";
+            label1.Text = $"XY:({Map.playerPos.X}, {Map.playerPos.Y}) limit:{gameManager.player.Limit} " +
+                $"mi:({mapImage.Location.X},{mapImage.Location.Y}) " +
+                $"oi:({overlayImg.Location.X},{overlayImg.Location.Y}) pi:({playerImg.Location.X},{playerImg.Location.Y})";
         }
 
     }//class
