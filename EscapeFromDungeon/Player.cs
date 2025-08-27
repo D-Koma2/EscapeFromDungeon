@@ -39,6 +39,8 @@ namespace EscapeFromDungeon
 
     internal class Player : Character
     {
+        private int limit = 999;
+
         public enum Direction { Up, Down, Left, Right }
 
         public Direction Dir { get; set; } = Direction.Up;
@@ -48,6 +50,20 @@ namespace EscapeFromDungeon
         public int Lv { get; private set; } = 1;
 
         public int Exp { get; set; }
+
+        public int Limit
+        {
+            get => limit;
+
+            set
+            {
+                if (value < 0)
+                {
+                    limit = 0;
+                }
+                limit = value;
+            }
+        }
 
         public List<Item> Inventry { get; private set; }
 

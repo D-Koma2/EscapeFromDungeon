@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -13,15 +14,14 @@ namespace EscapeFromDungeon
         private static readonly Brush passableBrush = Brushes.LightGray;
         private static readonly Brush blockedBrush = Brushes.DarkSlateGray;
 
-        public static Point playerPos = new Point(6, 6); // マップ上の座標
-        public static Point playerDispPos = new Point(6, 6); //プレイヤー表示座標
+        public static Point playerPos = new Point(6, 6); // マップ上の座標(map.csvの"S"で変更)
+        public static Point playerDispPos = new Point(6, 6); //プレイヤー表示座標(map中央固定)
+
+        public static int viewRadius = 12;// 歩数やアイテムで変化させる
 
         public const int tileSize = 32;
         public int MapX { get; set; }
         public int MapY { get; set; }
-
-        // プレイヤーから何マス見えるか
-        public int ViewRadius { get; set; } = 6;
 
         public int[,]? MapData { get; private set; }
 
@@ -112,29 +112,27 @@ namespace EscapeFromDungeon
 
         public void DrawBrightness(PictureBox overlayBox)
         {
-            int size = 32;
-
             using (Graphics g = Graphics.FromImage(overrayCanvas))
             {
                 for (int y = 0; y < Height; y++)
                 {
                     for (int x = 0; x < Width; x++)
                     {
-                        Rectangle rect = new Rectangle(x * size, y * size, size, size);
+                        Rectangle rect = new Rectangle(x * Map.tileSize, y * Map.tileSize, Map.tileSize, Map.tileSize);
 
                         // 視界判定
                         int dx = x - playerDispPos.X;
                         int dy = y - playerDispPos.Y;
                         double distance = Math.Sqrt(dx * dx + dy * dy);
                         //  視界制限が無効かどうか　もしくは　視界内かどうか
-                        bool isVisible = !GameManager.IsVisionEnabled || distance / 2 <= ViewRadius;
+                        bool isVisible = !GameManager.IsVisionEnabled || distance / 2 <= viewRadius;
 
                         if (isVisible)
                         {
                             if (GameManager.IsVisionEnabled)
                             {
                                 // ライト風の暗さを重ねる
-                                double brightness = 1.0 - (distance / ViewRadius);
+                                double brightness = 1.0 - (distance / viewRadius);
                                 int alpha = (int)((1.0 - brightness) * 255);
                                 alpha = Math.Min(255, Math.Max(0, alpha));// アルファ値を0-255の範囲に制限
                                 Color overlayColor = Color.FromArgb(alpha, 10, 0, 10);
@@ -153,6 +151,12 @@ namespace EscapeFromDungeon
                 }
 
             }
+        }
+
+        public void ClearBrightness(PictureBox overlayBox)
+        {
+            overrayCanvas = new Bitmap(Width * tileSize, Height * tileSize);
+            overlayBox.Image = overrayCanvas;
         }
 
         public bool CanMoveTo(int x, int y)
