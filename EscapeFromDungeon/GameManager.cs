@@ -82,6 +82,18 @@ namespace EscapeFromDungeon
                 mapImage.Location = current1;
                 overlayBox.Location = current2;
             }
+
+            Console.WriteLine($"x:{Map.playerPos.X} y:{Map.playerPos.Y}");
+        }
+
+        public void SetMapPos(PictureBox mapImage, PictureBox overlayBox, PictureBox playerImage)
+        {
+            int moveX = Map.tileSize * (Map.playerPos.X - 6);
+            int moveY = Map.tileSize * (Map.playerPos.Y - 6);
+
+            mapImage.Location = new Point(-moveX, -moveY);
+            overlayBox.Location = new Point(moveX, moveY);
+            playerImage.Location = new Point(Map.tileSize * 6, Map.tileSize * 6);
         }
 
     }//class

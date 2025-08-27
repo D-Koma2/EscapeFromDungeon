@@ -13,7 +13,8 @@ namespace EscapeFromDungeon
         private static readonly Brush passableBrush = Brushes.LightGray;
         private static readonly Brush blockedBrush = Brushes.DarkSlateGray;
 
-        public static Point playerPos = new Point(6, 6); // マップ上の座標   
+        public static Point playerPos = new Point(6, 6); // マップ上の座標
+        public static Point playerDispPos = new Point(6, 6); //プレイヤー表示座標
 
         public const int tileSize = 32;
         public int MapX { get; set; }
@@ -26,7 +27,7 @@ namespace EscapeFromDungeon
 
         public int Width { get; private set; }
         public int Height { get; private set; }
-        public Bitmap? Canvas1 { get; private set; }
+        public Bitmap? MapCanvas { get; private set; }
         public Bitmap? overrayCanvas { get; private set; }
         public Map(string path)
         {
@@ -39,7 +40,7 @@ namespace EscapeFromDungeon
             Height = lines.Length;
             Width = lines[0].Split(',').Length;
             MapData = new int[Width, Height];
-            Canvas1 = new Bitmap(Width * tileSize, Height * tileSize);
+            MapCanvas = new Bitmap(Width * tileSize, Height * tileSize);
             overrayCanvas = new Bitmap(Width * tileSize, Height * tileSize);
 
             for (int y = 0; y < Height; y++)
@@ -50,7 +51,7 @@ namespace EscapeFromDungeon
                     switch (cells[x].Trim())
                     {
                         case "S":
-                            //playerPos = new Point(x, y);
+                            playerPos = new Point(x, y);
                             MapData[x, y] = 0; // 通行可能
                             break;
                         case "0":
@@ -69,7 +70,7 @@ namespace EscapeFromDungeon
 
         public void Draw(PictureBox mapImage)
         {
-            using (Graphics g = Graphics.FromImage(Canvas1))
+            using (Graphics g = Graphics.FromImage(MapCanvas))
             {
                 for (int y = 0; y < Height; y++)
                 {
@@ -83,7 +84,7 @@ namespace EscapeFromDungeon
                 }
             }
 
-            mapImage.Image = Canvas1;
+            mapImage.Image = MapCanvas;
         }//Draw
 
         // 壁ライン描画
@@ -122,8 +123,8 @@ namespace EscapeFromDungeon
                         Rectangle rect = new Rectangle(x * size, y * size, size, size);
 
                         // 視界判定
-                        int dx = x - playerPos.X;
-                        int dy = y - playerPos.Y;
+                        int dx = x - playerDispPos.X;
+                        int dy = y - playerDispPos.Y;
                         double distance = Math.Sqrt(dx * dx + dy * dy);
                         //  視界制限が無効かどうか　もしくは　視界内かどうか
                         bool isVisible = !GameManager.IsVisionEnabled || distance / 2 <= ViewRadius;
