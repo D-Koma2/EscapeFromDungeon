@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -11,14 +12,6 @@ namespace EscapeFromDungeon
         Normal,
         Poison,
         Stun
-    }
-
-    public enum Direction
-    {
-        Up,
-        Down,
-        Left,
-        Right
     }
 
     public enum Weak
@@ -44,13 +37,30 @@ namespace EscapeFromDungeon
 
     internal class Player : Character
     {
-        public int Lv { get; set; }
+        public enum Direction { Up, Down, Left, Right }
 
-        public int Exp {  get; set; }
+        public Direction Dir { get; set; } = Direction.Up;
 
-        public Direction Dir { get; set; }
+        public int Lv { get; private set; } = 1;
 
-        public List<Item> Inventry { get; set; }
+        public int Exp { get; set; }
+
+        public List<Item> Inventry { get; private set; }
+
+        //public Image DirectionImage()
+        //{
+        //    switch (Dir)
+        //    {
+        //        case Player.Direction.Down:
+        //            return Properties.Resources.PlayerDown;
+        //        case Player.Direction.Left:
+        //            return Properties.Resources.PlayerLeft;
+        //        case Player.Direction.Right:
+        //            return Properties.Resources.PlayerRight;
+        //        default:
+        //            return Properties.Resources.PlayerUp;
+        //    }
+        //}
     }
 
     class Enemy : Character

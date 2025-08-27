@@ -28,34 +28,37 @@
         /// </summary>
         private void InitializeComponent()
         {
-            mainPicture = new PictureBox();
-            ((System.ComponentModel.ISupportInitialize)mainPicture).BeginInit();
+            mapDrawBox = new PictureBox();
+            ((System.ComponentModel.ISupportInitialize)mapDrawBox).BeginInit();
             SuspendLayout();
             // 
-            // mainPicture
+            // mapDrawBox
             // 
-            mainPicture.BackColor = Color.Gray;
-            mainPicture.Location = new Point(42, 26);
-            mainPicture.Name = "mainPicture";
-            mainPicture.Size = new Size(486, 337);
-            mainPicture.TabIndex = 0;
-            mainPicture.TabStop = false;
+            mapDrawBox.Anchor = AnchorStyles.None;
+            mapDrawBox.BackColor = Color.Black;
+            mapDrawBox.Location = new Point(36, 26);
+            mapDrawBox.Name = "mapDrawBox";
+            mapDrawBox.Size = new Size(486, 337);
+            mapDrawBox.TabIndex = 0;
+            mapDrawBox.TabStop = false;
             // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.Black;
-            ClientSize = new Size(792, 514);
-            Controls.Add(mainPicture);
+            ClientSize = new Size(781, 514);
+            Controls.Add(mapDrawBox);
+            KeyPreview = true;
             Name = "Form1";
             Text = "Form1";
-            ((System.ComponentModel.ISupportInitialize)mainPicture).EndInit();
+            KeyDown += MainForm_KeyDown;
+            ((System.ComponentModel.ISupportInitialize)mapDrawBox).EndInit();
             ResumeLayout(false);
         }
 
         #endregion
 
-        private PictureBox mainPicture;
+        private PictureBox mapDrawBox;
     }
 }
