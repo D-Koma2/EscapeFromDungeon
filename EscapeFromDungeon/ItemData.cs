@@ -9,31 +9,32 @@ namespace EscapeFromDungeon
 {
     internal class ItemData
     {
-        public List<Item> ItemDatas { get; private set; }
+        public List<Item> ItemDatas { get; private set; } = new List<Item>();
 
         public void ReadFromCsv(string path)
         {
             var lines = File.ReadAllLines(path);
 
-            for (int i = 0; i < lines.Length; i++)
+            foreach (var item in lines)
             {
-                var cells = lines[i].Split(',');
+                var cells = item.Split(',');
 
-                for (int j = 0; j < cells.Length; j++)
+                var itemType = (ItemType)Enum.Parse(typeof(ItemType), cells[0]);
+                var name = cells[1];
+                var description = cells[2];
+
+                var effects = new List<string>();
+                for (int j = 3; j < cells.Length; j++) effects.Add(cells[j]);
+
+                ItemDatas.Add(new Item
                 {
-                    //var effects = new Effect();
-                    //if(j >= 1 )
-                    //{
-
-                    //}
-
-
-                    //ItemDatas.Add(new Item { ItemType = (ItemType)Enum.Parse(typeof(ItemType), cells[0]), 
-                    //                            Name = cells[1], 
-                    //                        Effects = effects)
-                    //});
-                }
+                    ItemType = itemType,
+                    Name = name,
+                    Description = description,
+                    Effects = effects
+                });
             }
         }
-    }
-}
+
+    }//class
+}// namespace EscapeFromDungeon
