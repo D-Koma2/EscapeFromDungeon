@@ -26,6 +26,7 @@ namespace EscapeFromDungeon
     {
         public string Name { get; set; }
         public int Hp { get; set; }
+        public int MaxHp { get; set; }
         public int Attack { get; set; }
         public int Defence { get; set; }
         public int Speed { get; set; }
