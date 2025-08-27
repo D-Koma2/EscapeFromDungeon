@@ -33,6 +33,7 @@ namespace EscapeFromDungeon
         public Status Status { get; set; }
 
         public List<Effect> Effects { get; set; }
+
     }
 
     internal class Player : Character
@@ -41,26 +42,36 @@ namespace EscapeFromDungeon
 
         public Direction Dir { get; set; } = Direction.Up;
 
+        public Image playerImage { get; set; } = Properties.Resources.Up;
+
         public int Lv { get; private set; } = 1;
 
         public int Exp { get; set; }
 
         public List<Item> Inventry { get; private set; }
 
-        //public Image DirectionImage()
-        //{
-        //    switch (Dir)
-        //    {
-        //        case Player.Direction.Down:
-        //            return Properties.Resources.PlayerDown;
-        //        case Player.Direction.Left:
-        //            return Properties.Resources.PlayerLeft;
-        //        case Player.Direction.Right:
-        //            return Properties.Resources.PlayerRight;
-        //        default:
-        //            return Properties.Resources.PlayerUp;
-        //    }
-        //}
+        public void GetPlayerImage(Direction dir)
+        {
+            switch (dir)
+            {
+                case Player.Direction.Down:
+                    Dir = Direction.Down;
+                    playerImage = Properties.Resources.Down;
+                    break;
+                case Player.Direction.Left:
+                    Dir = Direction.Left;
+                    playerImage = Properties.Resources.Left;
+                    break;
+                case Player.Direction.Right:
+                    Dir = Direction.Right;
+                    playerImage = Properties.Resources.Right;
+                    break;
+                default:
+                    Dir = Direction.Up;
+                    playerImage = Properties.Resources.Up;
+                    break;
+            }
+        }
     }
 
     class Enemy : Character

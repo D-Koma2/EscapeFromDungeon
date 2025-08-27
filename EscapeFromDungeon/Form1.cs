@@ -3,7 +3,7 @@
     public partial class Form1 : Form
     {
         private string file = "map.csv";
-        private MapData mapData;
+        private Map map;
         private PictureBox mapImage, overlayBox, playerImg;
         private GameManager gameManager;
         private System.Timers.Timer scrollTimer;
@@ -16,15 +16,16 @@
 
         private void init()
         {
-            mapData = new MapData(file);
+            map = new Map(file);
+            gameManager = new GameManager();
 
-            mapDrawBox.Size = new Size(MapData.tileSize * 13, MapData.tileSize * 13);
+            mapDrawBox.Size = new Size(Map.tileSize * 13, Map.tileSize * 13);
 
             mapImage = new PictureBox
             {
-                Size = new Size(mapData.MapWidth * MapData.tileSize, mapData.MapHeight * MapData.tileSize),
+                Size = new Size(map.Width * Map.tileSize, map.Height * Map.tileSize),
                 Location = new Point(0, 0),
-                Image = mapData.mapCanvas,
+                Image = map.Canvas1,
                 SizeMode = PictureBoxSizeMode.Normal
             };
 
@@ -36,50 +37,33 @@
                 Size = mapDrawBox.Size,
                 Location = new Point(0, 0),
                 BackColor = Color.Transparent,
-                Image = mapData.mapCanvas2,
+                Image = map.overrayCanvas,
                 Parent = mapImage // mapImageの上に重ねる
             };
 
             overlayBox.BringToFront(); // mapImageの上に表示
 
-            gameManager = new GameManager();
-            mapData.Draw(mapImage);
+            playerImg = new PictureBox
+            {
+                Size = new(Map.tileSize, Map.tileSize),
+                Location = new Point(Map.playerPos.X * Map.tileSize, Map.playerPos.Y * Map.tileSize),
+                BackColor = Color.Transparent,
+                Image = gameManager.player.playerImage,
+                Parent = overlayBox
+            };
 
-            mapData.DrawBrightness(overlayBox);
+            playerImg.BringToFront(); // mapImageの上に表示
+
+            map.Draw(mapImage);
+            map.DrawBrightness(overlayBox);
         }
-
 
         private void MainForm_KeyDown(object sender, KeyEventArgs e)
         {
-            //gameManager.KeyInput(sender, e);
-
-            int moveAmount = 32; // 移動量（ピクセル）
-
-            Point current1 = mapImage.Location;
-            Point current2 = overlayBox.Location;
-
-            switch (e.KeyCode)
-            {
-                case Keys.Down:
-                    current1.Y -= moveAmount;
-                    current2.Y += moveAmount;
-                    break;
-                case Keys.Up:
-                    current1.Y += moveAmount;
-                    current2.Y -= moveAmount;
-                    break;
-                case Keys.Right:
-                    current1.X -= moveAmount;
-                    current2.X += moveAmount;
-                    break;
-                case Keys.Left:
-                    current1.X += moveAmount;
-                    current2.X -= moveAmount;
-                    break;
-            }
-
-            mapImage.Location = current1;
-            overlayBox.Location = current2;
+            gameManager.KeyInput(e.KeyCode, mapImage, overlayBox, map);
+            playerImg.Image = gameManager.player.playerImage;
+            overlayBox.Invalidate();
         }
+
     }//class
 }//namespace
