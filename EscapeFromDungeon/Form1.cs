@@ -25,7 +25,7 @@
             {
                 Size = new Size(map.Width * Map.tileSize, map.Height * Map.tileSize),
                 Location = new Point(0, 0),
-                Image = map.Canvas1,
+                Image = map.MapCanvas,
                 SizeMode = PictureBoxSizeMode.Normal
             };
 
@@ -52,10 +52,14 @@
                 Parent = overlayBox
             };
 
+            overlayBox.Controls.Add(playerImg);
             playerImg.BringToFront(); // mapImageの上に表示
 
             map.Draw(mapImage);
             map.DrawBrightness(overlayBox);
+
+            gameManager.SetMapPos(mapImage, overlayBox, playerImg);
+            DispPoint();
         }
 
         private void MainForm_KeyDown(object sender, KeyEventArgs e)
@@ -63,6 +67,13 @@
             gameManager.KeyInput(e.KeyCode, mapImage, overlayBox, map);
             playerImg.Image = gameManager.player.playerImage;
             overlayBox.Invalidate();
+            DispPoint();
+        }
+
+        private void DispPoint()
+        {
+            label1.Text = $"({Map.playerPos.X}, {Map.playerPos.Y}) mI:({mapImage.Location.X},{mapImage.Location.Y}) " +
+                $"ob:({overlayBox.Location.X},{overlayBox.Location.Y}) pi:({playerImg.Location.X},{playerImg.Location.Y})";
         }
 
     }//class
