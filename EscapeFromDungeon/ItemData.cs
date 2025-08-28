@@ -9,7 +9,13 @@ namespace EscapeFromDungeon
 {
     internal class ItemData
     {
-        public List<Item> ItemDatas { get; private set; } = new List<Item>();
+        public List<Item> ItemDatas { get; private set; }
+
+        public ItemData(string path)
+        {
+            ItemDatas = new List<Item>();
+            ReadFromCsv(path);
+        }
 
         public void ReadFromCsv(string path)
         {
@@ -19,20 +25,14 @@ namespace EscapeFromDungeon
             {
                 var cells = item.Split(',');
 
-                var itemType = (ItemType)Enum.Parse(typeof(ItemType), cells[0]);
-                var name = cells[1];
-                var description = cells[2];
-
-                var effects = new List<string>();
-                for (int j = 3; j < cells.Length; j++) effects.Add(cells[j]);
+                var name = cells[0];
+                var description = cells[1];
 
                 ItemDatas.Add(new Item
-                {
-                    ItemType = itemType,
-                    Name = name,
-                    Description = description,
-                    Effects = effects
-                });
+                (
+                    name,
+                    description
+                ));
             }
         }
 

@@ -11,7 +11,6 @@ namespace EscapeFromDungeon
     {
         Normal,
         Poison,
-        Stun
     }
 
     public enum Weak
@@ -19,14 +18,14 @@ namespace EscapeFromDungeon
         None,
         Fire,
         Ice,
-        Thunder
+        Heavy,
+        Holy
     }
 
     class Character
     {
         private int hp;
 
-        public string Name { get; set; }
         public int Hp
         {
             get => hp;
@@ -36,20 +35,25 @@ namespace EscapeFromDungeon
                 hp = value;
             }
         }
-        public int MaxHp { get; set; }
-        public int Attack { get; set; }
-        public int Defence { get; set; }
-        public int Speed { get; set; }
+        public int MaxHp { get; private set; }
+        public string Name { get; private set; }
+        public int Attack { get; private set; }
+        public Status Status { get; set; } = Status.Normal;
 
-        public Status Status { get; set; }
-
-        public List<Effect> Effects { get; set; }
-
+        public Character(string name, int hp, int attack)
+        {
+            Name = name;
+            Hp = hp;
+            MaxHp = hp;
+            Attack = attack;
+        }
     }
 
     internal class Player : Character
     {
         private int limit = 999;
+
+        public Player(string name, int hp, int attack) : base(name, hp, attack) { }
 
         public enum Direction { Up, Down, Left, Right }
 
@@ -57,14 +61,9 @@ namespace EscapeFromDungeon
 
         public Image playerImage { get; set; } = Properties.Resources.Up;
 
-        public int Lv { get; private set; } = 1;
-
-        public int Exp { get; set; }
-
         public int Limit
         {
             get => limit;
-
             set
             {
                 if (limit < 0) limit = 0;
@@ -98,8 +97,12 @@ namespace EscapeFromDungeon
         }
     }
 
-    class Enemy : Character
+    class Monster : Character
     {
-        public Weak Weak { get; set; }
+        public Weak Weak { get; set; } = Weak.None;
+        public Monster(string name, int hp, int attack, Weak weak) : base(name, hp, attack) 
+        {
+            Weak = weak;
+        }
     }
 }
