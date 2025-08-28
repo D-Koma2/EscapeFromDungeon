@@ -1,12 +1,26 @@
 ﻿using System;
+using System.Drawing.Imaging;
 using System.Windows.Forms;
 
 namespace EscapeFromDungeon
 {
     internal class GameManager
     {
+        private const string mapCsv = "map.csv";
+        private const string eventCsv = "event.csv";
+        private const string monsterCsv = "monster.csv";
+        private const string itemCsv = "item.csv";
+        private const string playerName = "あなた";
+
         public Player player { get; private set; }
+
         private int turnCount = 0;
+
+        private Map map;
+        private EventData eventData;
+        private MonsterData monsterData;
+        private ItemData itemData;
+        Message message;
 
         // true: 視界制限あり、false: 全体表示
         public static bool IsVisionEnabled { get; set; } = true;
@@ -16,19 +30,13 @@ namespace EscapeFromDungeon
 
         public GameManager()
         {
-            player = new Player
-            {
-                Name = "Hero",
-                Hp = 100,
-                MaxHp = 100,
-                Attack = 20,
-                Defence = 10,
-                Speed = 5,
-                Status = Status.Normal,
-            };
+            map = new Map(mapCsv);
+            player = new Player(playerName, 100, 10);
+            eventData = new EventData(eventCsv);
+            monsterData = new MonsterData(monsterCsv);
+            itemData = new ItemData(itemCsv);
+            message = new Message();
 
-            ItemData itemData = new ItemData();
-            itemData.ReadFromCsv("Item.csv");
             waitTimer = new System.Windows.Forms.Timer();
             waitTimer.Tick += UiTimer_Tick;
         }
@@ -115,6 +123,37 @@ namespace EscapeFromDungeon
             if (turnCount % 33 == 0) { Map.viewRadius--; }
             if (turnCount % 11 == 0) { player.Hp--; }// テスト用
         }
+
+        //private void CheckEvent(int x, int y)
+        //{
+        //    var cell = map.mapData[x, y];
+        //    if ()
+        //    {
+        //        Event evt = eventData.eventDatas.Find(e => e.Id == cell);
+        //        switch (evt.EventType)
+        //        {
+        //            case EventType.Message:
+        //                message.Show(evt.Word);
+        //                break;
+        //            case EventType.ItemGet:
+        //                message.Show($"アイテム「{evt.Word}」を取得！");
+        //                break;
+        //            case EventType.Heal:
+        //                message.Show(evt.Word);
+        //                break;
+        //            case EventType.Trap:
+        //                message.Show(evt.Word);
+        //                break;
+        //            case EventType.EnemyEncount:
+        //                message.Show($"{evt.Word} が現れた！");
+        //                break;
+        //            default:
+        //                message.Show("不明なイベントです");
+        //                break;
+        //        }
+        //        map.mapRawData[y, x] = "0"; // イベントを消去
+        //    }
+        //}
 
         private void Gameover()
         {

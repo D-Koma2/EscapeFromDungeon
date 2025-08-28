@@ -8,20 +8,24 @@ namespace EscapeFromDungeon
 {
     public enum EventType
     {
-        Message,//ヒント
+        Message,
         ItemGet,
-        Effect,//回復、毒、ダメージなど
+        Heal,
         Trap,
-        EnemyEncount,
-        GameStart,
-        GameOver,
-        GameClear
+        EnemyEncount
     }
 
     internal class Event
     {
+        public string Id { get; set; }
         public EventType EventType { get; set; }
-        public string Message { get; set; }
-        public List<string> Effects { get; set; }
+        public string Word { get; set; }
+
+        public Event(string id, EventType eventType, string word)
+        {
+            Id = id;
+            EventType = eventType;
+            Word = word;
+        }
     }
 }

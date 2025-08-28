@@ -14,7 +14,7 @@ namespace EscapeFromDungeon
         private static readonly Brush passableBrush = Brushes.LightGray;
         private static readonly Brush blockedBrush = Brushes.DarkSlateGray;
         private static readonly Color color = Color.FromArgb(255, 54, 83, 83);
-        private static readonly Brush transBrush = new SolidBrush(color);
+        private static readonly Brush transWallBrush = new SolidBrush(color);
 
         public static Point playerPos = new Point(6, 6); // マップ上の座標(map.csvの"S"で変更)
         public static Point playerDispPos = new Point(6, 6); //プレイヤー表示座標(map中央固定)
@@ -56,21 +56,21 @@ namespace EscapeFromDungeon
                 {
                     switch (cells[x].Trim())
                     {
-                        case "S"://スタート地点
+                        case "SS"://スタート地点
                             playerPos = new Point(x, y);
                             BaseMap[x, y] = 0;
                             break;
-                        case "G"://ゴール
+                        case "GG"://ゴール
 
                             BaseMap[x, y] = 0;
                             break;
-                        case "0"://通路
+                        case "00"://通路
                             BaseMap[x, y] = 0;
                             break;
-                        case "1"://壁
+                        case "11"://壁
                             BaseMap[x, y] = 1;
                             break;
-                        case "2"://通れる壁
+                        case "12"://通れる壁
                             BaseMap[x, y] = 2;
                             break;
                         default:
@@ -99,7 +99,7 @@ namespace EscapeFromDungeon
                         }
                         else if (BaseMap[x, y] == 2)
                         {
-                            brush = transBrush;
+                            brush = transWallBrush;
                         }
                         else
                         {
@@ -190,8 +190,7 @@ namespace EscapeFromDungeon
         {
             if (x < 0 || y < 0 || x >= Width || y >= Height) return false;
 
-            if (BaseMap[x, y] == 0) return true;
-            if (BaseMap[x, y] == 2) return true;
+            if (BaseMap[x, y] == 0 || BaseMap[x, y] == 2) return true;
             return false;
         }
 

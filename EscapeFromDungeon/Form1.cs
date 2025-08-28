@@ -2,7 +2,7 @@
 {
     public partial class Form1 : Form
     {
-        private string file = "map.csv";
+        private string mapCsv = "map.csv";
         private Map map;
         private PictureBox mapImage, overlayImg, playerImg;
         private GameManager gameManager;
@@ -16,7 +16,7 @@
 
         private void init()
         {
-            map = new Map(file);
+            map = new Map(mapCsv);
             gameManager = new GameManager();
             drawInfo = new DrawInfo();
 
