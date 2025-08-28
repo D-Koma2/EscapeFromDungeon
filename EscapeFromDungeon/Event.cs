@@ -11,6 +11,7 @@ namespace EscapeFromDungeon
         Message,//ヒント
         ItemGet,
         Effect,//回復、毒、ダメージなど
+        Trap,
         EnemyEncount,
         GameStart,
         GameOver,
@@ -19,8 +20,8 @@ namespace EscapeFromDungeon
 
     internal class Event
     {
-        public EventType EventType {  get; set; }
-        public string[] Messages {  get; set; }
-        public List<Effect> Effects { get; set; }
+        public EventType EventType { get; set; }
+        public string Message { get; set; }
+        public List<string> Effects { get; set; }
     }
 }

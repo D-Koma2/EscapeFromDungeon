@@ -1,0 +1,9 @@
+﻿EventType,message,効果
+GameStart,ダンジョンから脱出,
+GameOver,あなたは死にました,
+GameClear,ゲームクリア！,
+Message,どこかに通れる壁があるらしいよ,
+Message,モンスターには弱点があるのがいる,
+ItemGet,ポーション,
+Trap,
+EnemyEncount,スライム,

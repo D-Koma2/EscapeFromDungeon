@@ -15,7 +15,7 @@ namespace EscapeFromDungeon
         private const int barX = 10;
         private const int barY = 10;
 
-        public void DrawHPBar(Graphics g, Player player)
+        public void DrawStatus(Graphics g, Player player)
         {
             float hpRatio = (float)player.Hp / player.MaxHp; // HP割合
 
@@ -37,10 +37,13 @@ namespace EscapeFromDungeon
 
             // 数値表示
             string hpText = $"HP: {player.Hp} / {player.MaxHp}";
+            string state = $"状態： {player.Status.ToString()}";
             using (Font font = new Font("Arial", 10))
             {
                 g.DrawString(hpText, font, Brushes.White, barX + 10, barY + 2);
+                g.DrawString(state, font, Brushes.White, barX + 10, barY + 26);
             }
+
         }
     }
 }

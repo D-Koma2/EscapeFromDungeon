@@ -32,10 +32,7 @@ namespace EscapeFromDungeon
             get => hp;
             set
             {
-                if (value < 0)
-                {
-                    hp = 0;
-                }
+                if (hp < 0) hp = 0;
                 hp = value;
             }
         }
@@ -70,10 +67,7 @@ namespace EscapeFromDungeon
 
             set
             {
-                if (value < 0)
-                {
-                    limit = 0;
-                }
+                if (limit < 0) limit = 0;
                 limit = value;
             }
         }
