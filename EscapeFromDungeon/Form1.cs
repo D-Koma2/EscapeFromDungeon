@@ -21,6 +21,7 @@
             drawInfo = new DrawInfo();
 
             InitPictureBoxes();
+            MessageBox.Location = new Point(10, 440);
 
             map.Draw(mapImage);
             map.DrawBrightness(overlayImg);
@@ -76,6 +77,7 @@
             map.ClearBrightness(overlayImg);
             map.DrawBrightness(overlayImg);
             playerImg.Image = gameManager.player.playerImage;
+            gameManager.PlayerVisible(playerImg, map);
             overlayImg.Invalidate();
             StateBox.Invalidate();
             DispPoint();
@@ -83,7 +85,7 @@
 
         private void StateBox_Paint(object sender, PaintEventArgs e)
         {
-            drawInfo. DrawHPBar(e.Graphics, gameManager.player);
+            drawInfo. DrawStatus(e.Graphics, gameManager.player);
         }
 
         // デバッグ用

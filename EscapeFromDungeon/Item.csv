@@ -1,0 +1,4 @@
+﻿アイテムタイプ,名前,説明,効果
+UseItem,ポーション,HPを30回復,Heal30
+UseItem,良いポーション,HPを100回復,Heal100
+UseItem,毒薬,使うと毒になる,Poison3

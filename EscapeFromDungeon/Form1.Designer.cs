@@ -31,17 +31,19 @@
             mapDrawBox = new PictureBox();
             StateBox = new PictureBox();
             label1 = new Label();
+            MessageBox = new PictureBox();
             ((System.ComponentModel.ISupportInitialize)mapDrawBox).BeginInit();
             ((System.ComponentModel.ISupportInitialize)StateBox).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)MessageBox).BeginInit();
             SuspendLayout();
             // 
             // mapDrawBox
             // 
             mapDrawBox.Anchor = AnchorStyles.None;
             mapDrawBox.BackColor = Color.Black;
-            mapDrawBox.Location = new Point(36, 26);
+            mapDrawBox.Location = new Point(20, 17);
             mapDrawBox.Name = "mapDrawBox";
-            mapDrawBox.Size = new Size(486, 337);
+            mapDrawBox.Size = new Size(416, 416);
             mapDrawBox.TabIndex = 0;
             mapDrawBox.TabStop = false;
             // 
@@ -56,23 +58,32 @@
             // 
             // label1
             // 
-            label1.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             label1.AutoSize = true;
             label1.BackColor = Color.White;
-            label1.Location = new Point(719, 485);
+            label1.Location = new Point(-1, -1);
             label1.Name = "label1";
             label1.Size = new Size(26, 20);
             label1.TabIndex = 2;
             label1.Text = "XY";
-            label1.TextAlign = ContentAlignment.BottomRight;
+            // 
+            // MessageBox
+            // 
+            MessageBox.Anchor = AnchorStyles.Bottom;
+            MessageBox.BackColor = Color.FromArgb(64, 64, 64);
+            MessageBox.Location = new Point(20, 450);
+            MessageBox.Name = "MessageBox";
+            MessageBox.Size = new Size(477, 129);
+            MessageBox.TabIndex = 3;
+            MessageBox.TabStop = false;
             // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.Black;
-            ClientSize = new Size(781, 514);
+            ClientSize = new Size(781, 551);
             Controls.Add(label1);
+            Controls.Add(MessageBox);
             Controls.Add(StateBox);
             Controls.Add(mapDrawBox);
             KeyPreview = true;
@@ -81,6 +92,7 @@
             KeyDown += MainForm_KeyDown;
             ((System.ComponentModel.ISupportInitialize)mapDrawBox).EndInit();
             ((System.ComponentModel.ISupportInitialize)StateBox).EndInit();
+            ((System.ComponentModel.ISupportInitialize)MessageBox).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -90,5 +102,6 @@
         private PictureBox mapDrawBox;
         private PictureBox StateBox;
         private Label label1;
+        private PictureBox MessageBox;
     }
 }

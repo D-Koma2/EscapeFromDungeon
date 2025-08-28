@@ -13,7 +13,7 @@ namespace EscapeFromDungeon
 
         public void ReadFromCsv(string path)
         {
-            var lines = File.ReadAllLines(path);
+            var lines = File.ReadAllLines(path).Skip(1);//１行目スキップ
 
             foreach (var item in lines)
             {

@@ -13,6 +13,8 @@ namespace EscapeFromDungeon
     {
         private static readonly Brush passableBrush = Brushes.LightGray;
         private static readonly Brush blockedBrush = Brushes.DarkSlateGray;
+        private static readonly Color color = Color.FromArgb(255, 54, 83, 83);
+        private static readonly Brush transBrush = new SolidBrush(color);
 
         public static Point playerPos = new Point(6, 6); // マップ上の座標(map.csvの"S"で変更)
         public static Point playerDispPos = new Point(6, 6); //プレイヤー表示座標(map中央固定)
@@ -23,7 +25,11 @@ namespace EscapeFromDungeon
         public int MapX { get; set; }
         public int MapY { get; set; }
 
-        public int[,]? MapData { get; private set; }
+        public int[,]? BaseMap { get; private set; }
+
+        public int[,]? EventMap { get; private set; }
+
+        public int[,]? VisitedMap { get; private set; }
 
         public int Width { get; private set; }
         public int Height { get; private set; }
@@ -39,7 +45,7 @@ namespace EscapeFromDungeon
             var lines = File.ReadAllLines(path);
             Height = lines.Length;
             Width = lines[0].Split(',').Length;
-            MapData = new int[Width, Height];
+            BaseMap = new int[Width, Height];
             MapCanvas = new Bitmap(Width * tileSize, Height * tileSize);
             overrayCanvas = new Bitmap(Width * tileSize, Height * tileSize);
 
@@ -50,18 +56,25 @@ namespace EscapeFromDungeon
                 {
                     switch (cells[x].Trim())
                     {
-                        case "S":
+                        case "S"://スタート地点
                             playerPos = new Point(x, y);
-                            MapData[x, y] = 0; // 通行可能
+                            BaseMap[x, y] = 0;
                             break;
-                        case "0":
-                            MapData[x, y] = 0;
+                        case "G"://ゴール
+
+                            BaseMap[x, y] = 0;
                             break;
-                        case "1":
-                            MapData[x, y] = 1; // 通行不可
+                        case "0"://通路
+                            BaseMap[x, y] = 0;
+                            break;
+                        case "1"://壁
+                            BaseMap[x, y] = 1;
+                            break;
+                        case "2"://通れる壁
+                            BaseMap[x, y] = 2;
                             break;
                         default:
-                            MapData[x, y] = 0;
+                            BaseMap[x, y] = 0;
                             break;
                     }
                 }
@@ -77,7 +90,22 @@ namespace EscapeFromDungeon
                     for (int x = 0; x < Width; x++)
                     {
                         Rectangle rect = new Rectangle(x * tileSize, y * tileSize, tileSize, tileSize);
-                        Brush brush = MapData[x, y] == 0 ? passableBrush : blockedBrush;
+
+                        Brush brush;
+
+                        if (BaseMap[x, y] == 0)
+                        {
+                            brush = passableBrush;
+                        }
+                        else if (BaseMap[x, y] == 2)
+                        {
+                            brush = transBrush;
+                        }
+                        else
+                        {
+                            brush = blockedBrush;
+                        }
+
                         g.FillRectangle(brush, rect);
                         DrawWallLines(g, x, y);
                     }
@@ -92,23 +120,22 @@ namespace EscapeFromDungeon
         {
             int dx = x * tileSize, dy = y * tileSize;
 
-            if (MapData[x, y] == 1)
+            if (BaseMap[x, y] == 1 || BaseMap[x, y] == 2)
             {
                 // 上
-                if (y == 0 || MapData[x, y - 1] != 1)
+                if (y == 0 || (BaseMap[x, y - 1] != 1 && BaseMap[x, y - 1] != 2))
                     g.DrawLine(Pens.Black, dx, dy, dx + tileSize, dy);
                 // 下
-                if (y == Height - 1 || MapData[x, y + 1] != 1)
+                if (y == Height - 1 || (BaseMap[x, y + 1] != 1 && BaseMap[x, y + 1] != 2))
                     g.DrawLine(Pens.Black, dx, dy + tileSize - 1, dx + tileSize, dy + tileSize - 1);
                 // 左
-                if (x == 0 || MapData[x - 1, y] != 1)
+                if (x == 0 || (BaseMap[x - 1, y] != 1 && BaseMap[x - 1, y] != 2))
                     g.DrawLine(Pens.Black, dx - 1, dy, dx - 1, dy + tileSize);
                 // 右
-                if (x == Width - 1 || MapData[x + 1, y] != 1)
+                if (x == Width - 1 || (BaseMap[x + 1, y] != 1 && BaseMap[x + 1, y] != 2))
                     g.DrawLine(Pens.Black, dx + tileSize - 1, dy, dx + tileSize - 1, dy + tileSize);
             }
         }
-
 
         public void DrawBrightness(PictureBox overlayBox)
         {
@@ -162,7 +189,10 @@ namespace EscapeFromDungeon
         public bool CanMoveTo(int x, int y)
         {
             if (x < 0 || y < 0 || x >= Width || y >= Height) return false;
-            return MapData[x, y] == 0; // 0 = 通行可能
+
+            if (BaseMap[x, y] == 0) return true;
+            if (BaseMap[x, y] == 2) return true;
+            return false;
         }
 
     }//class

@@ -9,6 +9,7 @@ namespace EscapeFromDungeon
     public enum EffectType
     {
         Heal,
+        Poison,
         AttackUp,
         DefenceUp,
         SpeedUp,

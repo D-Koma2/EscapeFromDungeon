@@ -27,6 +27,8 @@ namespace EscapeFromDungeon
                 Status = Status.Normal,
             };
 
+            ItemData itemData = new ItemData();
+            itemData.ReadFromCsv("Item.csv");
             waitTimer = new System.Windows.Forms.Timer();
             waitTimer.Tick += UiTimer_Tick;
         }
@@ -99,7 +101,6 @@ namespace EscapeFromDungeon
                 CheckEvent();
             }
 
-
             isMoving = true;
             waitTimer.Interval = 56;
             waitTimer.Start();
@@ -108,14 +109,11 @@ namespace EscapeFromDungeon
 
         private void CheckEvent()
         {
-            player.Hp--;
             turnCount++;
             player.Limit--;
             if (player.Limit == 0 || player.Hp == 0) Gameover();
-            if (turnCount % 33 == 0)
-            {
-                Map.viewRadius--;
-            }
+            if (turnCount % 33 == 0) { Map.viewRadius--; }
+            if (turnCount % 11 == 0) { player.Hp--; }// テスト用
         }
 
         private void Gameover()
@@ -132,6 +130,11 @@ namespace EscapeFromDungeon
             mapImage.Location = new Point(-moveX, -moveY);
             overlayBox.Location = new Point(moveX, moveY);
             playerImage.Location = new Point(Map.tileSize * 6, Map.tileSize * 6);
+        }
+
+        public void PlayerVisible(PictureBox playerImage, Map map)
+        {
+            playerImage.Visible = map.BaseMap[Map.playerPos.X, Map.playerPos.Y] != 2 ? true : false;
         }
 
     }//class
