@@ -36,7 +36,6 @@ namespace EscapeFromDungeon
             monsterData = new MonsterData(monsterCsv);
             itemData = new ItemData(itemCsv);
             Message = new Message();
-
             waitTimer = new System.Windows.Forms.Timer();
             waitTimer.Tick += UiTimer_Tick;
         }
@@ -60,9 +59,7 @@ namespace EscapeFromDungeon
             if (isMoving) return; // 移動中は入力を無視
 
             SwitchView(keyCode, overlayBox);
-
             Move(keyCode, mapImage, overlayBox);
-
             WaitTimerStart();
         }
 
@@ -113,7 +110,16 @@ namespace EscapeFromDungeon
                 mapImage.Location = current1;
                 overlayBox.Location = current2;
                 CheckEvent(newPos.X, newPos.Y);
+                DamageCheck(newPos.X, newPos.Y);
                 TurnCheck();
+            }
+        }
+
+        private void DamageCheck(int x, int y)
+        {
+            if( Map.BaseMap[x, y] == 3)
+            {
+                player.Hp -= 3;
             }
         }
 
@@ -142,9 +148,8 @@ namespace EscapeFromDungeon
         {
             turnCount++;
             player.Limit--;
-            if (player.Limit == 0 || player.Hp == 0) Gameover();
+            if (player.Limit <= 0 || player.Hp <= 0) Gameover();
             if (turnCount % 33 == 0) { Map.viewRadius--; }
-            if (turnCount % 11 == 0) { player.Hp--; }// テスト用
         }
 
         private void CheckEvent(int x, int y)
@@ -160,6 +165,10 @@ namespace EscapeFromDungeon
                         Message.Show(evt.Word);
                         break;
                     case EventType.ItemGet:
+                        var item = itemData.ItemDatas.Find(x => x.Name == evt.Word);
+                        var name = item.Name;
+                        var dsc = item.Description;
+                        player.Inventry.Add(new Item(name, dsc));
                         Message.Show($"アイテム「{evt.Word}」を取得！");
                         break;
                     case EventType.Heal:

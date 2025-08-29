@@ -31,8 +31,8 @@ namespace EscapeFromDungeon
             get => hp;
             set
             {
-                if (hp < 0) hp = 0;
                 hp = value;
+                if (hp < 0) hp = 0;
             }
         }
         public int MaxHp { get; private set; }
@@ -53,7 +53,10 @@ namespace EscapeFromDungeon
     {
         private int limit = 999;
 
-        public Player(string name, int hp, int attack) : base(name, hp, attack) { }
+        public Player(string name, int hp, int attack) : base(name, hp, attack) 
+        {
+            Inventry = new List<Item>();
+        }
 
         public enum Direction { Up, Down, Left, Right }
 
@@ -66,8 +69,8 @@ namespace EscapeFromDungeon
             get => limit;
             set
             {
-                if (limit < 0) limit = 0;
                 limit = value;
+                if (limit < 0) limit = 0;
             }
         }
 
