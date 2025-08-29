@@ -33,6 +33,7 @@ namespace EscapeFromDungeon
             {
                 hp = value;
                 if (hp < 0) hp = 0;
+                if (hp >= MaxHp) hp = MaxHp;
             }
         }
         public int MaxHp { get; private set; }
@@ -43,8 +44,8 @@ namespace EscapeFromDungeon
         public Character(string name, int hp, int attack)
         {
             Name = name;
-            Hp = hp;
             MaxHp = hp;
+            Hp = hp;
             Attack = attack;
         }
     }

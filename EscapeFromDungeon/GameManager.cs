@@ -4,6 +4,14 @@ using System.Windows.Forms;
 
 namespace EscapeFromDungeon
 {
+    public enum GameMode
+    {
+        Title,
+        Explore,
+        Battle,
+        Gameover
+    }
+
     internal class GameManager
     {
         private const string mapCsv = "map.csv";
@@ -117,9 +125,13 @@ namespace EscapeFromDungeon
 
         private void DamageCheck(int x, int y)
         {
-            if( Map.BaseMap[x, y] == 3)
+            if (Map.BaseMap[x, y] == 3)
             {
                 player.Hp -= 3;
+            }
+            if (player.Status == Status.Poison)
+            {
+                player.Hp -= 1;
             }
         }
 
@@ -165,26 +177,90 @@ namespace EscapeFromDungeon
                         Message.Show(evt.Word);
                         break;
                     case EventType.ItemGet:
-                        var item = itemData.ItemDatas.Find(x => x.Name == evt.Word);
-                        var name = item.Name;
-                        var dsc = item.Description;
-                        player.Inventry.Add(new Item(name, dsc));
-                        Message.Show($"アイテム「{evt.Word}」を取得！");
+                        ApplyItemGetEvent(evt);
                         break;
                     case EventType.Heal:
-                        Message.Show(evt.Word);
+                        ApplyHealEffect(evt);
                         break;
                     case EventType.Trap:
-                        Message.Show(evt.Word);
+                        ApplyTrapEffect(evt);
                         break;
                     case EventType.EnemyEncount:
-                        Message.Show($"{evt.Word} が現れた！");
+                        ApplyEnemyEncounterEvent(evt);
                         break;
                     default:
                         break;
                 }
 
-                Map.EventMap[x, y] = "00"; // イベントを消去
+                // メッセージイベント以外は一度きり
+                if (evt.EventType != EventType.Message)
+                {
+                    Map.EventMap[x, y] = "00"; // イベントを消去
+                }
+            }
+        }
+
+        private void ApplyEnemyEncounterEvent(Event evt)
+        {
+            Message.Show($"{evt.Word} が現れた！");
+            var monster = monsterData.monsterDatas.Find(x => x.Name == evt.Word);
+            var battle = new Battle(monster, player, Message);
+            var winner = battle.BattleLoop();
+            if (winner.Name == playerName)
+            {
+                Message.Show($"{playerName}は勝利した！");
+            }
+        }
+
+        private void ApplyItemGetEvent(Event evt)
+        {
+            var item = itemData.ItemDatas.Find(x => x.Name == evt.Word);
+            var name = item.Name;
+            var dsc = item.Description;
+            player.Inventry.Add(new Item(name, dsc));
+            Message.Show($"アイテム「{evt.Word}」を取得！");
+        }
+
+        private void ApplyHealEffect(Event evt)
+        {
+            Message.Show(evt.Word);
+
+            switch (evt.Id)
+            {
+                case "L0":
+                    player.Hp += 20;
+                    break;
+                case "L1":
+                    player.Hp += 50;
+                    break;
+                case "L2":
+                    player.Hp += 100;
+                    break;
+                case "L3":
+                    player.Status = Status.Normal;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void ApplyTrapEffect(Event evt)
+        {
+            Message.Show(evt.Word);
+
+            switch (evt.Id)
+            {
+                case "T0":
+                    player.Hp -= 1;
+                    break;
+                case "T1":
+                    player.Hp -= 20;
+                    break;
+                case "T3":
+                    player.Status = Status.Poison;
+                    break;
+                default:
+                    break;
             }
         }
 

@@ -9,12 +9,9 @@ namespace EscapeFromDungeon
 {
     internal class Message
     {
-        private const string testMassage = "ダンジョンへようこそ！！\nダンジョンへようこそ！！\n\nダンジョンへようこそ！！\nダンジョンへようこそ！！";
+        private const int timerInterval = 16;
         public bool isMessageShowing = false;// メッセージ送り用フィールド
         public bool isMessageCompleted = false;// メッセージが完了したかどうか
-
-        private const int timerInterval = 16; // 約60FPS
-
         private string fullMessage = "";// フルメッセージ（改行を含む）
         private string currentMessage = "";// 現在表示中のメッセージ
         private int messageIndex = 0;// メッセージの現在のインデックス
@@ -22,7 +19,6 @@ namespace EscapeFromDungeon
         private const int MessageLineMargin = 4; // 行間マージン（ピクセル単位で調整可能）                                      
         private bool isMessageTicking = false;// メッセージ送り用
         private System.Windows.Forms.Timer msgTimer;
-
         private Queue<string> messageQueue = new Queue<string>();
 
         public Message()
@@ -83,7 +79,7 @@ namespace EscapeFromDungeon
         {
             if (!string.IsNullOrEmpty(currentMessage))
             {
-                using (Font font = new Font("MS UI Gothic", 16))
+                using (Font font = new Font("MS UI Gothic", 12))
                 {
                     string[] lines = currentMessage.Split('\n');
                     for (int i = 0; i < lines.Length; i++)

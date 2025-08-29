@@ -13,10 +13,10 @@ E2,EnemyEncount,炎スライム
 E3,EnemyEncount,氷スライム
 E4,EnemyEncount,雷スライム
 E5,EnemyEncount,デーモン
-H0,Heal,HPが20回復した!
-H1,Heal,HPが50回復した!
-H2,Heal,HPが完全に回復した!
-H3,Heal,毒が治った!
+L0,Heal,HPが20回復した!
+L1,Heal,HPが50回復した!
+L2,Heal,HPが完全に回復した!
+L3,Heal,毒が治った!
 T0,Trap,1のダメージを受けた!
 T1,Trap,20のダメージを受けた!
 T3,Trap,毒になってしまった！
