@@ -1,12 +1,13 @@
-﻿namespace EscapeFromDungeon
+﻿
+namespace EscapeFromDungeon
 {
     public partial class Form1 : Form
     {
-        private string mapCsv = "map.csv";
-        private Map map;
         private PictureBox mapImage, overlayImg, playerImg;
         private GameManager gameManager;
         private DrawInfo drawInfo;
+        private System.Windows.Forms.Timer timer;//画面表示更新用
+        private const int timerInterval = 16; // 約60FPS
 
         public Form1()
         {
@@ -16,16 +17,31 @@
 
         private void init()
         {
-            map = new Map(mapCsv);
             gameManager = new GameManager();
             drawInfo = new DrawInfo();
 
             InitPictureBoxes();
-            MessageBox.Location = new Point(10, 440);
+            MsgBox.Location = new Point(10, 440);
 
-            map.Draw(mapImage);
-            map.DrawBrightness(overlayImg);
+            gameManager.Map.Draw(mapImage);
+            gameManager.Map.DrawBrightness(overlayImg);
             gameManager.SetMapPos(mapImage, overlayImg, playerImg);
+            DispPoint();
+            timer = new System.Windows.Forms.Timer();
+            timer.Interval = timerInterval;
+            timer.Tick += Timer_Tick;
+            timer.Start();
+        }
+
+        private void Timer_Tick(object? sender, EventArgs e)
+        {
+            gameManager.Map.ClearBrightness(overlayImg);
+            gameManager.Map.DrawBrightness(overlayImg);
+            playerImg.Image = gameManager.player.playerImage;
+            gameManager.PlayerVisible(playerImg);
+            overlayImg.Invalidate();
+            StateBox.Invalidate();
+            MsgBox.Invalidate();
             DispPoint();
         }
 
@@ -37,9 +53,9 @@
             // マップ画像　入れ子の子
             mapImage = new PictureBox
             {
-                Size = new Size(map.Width * Map.tileSize, map.Height * Map.tileSize),
+                Size = new Size(gameManager.Map.Width * Map.tileSize, gameManager.Map.Height * Map.tileSize),
                 Location = new Point(0, 0),
-                Image = map.MapCanvas,
+                Image = gameManager.Map.MapCanvas,
                 SizeMode = PictureBoxSizeMode.Normal
             };
 
@@ -51,7 +67,7 @@
                 Size = mapDrawBox.Size,
                 Location = new Point(0, 0),
                 BackColor = Color.Transparent,
-                Image = map.overrayCanvas,
+                Image = gameManager.Map.overrayCanvas,
                 Parent = mapImage // mapImageの上に重ねる
             };
 
@@ -73,19 +89,17 @@
 
         private void MainForm_KeyDown(object sender, KeyEventArgs e)
         {
-            gameManager.KeyInput(e.KeyCode, mapImage, overlayImg, map);
-            map.ClearBrightness(overlayImg);
-            map.DrawBrightness(overlayImg);
-            playerImg.Image = gameManager.player.playerImage;
-            gameManager.PlayerVisible(playerImg, map);
-            overlayImg.Invalidate();
-            StateBox.Invalidate();
-            DispPoint();
+            gameManager.KeyInput(e.KeyCode, mapImage, overlayImg);
         }
 
         private void StateBox_Paint(object sender, PaintEventArgs e)
         {
-            drawInfo. DrawStatus(e.Graphics, gameManager.player);
+            drawInfo.DrawStatus(e.Graphics, gameManager.player);
+        }
+
+        private void MsgBox_Paint(object sender, PaintEventArgs e)
+        {
+            gameManager.Message.Draw(e.Graphics);
         }
 
         // デバッグ用

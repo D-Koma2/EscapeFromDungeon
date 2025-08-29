@@ -31,10 +31,10 @@
             mapDrawBox = new PictureBox();
             StateBox = new PictureBox();
             label1 = new Label();
-            MessageBox = new PictureBox();
+            MsgBox = new PictureBox();
             ((System.ComponentModel.ISupportInitialize)mapDrawBox).BeginInit();
             ((System.ComponentModel.ISupportInitialize)StateBox).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)MessageBox).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)MsgBox).BeginInit();
             SuspendLayout();
             // 
             // mapDrawBox
@@ -49,7 +49,7 @@
             // 
             // StateBox
             // 
-            StateBox.Location = new Point(539, 26);
+            StateBox.Location = new Point(454, 17);
             StateBox.Name = "StateBox";
             StateBox.Size = new Size(230, 214);
             StateBox.TabIndex = 1;
@@ -66,15 +66,16 @@
             label1.TabIndex = 2;
             label1.Text = "XY";
             // 
-            // MessageBox
+            // MsgBox
             // 
-            MessageBox.Anchor = AnchorStyles.Bottom;
-            MessageBox.BackColor = Color.FromArgb(64, 64, 64);
-            MessageBox.Location = new Point(20, 450);
-            MessageBox.Name = "MessageBox";
-            MessageBox.Size = new Size(477, 129);
-            MessageBox.TabIndex = 3;
-            MessageBox.TabStop = false;
+            MsgBox.Anchor = AnchorStyles.Bottom;
+            MsgBox.BackColor = Color.FromArgb(64, 64, 64);
+            MsgBox.Location = new Point(20, 450);
+            MsgBox.Name = "MsgBox";
+            MsgBox.Size = new Size(477, 129);
+            MsgBox.TabIndex = 3;
+            MsgBox.TabStop = false;
+            MsgBox.Paint += MsgBox_Paint;
             // 
             // Form1
             // 
@@ -83,7 +84,7 @@
             BackColor = Color.Black;
             ClientSize = new Size(781, 551);
             Controls.Add(label1);
-            Controls.Add(MessageBox);
+            Controls.Add(MsgBox);
             Controls.Add(StateBox);
             Controls.Add(mapDrawBox);
             KeyPreview = true;
@@ -92,7 +93,7 @@
             KeyDown += MainForm_KeyDown;
             ((System.ComponentModel.ISupportInitialize)mapDrawBox).EndInit();
             ((System.ComponentModel.ISupportInitialize)StateBox).EndInit();
-            ((System.ComponentModel.ISupportInitialize)MessageBox).EndInit();
+            ((System.ComponentModel.ISupportInitialize)MsgBox).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -102,6 +103,6 @@
         private PictureBox mapDrawBox;
         private PictureBox StateBox;
         private Label label1;
-        private PictureBox MessageBox;
+        private PictureBox MsgBox;
     }
 }

@@ -11,10 +11,12 @@ namespace EscapeFromDungeon
 {
     internal class Map
     {
+        private static readonly Brush damageBrush = Brushes.Purple;
         private static readonly Brush passableBrush = Brushes.LightGray;
         private static readonly Brush blockedBrush = Brushes.DarkSlateGray;
         private static readonly Color color = Color.FromArgb(255, 54, 83, 83);
         private static readonly Brush transWallBrush = new SolidBrush(color);
+
 
         public static Point playerPos = new Point(6, 6); // マップ上の座標(map.csvの"S"で変更)
         public static Point playerDispPos = new Point(6, 6); //プレイヤー表示座標(map中央固定)
@@ -27,9 +29,9 @@ namespace EscapeFromDungeon
 
         public int[,]? BaseMap { get; private set; }
 
-        public int[,]? EventMap { get; private set; }
+        public string[,] EventMap { get; private set; }
 
-        public int[,]? VisitedMap { get; private set; }
+        //public int[,]? VisitedMap { get; private set; }
 
         public int Width { get; private set; }
         public int Height { get; private set; }
@@ -46,6 +48,7 @@ namespace EscapeFromDungeon
             Height = lines.Length;
             Width = lines[0].Split(',').Length;
             BaseMap = new int[Width, Height];
+            EventMap = new string[Width, Height];
             MapCanvas = new Bitmap(Width * tileSize, Height * tileSize);
             overrayCanvas = new Bitmap(Width * tileSize, Height * tileSize);
 
@@ -61,11 +64,14 @@ namespace EscapeFromDungeon
                             BaseMap[x, y] = 0;
                             break;
                         case "GG"://ゴール
-
+                            EventMap[x, y] = cells[x];
                             BaseMap[x, y] = 0;
                             break;
                         case "00"://通路
                             BaseMap[x, y] = 0;
+                            break;
+                        case "XX"://ダメージ床
+                            BaseMap[x, y] = 3;
                             break;
                         case "11"://壁
                             BaseMap[x, y] = 1;
@@ -74,6 +80,7 @@ namespace EscapeFromDungeon
                             BaseMap[x, y] = 2;
                             break;
                         default:
+                            EventMap[x, y] = cells[x];
                             BaseMap[x, y] = 0;
                             break;
                     }
@@ -100,6 +107,10 @@ namespace EscapeFromDungeon
                         else if (BaseMap[x, y] == 2)
                         {
                             brush = transWallBrush;
+                        }
+                        else if (BaseMap[x, y] == 3)
+                        {
+                            brush = damageBrush;
                         }
                         else
                         {
@@ -190,7 +201,7 @@ namespace EscapeFromDungeon
         {
             if (x < 0 || y < 0 || x >= Width || y >= Height) return false;
 
-            if (BaseMap[x, y] == 0 || BaseMap[x, y] == 2) return true;
+            if (BaseMap[x, y] == 0 || BaseMap[x, y] == 2 || BaseMap[x, y] == 3) return true;
             return false;
         }
 
