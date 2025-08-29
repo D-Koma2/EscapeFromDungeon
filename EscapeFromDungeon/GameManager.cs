@@ -16,11 +16,11 @@ namespace EscapeFromDungeon
 
         private int turnCount = 0;
 
-        private Map map;
+        public Map Map { get; private set; }
         private EventData eventData;
         private MonsterData monsterData;
         private ItemData itemData;
-        Message message;
+        public Message Message { get; private set; }
 
         // true: 視界制限あり、false: 全体表示
         public static bool IsVisionEnabled { get; set; } = true;
@@ -30,12 +30,12 @@ namespace EscapeFromDungeon
 
         public GameManager()
         {
-            map = new Map(mapCsv);
+            Map = new Map(mapCsv);
             player = new Player(playerName, 100, 10);
             eventData = new EventData(eventCsv);
             monsterData = new MonsterData(monsterCsv);
             itemData = new ItemData(itemCsv);
-            message = new Message();
+            Message = new Message();
 
             waitTimer = new System.Windows.Forms.Timer();
             waitTimer.Tick += UiTimer_Tick;
@@ -47,21 +47,27 @@ namespace EscapeFromDungeon
             waitTimer.Stop();
         }
 
-        public void KeyInput(Keys keyCode, PictureBox mapImage, PictureBox overlayBox, Map map)
+        public void KeyInput(Keys keyCode, PictureBox mapImage, PictureBox overlayBox)
         {
-            if (isMoving) return; // 移動中は入力を無視
-
-            if (keyCode == Keys.V)
+            // メッセージ中は移動操作を無効化
+            if (Message.isMessageShowing)
             {
-                IsVisionEnabled = !IsVisionEnabled;
-                if (IsVisionEnabled)
-                    map.DrawBrightness(overlayBox);
-                else
-                {
-                    map.ClearBrightness(overlayBox);
-                }
+                // メッセージ表示中はスペースで全文表示 or 次のメッセージ
+                if (keyCode == Keys.Space) Message.InputKey();
+                return;
             }
 
+            if (isMoving) return; // 移動中は入力を無視
+
+            SwitchView(keyCode, overlayBox);
+
+            Move(keyCode, mapImage, overlayBox);
+
+            WaitTimerStart();
+        }
+
+        private void Move(Keys keyCode, PictureBox mapImage, PictureBox overlayBox)
+        {
             Point dir = Point.Empty;
             int moveAmount = 32; // 移動量（ピクセル）
 
@@ -101,21 +107,38 @@ namespace EscapeFromDungeon
             Point newPos = new Point(Map.playerPos.X + dir.X, Map.playerPos.Y + dir.Y);
 
             // 移動可能かチェック
-            if (map.CanMoveTo(newPos.X, newPos.Y))
+            if (Map.CanMoveTo(newPos.X, newPos.Y))
             {
                 Map.playerPos = newPos;
                 mapImage.Location = current1;
                 overlayBox.Location = current2;
-                CheckEvent();
+                CheckEvent(newPos.X, newPos.Y);
+                TurnCheck();
             }
+        }
 
+        private void SwitchView(Keys keyCode, PictureBox overlayBox)
+        {
+            if (keyCode == Keys.V)
+            {
+                IsVisionEnabled = !IsVisionEnabled;
+                if (IsVisionEnabled)
+                    Map.DrawBrightness(overlayBox);
+                else
+                {
+                    Map.ClearBrightness(overlayBox);
+                }
+            }
+        }
+
+        private void WaitTimerStart()
+        {
             isMoving = true;
             waitTimer.Interval = 56;
             waitTimer.Start();
-            Console.WriteLine($"x:{Map.playerPos.X} y:{Map.playerPos.Y}");
         }
 
-        private void CheckEvent()
+        private void TurnCheck()
         {
             turnCount++;
             player.Limit--;
@@ -124,36 +147,37 @@ namespace EscapeFromDungeon
             if (turnCount % 11 == 0) { player.Hp--; }// テスト用
         }
 
-        //private void CheckEvent(int x, int y)
-        //{
-        //    var cell = map.mapData[x, y];
-        //    if ()
-        //    {
-        //        Event evt = eventData.eventDatas.Find(e => e.Id == cell);
-        //        switch (evt.EventType)
-        //        {
-        //            case EventType.Message:
-        //                message.Show(evt.Word);
-        //                break;
-        //            case EventType.ItemGet:
-        //                message.Show($"アイテム「{evt.Word}」を取得！");
-        //                break;
-        //            case EventType.Heal:
-        //                message.Show(evt.Word);
-        //                break;
-        //            case EventType.Trap:
-        //                message.Show(evt.Word);
-        //                break;
-        //            case EventType.EnemyEncount:
-        //                message.Show($"{evt.Word} が現れた！");
-        //                break;
-        //            default:
-        //                message.Show("不明なイベントです");
-        //                break;
-        //        }
-        //        map.mapRawData[y, x] = "0"; // イベントを消去
-        //    }
-        //}
+        private void CheckEvent(int x, int y)
+        {
+            var cell = Map.EventMap[x, y];
+
+            Event evt = eventData.eventDatas.Find(e => e.Id == cell);
+            if (evt != null)
+            {
+                switch (evt.EventType)
+                {
+                    case EventType.Message:
+                        Message.Show(evt.Word);
+                        break;
+                    case EventType.ItemGet:
+                        Message.Show($"アイテム「{evt.Word}」を取得！");
+                        break;
+                    case EventType.Heal:
+                        Message.Show(evt.Word);
+                        break;
+                    case EventType.Trap:
+                        Message.Show(evt.Word);
+                        break;
+                    case EventType.EnemyEncount:
+                        Message.Show($"{evt.Word} が現れた！");
+                        break;
+                    default:
+                        break;
+                }
+
+                Map.EventMap[x, y] = "00"; // イベントを消去
+            }
+        }
 
         private void Gameover()
         {
@@ -171,9 +195,9 @@ namespace EscapeFromDungeon
             playerImage.Location = new Point(Map.tileSize * 6, Map.tileSize * 6);
         }
 
-        public void PlayerVisible(PictureBox playerImage, Map map)
+        public void PlayerVisible(PictureBox playerImage)
         {
-            playerImage.Visible = map.BaseMap[Map.playerPos.X, Map.playerPos.Y] != 2 ? true : false;
+            playerImage.Visible = Map.BaseMap[Map.playerPos.X, Map.playerPos.Y] != 2 ? true : false;
         }
 
     }//class

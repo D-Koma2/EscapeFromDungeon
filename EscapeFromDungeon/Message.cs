@@ -30,7 +30,6 @@ namespace EscapeFromDungeon
             msgTimer = new System.Windows.Forms.Timer();
             msgTimer.Interval = timerInterval;
             msgTimer.Tick += MsgTimer_Tick;
-            msgTimer.Start();
         }
 
         public void MsgTimer_Tick(object sender, EventArgs e)
@@ -53,8 +52,9 @@ namespace EscapeFromDungeon
         public void Show(string message)
         {
             // 複数メッセージをキューに分割（例：\n\nで区切る）
-            var messages = message.Split(new[] { "\n\n" }, StringSplitOptions.None);
+            var messages = message.Split(new[] { "$$" }, StringSplitOptions.None);
             foreach (var msg in messages) messageQueue.Enqueue(msg);
+            msgTimer.Start();
             ShowNext();
         }
 
@@ -75,6 +75,7 @@ namespace EscapeFromDungeon
                 isMessageCompleted = false;
                 currentMessage = "";
                 isMessageTicking = false;
+                msgTimer.Stop();
             }
         }
 
@@ -94,25 +95,16 @@ namespace EscapeFromDungeon
             }
         }
 
-        public void InputKey(object sender, KeyEventArgs e)
+        public void InputKey()
         {
-            // メッセージ中はescape以外のキー操作を無効化
-            if (isMessageShowing)
+            if (!isMessageCompleted)
             {
-                // メッセージ表示中はスペースで全文表示 or 次のメッセージ
-                if (e.KeyCode == Keys.Space)
-                {
-                    if (!isMessageCompleted)
-                    {
-                        // 全文一気に表示
-                        currentMessage = fullMessage;
-                        messageIndex = fullMessage.Length;
-                        isMessageCompleted = true;
-                    }
-                    else ShowNext();
-                }
-                return;
+                // 全文一気に表示
+                currentMessage = fullMessage;
+                messageIndex = fullMessage.Length;
+                isMessageCompleted = true;
             }
+            else ShowNext();
         }
 
     }//class

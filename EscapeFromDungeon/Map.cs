@@ -27,9 +27,9 @@ namespace EscapeFromDungeon
 
         public int[,]? BaseMap { get; private set; }
 
-        public int[,]? EventMap { get; private set; }
+        public string[,] EventMap { get; private set; }
 
-        public int[,]? VisitedMap { get; private set; }
+        //public int[,]? VisitedMap { get; private set; }
 
         public int Width { get; private set; }
         public int Height { get; private set; }
@@ -46,6 +46,7 @@ namespace EscapeFromDungeon
             Height = lines.Length;
             Width = lines[0].Split(',').Length;
             BaseMap = new int[Width, Height];
+            EventMap = new string[Width, Height];
             MapCanvas = new Bitmap(Width * tileSize, Height * tileSize);
             overrayCanvas = new Bitmap(Width * tileSize, Height * tileSize);
 
@@ -61,7 +62,7 @@ namespace EscapeFromDungeon
                             BaseMap[x, y] = 0;
                             break;
                         case "GG"://ゴール
-
+                            EventMap[x, y] = cells[x];
                             BaseMap[x, y] = 0;
                             break;
                         case "00"://通路
@@ -74,6 +75,7 @@ namespace EscapeFromDungeon
                             BaseMap[x, y] = 2;
                             break;
                         default:
+                            EventMap[x, y] = cells[x];
                             BaseMap[x, y] = 0;
                             break;
                     }
