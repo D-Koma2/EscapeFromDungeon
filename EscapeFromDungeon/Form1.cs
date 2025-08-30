@@ -148,7 +148,7 @@ namespace EscapeFromDungeon
             };
 
             monsterImg.BringToFront();
-        }
+        }//InitPictureBoxes
 
         private void MainForm_KeyDown(object sender, KeyEventArgs e)
         {
@@ -176,7 +176,7 @@ namespace EscapeFromDungeon
 
             if (GameManager.gameMode == GameMode.Battle)
             {
-                HideBattleCommands();
+                SetBattleButtonsEnabled(false);
                 await gameManager.Battle.PlayerTurn("Attack");
                 await gameManager.BattleCheck();
             }
@@ -199,7 +199,7 @@ namespace EscapeFromDungeon
 
             if (GameManager.gameMode == GameMode.Battle)
             {
-                HideBattleCommands();
+                SetBattleButtonsEnabled(false);
                 await gameManager.Battle.PlayerTurn("Defence");
                 await gameManager.BattleCheck();
             }
@@ -222,7 +222,7 @@ namespace EscapeFromDungeon
 
             if (GameManager.gameMode == GameMode.Battle)
             {
-                HideBattleCommands();
+                SetBattleButtonsEnabled(false);
                 await gameManager.Battle.PlayerTurn("Heal");
                 await gameManager.BattleCheck();
             }
@@ -245,7 +245,7 @@ namespace EscapeFromDungeon
 
             if (GameManager.gameMode == GameMode.Battle)
             {
-                HideBattleCommands();
+                SetBattleButtonsEnabled(false);
                 await gameManager.Battle.PlayerTurn("Escape");
                 await gameManager.BattleCheck();
             }
@@ -257,22 +257,6 @@ namespace EscapeFromDungeon
             isWaiting = false;
         }
 
-        public void ShowBattleCommands()
-        {
-            lblAttack.Visible = true;
-            lblDefence.Visible = true;
-            lblHeal.Visible = true;
-            lblEscape.Visible = true;
-        }
-
-        private void HideBattleCommands()
-        {
-            lblAttack.Visible = false;
-            lblDefence.Visible = false;
-            lblHeal.Visible = false;
-            lblEscape.Visible = false;
-        }
-
         private void SetBattleButtonsEnabled(bool enabled)
         {
             lblAttack.Visible = enabled;
@@ -281,10 +265,7 @@ namespace EscapeFromDungeon
             lblEscape.Visible = enabled;
         }
 
-        private void SetMonsterVisible(bool visible)
-        {
-            monsterImg.Visible = visible;
-        }
+        private void SetMonsterVisible(bool visible) => monsterImg.Visible = visible;
 
         private void LblAttack_MouseHover(object sender, EventArgs e) => lblAttack.BackColor = btnSelectCol;
 

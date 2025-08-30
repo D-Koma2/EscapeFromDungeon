@@ -9,7 +9,6 @@ namespace EscapeFromDungeon
     {
         Title,
         Explore,
-        WaitCommand,
         Battle,
         Escaped,
         BattleEnd,
@@ -123,18 +122,19 @@ namespace EscapeFromDungeon
             {
                 Gameover();
             }
-        }
+        }//BattleCheck
 
+        // バトルイベントを消去
         private void DeleteEncountEvent()
         {
             if (player.Dir == Player.Direction.Up)
-                Map.EventMap[Map.playerPos.X, Map.playerPos.Y - 1] = null; // バトルイベントを消去
+                Map.EventMap[Map.playerPos.X, Map.playerPos.Y - 1] = null;
             else if (player.Dir == Player.Direction.Down)
-                Map.EventMap[Map.playerPos.X, Map.playerPos.Y + 1] = null; // バトルイベントを消去
+                Map.EventMap[Map.playerPos.X, Map.playerPos.Y + 1] = null;
             else if (player.Dir == Player.Direction.Left)
-                Map.EventMap[Map.playerPos.X - 1, Map.playerPos.Y] = null; // バトルイベントを消去
+                Map.EventMap[Map.playerPos.X - 1, Map.playerPos.Y] = null;
             else if (player.Dir == Player.Direction.Right)
-                Map.EventMap[Map.playerPos.X + 1, Map.playerPos.Y] = null; // バトルイベントを消去
+                Map.EventMap[Map.playerPos.X + 1, Map.playerPos.Y] = null;
         }
 
         private void Move(Keys keyCode, PictureBox mapImage, PictureBox overlayBox)
@@ -190,19 +190,19 @@ namespace EscapeFromDungeon
                     return;
                 }
 
+                // 移動後処理
                 Map.playerPos = newPos;
                 mapImage.Location = current1;
                 overlayBox.Location = current2;
-
                 DamageCheck(newPos.X, newPos.Y);
                 TurnCheck();
             }
-        }
+        }//Move 
 
         private void DamageCheck(int x, int y)
         {
             // ダメージ床
-            if (Map.BaseMap[x, y] == 3)
+            if (Map.WalkMap[x, y] == 3)
             {
                 player.Hp -= DamageFloorValue;
             }
@@ -282,10 +282,11 @@ namespace EscapeFromDungeon
 
                 return evt;
             }
-            return null;
-        }
 
-        private void EncounterEvent(Event evt)
+            return null;
+        }//CheckEvent   
+
+        private async void EncounterEvent(Event evt)
         {
             Form1.isBattleInputLocked = true;
             Form1.battleInputUnlockTime = DateTime.Now.AddSeconds(1.5); // 1.5秒間ロック
@@ -293,10 +294,13 @@ namespace EscapeFromDungeon
             var mon = monsterData.Dict[evt.Word];
             Battle.Monster = new Monster(mon.Name, mon.Hp, mon.Attack, mon.Weak);
             Battle.TurnCount = 0;
-            Message.Show($"{mon.Name}が現れた！");
-            ChangeLblText.Invoke();
-            Battle.SetButtonEnabled.Invoke(true);
             Battle.SetMonsterVisible.Invoke(true);
+            ChangeLblText.Invoke();
+            await Message.ShowAsync($"{mon.Name}が現れた！");
+            await Task.Delay(500);
+            await Message.ShowAsync($"コマンド？");
+            Battle.SetButtonEnabled.Invoke(true);
+            await Task.Delay(100);
         }
 
         private void ItemGetEvent(Event evt)
@@ -354,6 +358,7 @@ namespace EscapeFromDungeon
         private void Gameover()
         {
             MessageBox.Show("Game Over!");
+            Application.Exit();
         }
 
         // マップとプレイヤーの位置調整
@@ -369,7 +374,7 @@ namespace EscapeFromDungeon
 
         public void PlayerVisible(PictureBox playerImage)
         {
-            playerImage.Visible = Map.BaseMap[Map.playerPos.X, Map.playerPos.Y] != 2 ? true : false;
+            playerImage.Visible = Map.WalkMap[Map.playerPos.X, Map.playerPos.Y] != 2 ? true : false;
         }
 
     }//class

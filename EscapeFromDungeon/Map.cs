@@ -26,11 +26,9 @@ namespace EscapeFromDungeon
         public int MapX { get; set; }
         public int MapY { get; set; }
 
-        public int[,]? BaseMap { get; private set; }
+        public int[,] WalkMap { get; private set; }
 
         public string[,] EventMap { get; private set; }
-
-        //public int[,]? VisitedMap { get; private set; }
 
         public int Width { get; private set; }
         public int Height { get; private set; }
@@ -43,7 +41,7 @@ namespace EscapeFromDungeon
             var lines = File.ReadAllLines(path);
             Height = lines.Length;
             Width = lines[0].Split(',').Length;
-            BaseMap = new int[Width, Height];
+            WalkMap = new int[Width, Height];
             EventMap = new string[Width, Height];
             MapCanvas = new Bitmap(Width * tileSize, Height * tileSize);
             overrayCanvas = new Bitmap(Width * tileSize, Height * tileSize);
@@ -57,27 +55,27 @@ namespace EscapeFromDungeon
                     {
                         case "SS"://スタート地点
                             playerPos = new Point(x, y);
-                            BaseMap[x, y] = 0;
+                            WalkMap[x, y] = 0;
                             break;
                         case "GG"://ゴール
                             EventMap[x, y] = cells[x];
-                            BaseMap[x, y] = 0;
+                            WalkMap[x, y] = 0;
                             break;
                         case "00"://通路
-                            BaseMap[x, y] = 0;
+                            WalkMap[x, y] = 0;
                             break;
                         case "XX"://ダメージ床
-                            BaseMap[x, y] = 3;
+                            WalkMap[x, y] = 3;
                             break;
                         case "11"://壁
-                            BaseMap[x, y] = 1;
+                            WalkMap[x, y] = 1;
                             break;
                         case "12"://通れる壁
-                            BaseMap[x, y] = 2;
+                            WalkMap[x, y] = 2;
                             break;
                         default:
                             EventMap[x, y] = cells[x];
-                            BaseMap[x, y] = 0;
+                            WalkMap[x, y] = 0;
                             break;
                     }
                 }
@@ -96,15 +94,15 @@ namespace EscapeFromDungeon
 
                         Brush brush;
 
-                        if (BaseMap[x, y] == 0)
+                        if (WalkMap[x, y] == 0)
                         {
                             brush = passableBrush;
                         }
-                        else if (BaseMap[x, y] == 2)
+                        else if (WalkMap[x, y] == 2)
                         {
                             brush = transWallBrush;
                         }
-                        else if (BaseMap[x, y] == 3)
+                        else if (WalkMap[x, y] == 3)
                         {
                             brush = damageBrush;
                         }
@@ -127,22 +125,22 @@ namespace EscapeFromDungeon
         {
             int dx = x * tileSize, dy = y * tileSize;
 
-            if (BaseMap[x, y] == 1 || BaseMap[x, y] == 2)
+            if (WalkMap[x, y] == 1 || WalkMap[x, y] == 2)
             {
                 // 上
-                if (y == 0 || (BaseMap[x, y - 1] != 1 && BaseMap[x, y - 1] != 2))
+                if (y == 0 || (WalkMap[x, y - 1] != 1 && WalkMap[x, y - 1] != 2))
                     g.DrawLine(Pens.Black, dx, dy, dx + tileSize, dy);
                 // 下
-                if (y == Height - 1 || (BaseMap[x, y + 1] != 1 && BaseMap[x, y + 1] != 2))
+                if (y == Height - 1 || (WalkMap[x, y + 1] != 1 && WalkMap[x, y + 1] != 2))
                     g.DrawLine(Pens.Black, dx, dy + tileSize - 1, dx + tileSize, dy + tileSize - 1);
                 // 左
-                if (x == 0 || (BaseMap[x - 1, y] != 1 && BaseMap[x - 1, y] != 2))
+                if (x == 0 || (WalkMap[x - 1, y] != 1 && WalkMap[x - 1, y] != 2))
                     g.DrawLine(Pens.Black, dx - 1, dy, dx - 1, dy + tileSize);
                 // 右
-                if (x == Width - 1 || (BaseMap[x + 1, y] != 1 && BaseMap[x + 1, y] != 2))
+                if (x == Width - 1 || (WalkMap[x + 1, y] != 1 && WalkMap[x + 1, y] != 2))
                     g.DrawLine(Pens.Black, dx + tileSize - 1, dy, dx + tileSize - 1, dy + tileSize);
             }
-        }
+        }//DrawWallLines
 
         public void DrawBrightness(PictureBox overlayBox)
         {
@@ -185,7 +183,7 @@ namespace EscapeFromDungeon
                 }
 
             }
-        }
+        }//DrawBrightness
 
         public void ClearBrightness(PictureBox overlayBox)
         {
@@ -197,7 +195,7 @@ namespace EscapeFromDungeon
         {
             if (x < 0 || y < 0 || x >= Width || y >= Height) return false;
 
-            if (BaseMap[x, y] == 0 || BaseMap[x, y] == 2 || BaseMap[x, y] == 3) return true;
+            if (WalkMap[x, y] == 0 || WalkMap[x, y] == 2 || WalkMap[x, y] == 3) return true;
             return false;
         }
 

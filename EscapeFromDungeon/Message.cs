@@ -117,7 +117,7 @@ namespace EscapeFromDungeon
             Show(messageText); // 既存の Show を呼び出す
             while (!isMessageCompleted)
             {
-                await Task.Delay(100); // メッセージが完了するまで待機
+                await Task.Delay(200); // メッセージが完了するまで待機
             }
         }
 

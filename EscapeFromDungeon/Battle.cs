@@ -32,6 +32,7 @@ namespace EscapeFromDungeon
             {
                 GameManager.gameMode = GameMode.BattleEnd;
                 await message.ShowAsync($"{Monster.Name}を倒した！");
+                await Task.Delay(500);
                 SetMonsterVisible.Invoke(false);
                 SetButtonEnabled.Invoke(true);
                 ChangeLblText.Invoke();
@@ -41,6 +42,7 @@ namespace EscapeFromDungeon
             {
                 GameManager.gameMode = GameMode.Gameover;
                 await message.ShowAsync($"{Player.Name}は敗北した！");
+                await Task.Delay(500);
                 SetMonsterVisible.Invoke(false);
                 return;
             }
@@ -51,7 +53,7 @@ namespace EscapeFromDungeon
                 await message.ShowAsync($"コマンド？");
                 SetButtonEnabled?.Invoke(true);
             }
-        }
+        }//BattleLoopAsync
 
         public async Task PlayerTurn(string command)
         {
@@ -72,7 +74,7 @@ namespace EscapeFromDungeon
                     await message.ShowAsync($"{Player.Name}は防御の体勢を取った！");
                     break;
                 case "Heal":
-                    if (Player.Inventry.Find(item => item.Name == "ポーション") != null)
+                    if (Player.Inventry.Find(item => item.Name == "ポーション") != null)//仮 HPMAｘのときは押せないようにする予定
                     {
                         int point = 30;
                         point = Math.Min(point, Player.MaxHp - Player.Hp);
@@ -82,7 +84,7 @@ namespace EscapeFromDungeon
                     }
                     else
                     {
-                        await message.ShowAsync("ポーションがない！");
+                        await message.ShowAsync("ポーションがない！");//仮 所持してないときはボタンを押せないようにする予定
                     }
                     break;
                 case "Escape":
@@ -92,18 +94,14 @@ namespace EscapeFromDungeon
                     return;
             }
 
-            if (Monster.Hp > 0)
-            {
-                await EnemyTurn();
-            }
-            else
-            {
-                await BattleLoopAsync();
-            }
-        }
+            if (Monster.Hp > 0) await EnemyTurn();
+            else await BattleLoopAsync();
+        }//PlayerTurn
 
         private async Task EnemyTurn()
         {
+            await Task.Delay(500);
+
             if (isDefending)
             {
                 await message.ShowAsync($"{Monster.Name}の攻撃！{Player.Name}は防御した！");
@@ -155,8 +153,9 @@ namespace EscapeFromDungeon
                 }
             }
 
+            await Task.Delay(500);
             await BattleLoopAsync();
-        }
+        }//EnemyTurn
 
     }//class Battle
 }//namespace EscapeFromDungeon
