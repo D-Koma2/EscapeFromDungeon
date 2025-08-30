@@ -32,11 +32,9 @@ namespace EscapeFromDungeon
 
         public int Width { get; private set; }
         public int Height { get; private set; }
-        public Bitmap? MapCanvas { get; private set; }
-        public Bitmap? overrayCanvas { get; private set; }
-        public Map(string path) => LoadFromCsv(path);
-
-        public void LoadFromCsv(string path)
+        public Bitmap MapCanvas { get; private set; }
+        public Bitmap overrayCanvas { get; private set; }
+        public Map(string path)
         {
             var lines = File.ReadAllLines(path);
             Height = lines.Length;

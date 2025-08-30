@@ -11,9 +11,7 @@ namespace EscapeFromDungeon
     {
         public Dictionary<string, Item> Dict { get; private set; } = new Dictionary<string, Item>();
 
-        public ItemData(string path) => ReadFromCsv(path);
-
-        public void ReadFromCsv(string path)
+        public ItemData(string path)
         {
             var lines = File.ReadAllLines(path).Skip(1);//１行目スキップ
 

@@ -22,7 +22,7 @@ namespace EscapeFromDungeon
         private System.Windows.Forms.Timer msgTimer;
         private Queue<string> messageQueue = new Queue<string>();
 
-        public event Action OnMessageCompleted;
+        public event Action? OnMessageCompleted;
 
         public Message()
         {
@@ -73,7 +73,7 @@ namespace EscapeFromDungeon
             }
         }
 
-        public async void ShowNextAsync()
+        private async void ShowNextAsync()
         {
             if (messageQueue.Count > 0)
             {

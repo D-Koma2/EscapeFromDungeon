@@ -18,17 +18,21 @@ namespace EscapeFromDungeon
     internal class GameManager
     {
         public static GameMode gameMode { get; set; } = GameMode.Explore;
-        // true: 視界制限あり、false: 全体表示
+        // true: 視界制限あり、false: 全体表示デバッグ用
         public static bool IsVisionEnabled { get; set; } = true;
 
         private const string mapCsv = "map.csv";
         private const string eventCsv = "event.csv";
         private const string monsterCsv = "monster.csv";
         private const string itemCsv = "item.csv";
-        private const string playerName = "あなた";
+
         private const int ViewShrinkInterval = 33;
         private const int DamageFloorValue = 3;
         private const int PoisonDamageValue = 1;
+
+        private const string _playerName = "あなた";
+        private const int _playerHp = 100;
+        private const int _playerAttack = 10;
         private const int _limitMax = 999;
 
         public Player Player { get; private set; }
@@ -36,15 +40,17 @@ namespace EscapeFromDungeon
         public Message Message { get; private set; }
         public Battle Battle { get; private set; }
 
-        public Action ChangeLblText;
-        public Action KeyUpPressed;
-        public Action KeyDownPressed;
-        public Action KeyLeftPressed;
-        public Action KeyRightPressed;
+        public Action? ChangeLblText;
+        public Action? KeyUpPressed;
+        public Action? KeyDownPressed;
+        public Action? KeyLeftPressed;
+        public Action? KeyRightPressed;
 
         private EventData _eventData;
         private MonsterData _monsterData;
         private ItemData _itemData;
+
+        private Point eventPos = Point.Empty;
 
         public GameManager()
         {
@@ -54,8 +60,7 @@ namespace EscapeFromDungeon
             _monsterData = new MonsterData(monsterCsv);
             _itemData = new ItemData(itemCsv);
 
-            Player = new Player(playerName, 100, 10);
-            Player.Limit = _limitMax;
+            Player = new Player(_playerName, _playerHp, _playerAttack, _limitMax);
             Message = new Message();
             Battle = new Battle(Player, Message);
         }
@@ -81,19 +86,19 @@ namespace EscapeFromDungeon
             {
                 if (keyCode == Keys.Up)
                 {
-                    KeyUpPressed.Invoke();
+                    KeyUpPressed?.Invoke();
                 }
                 else if (keyCode == Keys.Down)
                 {
-                    KeyDownPressed.Invoke();
+                    KeyDownPressed?.Invoke();
                 }
                 else if (keyCode == Keys.Left)
                 {
-                    KeyLeftPressed.Invoke();
+                    KeyLeftPressed?.Invoke();
                 }
                 else if (keyCode == Keys.Right)
                 {
-                    KeyRightPressed.Invoke();
+                    KeyRightPressed?.Invoke();
                 }
             }
         }
@@ -105,7 +110,7 @@ namespace EscapeFromDungeon
                 Message.Show($"{Player.Name}は逃げ出した！");
                 await Task.Delay(500);
                 gameMode = GameMode.Explore;
-                ChangeLblText.Invoke();
+                ChangeLblText?.Invoke();
             }
 
             if (gameMode == GameMode.BattleEnd)
@@ -114,27 +119,15 @@ namespace EscapeFromDungeon
                 {
                     Message.Show($"{Player.Name}は勝利した!");
                     await Task.Delay(500);
-                    DeleteEncountEvent();
+                    // モンスターを倒したらイベントを消去
+                    Map.EventMap[eventPos.X, eventPos.Y] = null;
                     gameMode = GameMode.Explore;
-                    ChangeLblText.Invoke();
+                    ChangeLblText?.Invoke();
                 }
             }
 
             if (gameMode == GameMode.Gameover) Gameover();
         }//BattleCheck
-
-        // バトルイベントを消去(向いている方向の一歩前)
-        private void DeleteEncountEvent()
-        {
-            if (Player.Dir == Player.Direction.Up)
-                Map.EventMap[Map.playerPos.X, Map.playerPos.Y - 1] = null;
-            else if (Player.Dir == Player.Direction.Down)
-                Map.EventMap[Map.playerPos.X, Map.playerPos.Y + 1] = null;
-            else if (Player.Dir == Player.Direction.Left)
-                Map.EventMap[Map.playerPos.X - 1, Map.playerPos.Y] = null;
-            else if (Player.Dir == Player.Direction.Right)
-                Map.EventMap[Map.playerPos.X + 1, Map.playerPos.Y] = null;
-        }
 
         private void Move(Keys keyCode, PictureBox mapImage, PictureBox overlayBox)
         {
@@ -185,11 +178,10 @@ namespace EscapeFromDungeon
 
                 if (evt != null && evt.EventType == EventType.Encount)
                 {
-                    // 戦闘イベントなら移動せずに終了
+                    eventPos = newPos; // モンスターイベント位置を保存
                     return;
                 }
 
-                // 移動後処理
                 Map.playerPos = newPos;
                 mapImage.Location = current1;
                 overlayBox.Location = current2;
@@ -244,45 +236,41 @@ namespace EscapeFromDungeon
 
             if (!_eventData.Dict.ContainsKey(eventId)) return null;
 
-            if (evt != null)
+            switch (evt.EventType)
             {
-                switch (evt.EventType)
-                {
-                    case EventType.Message:
-                        Message.Show(evt.Word);
-                        break;
-                    case EventType.Hint:
-                        Message.Show(evt.Word);
-                        break;
-                    case EventType.ItemGet:
-                        ItemGetEvent(evt);
-                        break;
-                    case EventType.Heal:
-                        HealEvent(evt);
-                        break;
-                    case EventType.Trap:
-                        TrapEvent(evt);
-                        break;
-                    case EventType.Encount:
-                        EncounterEventAsync(evt);
-                        break;
-                    default:
-                        break;
-                }
-
-                if (evt.EventType == EventType.Hint || evt.EventType == EventType.Encount)
-                {
-                    // ヒント以外は一度きり,バトルは逃げた場合残すのでここでは消去しない
-                }
-                else
-                {
-                    Map.EventMap[x, y] = null; // イベントを消去
-                }
-
-                return evt;
+                case EventType.Message:
+                    Message.Show(evt.Word);
+                    break;
+                case EventType.Hint:
+                    Message.Show(evt.Word);
+                    break;
+                case EventType.ItemGet:
+                    ItemGetEvent(evt);
+                    break;
+                case EventType.Heal:
+                    HealEvent(evt);
+                    break;
+                case EventType.Trap:
+                    TrapEvent(evt);
+                    break;
+                case EventType.Encount:
+                    EncounterEventAsync(evt);
+                    break;
+                default:
+                    break;
             }
 
-            return null;
+            if (evt.EventType == EventType.Hint || evt.EventType == EventType.Encount)
+            {
+                // ヒント以外は一度きり,バトルは逃げた場合残すのでここでは消去しない
+            }
+            else
+            {
+                Map.EventMap[x, y] = null; // イベントを消去
+            }
+
+            return evt;
+
         }//CheckEvent   
 
         private async void EncounterEventAsync(Event evt)
@@ -295,14 +283,14 @@ namespace EscapeFromDungeon
             Battle.Monster = new Monster(mon.Name, mon.Hp, mon.Attack, mon.Weak);
             Battle.BattleTurn = 0;
 
-            Battle.SetMonsterVisible.Invoke(true);
-            ChangeLblText.Invoke();
+            Battle.SetMonsterVisible?.Invoke(true);
+            ChangeLblText?.Invoke();
 
             await Message.ShowAsync($"{mon.Name}が現れた！");
             await Task.Delay(500);
 
             await Message.ShowAsync($"コマンド？");
-            Battle.SetButtonEnabled.Invoke(true);
+            Battle.SetButtonEnabled?.Invoke(true);
             await Task.Delay(100);
         }
 

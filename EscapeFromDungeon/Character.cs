@@ -52,12 +52,13 @@ namespace EscapeFromDungeon
 
     internal class Player : Character
     {
-        private int limit = 999;
+        private int limit;
         public List<Item> Inventry { get; set; }
 
-        public Player(string name, int hp, int attack) : base(name, hp, attack) 
+        public Player(string name, int hp, int attack, int limit) : base(name, hp, attack) 
         {
             Inventry = new List<Item>();
+            this.Limit = limit;
         }
 
         public enum Direction { Up, Down, Left, Right }

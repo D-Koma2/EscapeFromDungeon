@@ -10,9 +10,7 @@ namespace EscapeFromDungeon
     internal class MonsterData
     {
         public Dictionary<string,Monster> Dict { get; private set; } = new Dictionary<string, Monster>();
-        public MonsterData(string path) => ReadFromCsv(path);
-
-        public void ReadFromCsv(string path)
+        public MonsterData(string path)
         {
             var lines = File.ReadAllLines(path).Skip(1);//１行目スキップ
 

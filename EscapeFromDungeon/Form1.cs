@@ -10,11 +10,11 @@ namespace EscapeFromDungeon
         private readonly Color btnBaseCol = Color.DarkGray;
         private readonly Color btnSelectCol = Color.DarkOrange;
 
-        private PictureBox mapImage, overlayImg, playerImg, monsterImg;
+        private PictureBox mapImage = default!, overlayImg = default!, playerImg = default!, monsterImg = default!;
         private GameManager gameManager;
         private DrawInfo drawInfo;
 
-        private System.Windows.Forms.Timer timer;//画面表示更新用
+        private System.Windows.Forms.Timer timer = default!;//画面表示更新用
         private const int timerInterval = 32;
 
         public static bool isBattleInputLocked = false;
@@ -23,20 +23,16 @@ namespace EscapeFromDungeon
         private DateTime lastInputTime = DateTime.MinValue;
         private readonly TimeSpan inputCooldown = TimeSpan.FromMilliseconds(500);
 
-        private bool isWaiting = false;
+        private bool _isWaiting = false;
 
         public Form1()
         {
             InitializeComponent();
-            Init();
-        }
-
-        private void Init()
-        {
             gameManager = new GameManager();//最初に生成する事!
             drawInfo = new DrawInfo();
 
             InitPictureBoxes();
+
             MsgBox.Location = new Point(10, 440);
 
             gameManager.Battle.SetButtonEnabled = SetBattleButtonsEnabled;
@@ -168,10 +164,10 @@ namespace EscapeFromDungeon
         private async void lblAttackClickAsynk(object sender, EventArgs e)
         {
             if (isBattleInputLocked && DateTime.Now < battleInputUnlockTime) return;
-            if (isWaiting) return;
+            if (_isWaiting) return;
             if (DateTime.Now - lastInputTime < inputCooldown) return;
 
-            isWaiting = true;
+            _isWaiting = true;
             lastInputTime = DateTime.Now;
 
             if (GameManager.gameMode == GameMode.Battle)
@@ -185,16 +181,16 @@ namespace EscapeFromDungeon
                 gameManager.KeyInput(Keys.Up, mapImage, overlayImg);
             }
 
-            isWaiting = false;
+            _isWaiting = false;
         }
 
         private async void lblDefenceClickAsync(object sender, EventArgs e)
         {
             if (isBattleInputLocked && DateTime.Now < battleInputUnlockTime) return;
-            if (isWaiting) return;
+            if (_isWaiting) return;
             if (DateTime.Now - lastInputTime < inputCooldown) return;
 
-            isWaiting = true;
+            _isWaiting = true;
             lastInputTime = DateTime.Now;
 
             if (GameManager.gameMode == GameMode.Battle)
@@ -208,16 +204,16 @@ namespace EscapeFromDungeon
                 gameManager.KeyInput(Keys.Left, mapImage, overlayImg);
             }
 
-            isWaiting = false;
+            _isWaiting = false;
         }
 
         private async void lblHealClickAsync(object sender, EventArgs e)
         {
             if (isBattleInputLocked && DateTime.Now < battleInputUnlockTime) return;
-            if (isWaiting) return;
+            if (_isWaiting) return;
             if (DateTime.Now - lastInputTime < inputCooldown) return;
 
-            isWaiting = true;
+            _isWaiting = true;
             lastInputTime = DateTime.Now;
 
             if (GameManager.gameMode == GameMode.Battle)
@@ -231,16 +227,16 @@ namespace EscapeFromDungeon
                 gameManager.KeyInput(Keys.Right, mapImage, overlayImg);
             }
 
-            isWaiting = false;
+            _isWaiting = false;
         }
 
         private async void lblEscapeClickAsync(object sender, EventArgs e)
         {
             if (isBattleInputLocked && DateTime.Now < battleInputUnlockTime) return;
-            if (isWaiting) return;
+            if (_isWaiting) return;
             if (DateTime.Now - lastInputTime < inputCooldown) return;
 
-            isWaiting = true;
+            _isWaiting = true;
             lastInputTime = DateTime.Now;
 
             if (GameManager.gameMode == GameMode.Battle)
@@ -254,7 +250,7 @@ namespace EscapeFromDungeon
                 gameManager.KeyInput(Keys.Down, mapImage, overlayImg);
             }
 
-            isWaiting = false;
+            _isWaiting = false;
         }
 
         private void SetBattleButtonsEnabled(bool enabled)
