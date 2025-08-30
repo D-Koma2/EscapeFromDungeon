@@ -56,7 +56,7 @@
             // 
             StateBox.Location = new Point(454, 17);
             StateBox.Name = "StateBox";
-            StateBox.Size = new Size(230, 214);
+            StateBox.Size = new Size(301, 410);
             StateBox.TabIndex = 1;
             StateBox.TabStop = false;
             StateBox.Paint += StateBox_Paint;
@@ -75,9 +75,9 @@
             // 
             MsgBox.Anchor = AnchorStyles.None;
             MsgBox.BackColor = Color.FromArgb(64, 64, 64);
-            MsgBox.Location = new Point(11, 442);
+            MsgBox.Location = new Point(11, 439);
             MsgBox.Name = "MsgBox";
-            MsgBox.Size = new Size(477, 129);
+            MsgBox.Size = new Size(477, 102);
             MsgBox.TabIndex = 3;
             MsgBox.TabStop = false;
             MsgBox.Paint += MsgBox_Paint;
@@ -87,13 +87,12 @@
             lblAttack.Anchor = AnchorStyles.None;
             lblAttack.BackColor = Color.Gray;
             lblAttack.BorderStyle = BorderStyle.Fixed3D;
-            lblAttack.Location = new Point(517, 451);
+            lblAttack.Location = new Point(596, 442);
             lblAttack.Name = "lblAttack";
             lblAttack.Size = new Size(69, 37);
             lblAttack.TabIndex = 4;
             lblAttack.Text = "攻撃";
             lblAttack.TextAlign = ContentAlignment.MiddleCenter;
-            lblAttack.Visible = false;
             lblAttack.Click += lblAttack_Click;
             lblAttack.MouseLeave += LblAttack_MouseLeave;
             lblAttack.MouseHover += LblAttack_MouseHover;
@@ -103,13 +102,12 @@
             lblHeal.Anchor = AnchorStyles.None;
             lblHeal.BackColor = Color.Gray;
             lblHeal.BorderStyle = BorderStyle.Fixed3D;
-            lblHeal.Location = new Point(612, 451);
+            lblHeal.Location = new Point(671, 473);
             lblHeal.Name = "lblHeal";
             lblHeal.Size = new Size(69, 37);
             lblHeal.TabIndex = 5;
             lblHeal.Text = "回復";
             lblHeal.TextAlign = ContentAlignment.MiddleCenter;
-            lblHeal.Visible = false;
             lblHeal.Click += lblHeal_Click;
             lblHeal.MouseLeave += LblHeal_MouseLeave;
             lblHeal.MouseHover += LblHeal_MouseHover;
@@ -119,13 +117,12 @@
             lblDefence.Anchor = AnchorStyles.None;
             lblDefence.BackColor = Color.Gray;
             lblDefence.BorderStyle = BorderStyle.Fixed3D;
-            lblDefence.Location = new Point(517, 499);
+            lblDefence.Location = new Point(521, 473);
             lblDefence.Name = "lblDefence";
             lblDefence.Size = new Size(69, 41);
             lblDefence.TabIndex = 6;
             lblDefence.Text = "防御";
             lblDefence.TextAlign = ContentAlignment.MiddleCenter;
-            lblDefence.Visible = false;
             lblDefence.Click += lblDefence_Click;
             lblDefence.MouseLeave += LblDefence_MouseLeave;
             lblDefence.MouseHover += LblDefence_MouseHover;
@@ -135,13 +132,12 @@
             lblEscape.Anchor = AnchorStyles.None;
             lblEscape.BackColor = Color.Gray;
             lblEscape.BorderStyle = BorderStyle.Fixed3D;
-            lblEscape.Location = new Point(612, 499);
+            lblEscape.Location = new Point(596, 500);
             lblEscape.Name = "lblEscape";
             lblEscape.Size = new Size(69, 41);
             lblEscape.TabIndex = 7;
             lblEscape.Text = "逃げる";
             lblEscape.TextAlign = ContentAlignment.MiddleCenter;
-            lblEscape.Visible = false;
             lblEscape.Click += lblEscape_Click;
             lblEscape.MouseLeave += LblEscape_MouseLeave;
             lblEscape.MouseHover += LblEscape_MouseHover;

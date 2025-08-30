@@ -15,7 +15,15 @@ namespace EscapeFromDungeon
         private DrawInfo drawInfo;
 
         private System.Windows.Forms.Timer timer;//画面表示更新用
-        private const int timerInterval = 16; // 約60FPS
+        private const int timerInterval = 32;
+
+        public static bool isBattleInputLocked = false;
+        public static DateTime battleInputUnlockTime;
+
+        private DateTime lastInputTime = DateTime.MinValue;
+        private readonly TimeSpan inputCooldown = TimeSpan.FromMilliseconds(300);
+
+        private bool isWaiting = false;
 
         public Form1()
         {
@@ -33,6 +41,14 @@ namespace EscapeFromDungeon
 
             gameManager.Battle.SetButtonEnabled = SetBattleButtonsEnabled;
             gameManager.Battle.SetMonsterVisible = SetMonsterVisible;
+            gameManager.Battle.ChangeLblText = ChangeLblText;
+            gameManager.ChangeLblText = ChangeLblText;
+            gameManager.KeyUpPressed = () => lblAttack_Click(this, EventArgs.Empty);
+            gameManager.KeyLeftPressed = () => lblDefence_Click(this, EventArgs.Empty);
+            gameManager.KeyRightPressed = () => lblHeal_Click(this, EventArgs.Empty);
+            gameManager.KeyDownPressed = () => lblEscape_Click(this, EventArgs.Empty);
+
+            ChangeLblText();
 
             gameManager.Map.Draw(mapImage);
             gameManager.Map.DrawBrightness(overlayImg);
@@ -57,7 +73,24 @@ namespace EscapeFromDungeon
             StateBox.Invalidate();
             MsgBox.Invalidate();
             DispPoint();
-            Debug.WriteLine("Tick");
+        }
+
+        public void ChangeLblText()
+        {
+            if (GameManager.gameMode == GameMode.Battle)
+            {
+                lblAttack.Text = "攻撃";
+                lblDefence.Text = "防御";
+                lblHeal.Text = "回復";
+                lblEscape.Text = "逃げる";
+            }
+            else
+            {
+                lblAttack.Text = "↑";
+                lblDefence.Text = "←";
+                lblHeal.Text = "→";
+                lblEscape.Text = "↓";
+            }
         }
 
         private void InitPictureBoxes()
@@ -134,30 +167,94 @@ namespace EscapeFromDungeon
 
         private async void lblAttack_Click(object sender, EventArgs e)
         {
-            HideBattleCommands();
-            await gameManager.Battle.PlayerTurn("Attack");
-            await gameManager.BattleCheck();
+            if (isBattleInputLocked && DateTime.Now < battleInputUnlockTime) return;
+            if (isWaiting) return;
+            if (DateTime.Now - lastInputTime < inputCooldown) return;
+
+            isWaiting = true;
+            lastInputTime = DateTime.Now;
+
+            if (GameManager.gameMode == GameMode.Battle)
+            {
+                HideBattleCommands();
+                await gameManager.Battle.PlayerTurn("Attack");
+                await gameManager.BattleCheck();
+            }
+            if (GameManager.gameMode == GameMode.Explore)
+            {
+                gameManager.KeyInput(Keys.Up, mapImage, overlayImg);
+            }
+
+            isWaiting = false;
         }
 
         private async void lblDefence_Click(object sender, EventArgs e)
         {
-            HideBattleCommands();
-            await gameManager.Battle.PlayerTurn("Defence");
-            await gameManager.BattleCheck();
+            if (isBattleInputLocked && DateTime.Now < battleInputUnlockTime) return;
+            if (isWaiting) return;
+            if (DateTime.Now - lastInputTime < inputCooldown) return;
+
+            isWaiting = true;
+            lastInputTime = DateTime.Now;
+
+            if (GameManager.gameMode == GameMode.Battle)
+            {
+                HideBattleCommands();
+                await gameManager.Battle.PlayerTurn("Defence");
+                await gameManager.BattleCheck();
+            }
+            if (GameManager.gameMode == GameMode.Explore)
+            {
+                gameManager.KeyInput(Keys.Left, mapImage, overlayImg);
+            }
+
+            isWaiting = false;
         }
 
         private async void lblHeal_Click(object sender, EventArgs e)
         {
-            HideBattleCommands();
-            await gameManager.Battle.PlayerTurn("Heal");
-            await gameManager.BattleCheck();
+            if (isBattleInputLocked && DateTime.Now < battleInputUnlockTime) return;
+            if (isWaiting) return;
+            if (DateTime.Now - lastInputTime < inputCooldown) return;
+
+            isWaiting = true;
+            lastInputTime = DateTime.Now;
+
+            if (GameManager.gameMode == GameMode.Battle)
+            {
+                HideBattleCommands();
+                await gameManager.Battle.PlayerTurn("Heal");
+                await gameManager.BattleCheck();
+            }
+            if (GameManager.gameMode == GameMode.Explore)
+            {
+                gameManager.KeyInput(Keys.Right, mapImage, overlayImg);
+            }
+
+            isWaiting = false;
         }
 
         private async void lblEscape_Click(object sender, EventArgs e)
         {
-            HideBattleCommands();
-            await gameManager.Battle.PlayerTurn("Escape");
-            await gameManager.BattleCheck();
+            if (isBattleInputLocked && DateTime.Now < battleInputUnlockTime) return;
+            if (isWaiting) return;
+            if (DateTime.Now - lastInputTime < inputCooldown) return;
+
+            isWaiting = true;
+            lastInputTime = DateTime.Now;
+
+            if (GameManager.gameMode == GameMode.Battle)
+            {
+                HideBattleCommands();
+                await gameManager.Battle.PlayerTurn("Escape");
+                await gameManager.BattleCheck();
+            }
+            if (GameManager.gameMode == GameMode.Explore)
+            {
+                gameManager.KeyInput(Keys.Down, mapImage, overlayImg);
+            }
+
+            isWaiting = false;
         }
 
         public void ShowBattleCommands()
@@ -212,5 +309,6 @@ namespace EscapeFromDungeon
                 $"mi:({mapImage.Location.X},{mapImage.Location.Y}) " +
                 $"oi:({overlayImg.Location.X},{overlayImg.Location.Y}) pi:({playerImg.Location.X},{playerImg.Location.Y})";
         }
+
     }//class
 }//namespace

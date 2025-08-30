@@ -9,6 +9,7 @@ namespace EscapeFromDungeon
     {
         Title,
         Explore,
+        WaitCommand,
         Battle,
         Escaped,
         BattleEnd,
@@ -33,8 +34,14 @@ namespace EscapeFromDungeon
         private int turnCount = 0;
 
         public Battle Battle { get; private set; }
+        public Action ChangeLblText;
+        public Action KeyUpPressed;
+        public Action KeyDownPressed;
+        public Action KeyLeftPressed;
+        public Action KeyRightPressed;
 
         public Map Map { get; private set; }
+
         private EventData eventData;
         private MonsterData monsterData;
         private ItemData itemData;
@@ -42,9 +49,6 @@ namespace EscapeFromDungeon
 
         // true: 視界制限あり、false: 全体表示
         public static bool IsVisionEnabled { get; set; } = true;
-
-        private bool isMoving = false;
-        private System.Windows.Forms.Timer waitTimer;
 
         public GameManager()
         {
@@ -57,15 +61,6 @@ namespace EscapeFromDungeon
             player = new Player(playerName, 100, 10);
             Message = new Message();
             Battle = new Battle(player, Message);
-
-            waitTimer = new System.Windows.Forms.Timer();
-            waitTimer.Tick += UiTimer_Tick;
-        }
-
-        private void UiTimer_Tick(object? sender, EventArgs e)
-        {
-            isMoving = false;
-            waitTimer.Stop();
         }
 
         public void KeyInput(Keys keyCode, PictureBox mapImage, PictureBox overlayBox)
@@ -75,15 +70,32 @@ namespace EscapeFromDungeon
                 // メッセージ表示中はメッセージ処理優先
                 if (Message.isMessageShowing)
                 {
-                    // メッセージ表示中はスペースで全文表示 or 次のメッセージ
-                    if (keyCode == Keys.Space) Message.InputKey();
+                    Message.InputKey();
                     return;
                 }
 
-                if (isMoving) return; // 移動中は入力を無視
-
                 SwitchView(keyCode, overlayBox);
                 Move(keyCode, mapImage, overlayBox);
+            }
+
+            if (gameMode == GameMode.Battle)
+            {
+                if (keyCode == Keys.Up)
+                {
+                    KeyUpPressed.Invoke();
+                }
+                else if (keyCode == Keys.Down)
+                {
+                    KeyDownPressed.Invoke();
+                }
+                else if (keyCode == Keys.Left)
+                {
+                    KeyLeftPressed.Invoke();
+                }
+                else if (keyCode == Keys.Right)
+                {
+                    KeyRightPressed.Invoke();
+                }
             }
         }
 
@@ -93,6 +105,7 @@ namespace EscapeFromDungeon
             {
                 Message.Show($"{player.Name}は逃げ出した！");
                 gameMode = GameMode.Explore;
+                ChangeLblText.Invoke();
             }
 
             if (gameMode == GameMode.BattleEnd)
@@ -102,19 +115,19 @@ namespace EscapeFromDungeon
                     Message.Show($"{player.Name}は勝利した!");
                     DeleteEncountEvent();
                     gameMode = GameMode.Explore;
+                    ChangeLblText.Invoke();
                 }
             }
 
             if (gameMode == GameMode.Gameover)
             {
-                Message.Show($"{player.Name}は死にました");
                 Gameover();
             }
         }
 
         private void DeleteEncountEvent()
         {
-            if(player.Dir == Player.Direction.Up)
+            if (player.Dir == Player.Direction.Up)
                 Map.EventMap[Map.playerPos.X, Map.playerPos.Y - 1] = null; // バトルイベントを消去
             else if (player.Dir == Player.Direction.Down)
                 Map.EventMap[Map.playerPos.X, Map.playerPos.Y + 1] = null; // バトルイベントを消去
@@ -169,6 +182,8 @@ namespace EscapeFromDungeon
             {
                 Event evt = CheckEvent(newPos.X, newPos.Y);
 
+                if (evt == null) Message.Reset(); // メッセージリセット
+
                 if (evt != null && evt.EventType == EventType.Encount)
                 {
                     // 戦闘イベントなら移動せずに終了
@@ -178,10 +193,9 @@ namespace EscapeFromDungeon
                 Map.playerPos = newPos;
                 mapImage.Location = current1;
                 overlayBox.Location = current2;
-   
+
                 DamageCheck(newPos.X, newPos.Y);
                 TurnCheck();
-                WaitTimerStart();
             }
         }
 
@@ -211,13 +225,6 @@ namespace EscapeFromDungeon
                     Map.ClearBrightness(overlayBox);
                 }
             }
-        }
-
-        private void WaitTimerStart()
-        {
-            isMoving = true;
-            waitTimer.Interval = 32;
-            waitTimer.Start();
         }
 
         private void TurnCheck()
@@ -280,10 +287,14 @@ namespace EscapeFromDungeon
 
         private void EncounterEvent(Event evt)
         {
+            Form1.isBattleInputLocked = true;
+            Form1.battleInputUnlockTime = DateTime.Now.AddSeconds(1.5); // 1.5秒間ロック
             gameMode = GameMode.Battle;
             var mon = monsterData.Dict[evt.Word];
             Battle.Monster = new Monster(mon.Name, mon.Hp, mon.Attack, mon.Weak);
+            Battle.TurnCount = 0;
             Message.Show($"{mon.Name}が現れた！");
+            ChangeLblText.Invoke();
             Battle.SetButtonEnabled.Invoke(true);
             Battle.SetMonsterVisible.Invoke(true);
         }

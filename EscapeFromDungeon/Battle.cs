@@ -12,53 +12,59 @@ namespace EscapeFromDungeon
         public Monster Monster { get; set; }
         public Player Player { get; set; }
         public Message message { get; set; }
+        public int TurnCount { get; set; } = 0;
 
         private bool isDefending;
 
         public Action<bool> SetButtonEnabled;
         public Action<bool> SetMonsterVisible;
+        public Action ChangeLblText;
 
-
-        public Battle(Player player, Message message) 
+        public Battle(Player player, Message message)
         {
             this.Player = player;
             this.message = message;
         }
 
-        public async Task<Character> BattleLoopAsync()
+        public async Task BattleLoopAsync()
         {
             if (Monster.Hp <= 0)
             {
                 GameManager.gameMode = GameMode.BattleEnd;
                 await message.ShowAsync($"{Monster.Name}を倒した！");
                 SetMonsterVisible.Invoke(false);
-                return Monster;
+                SetButtonEnabled.Invoke(true);
+                ChangeLblText.Invoke();
+                return;
             }
             if (Player.Hp <= 0)
             {
-                GameManager.gameMode = GameMode.BattleEnd;
+                GameManager.gameMode = GameMode.Gameover;
+                await message.ShowAsync($"{Player.Name}は敗北した！");
                 SetMonsterVisible.Invoke(false);
-                return Player;
+                return;
             }
 
             // 戦闘が続いているときだけボタンを表示
             if (GameManager.gameMode == GameMode.Battle)
             {
-                //await message.ShowAsync($"コマンド？");
+                await message.ShowAsync($"コマンド？");
                 SetButtonEnabled?.Invoke(true);
             }
-
-            return null;
         }
 
         public async Task PlayerTurn(string command)
         {
+            TurnCount++;
             isDefending = false;
 
             switch (command)
             {
                 case "Attack":
                     Monster.Hp -= Player.Attack;
+
+                    //ここで敵の弱点のアイテムを持っていればダメージアップの処理
+
                     await message.ShowAsync($"{Player.Name}の攻撃！{Monster.Name}に {Player.Attack} ダメージ！");
                     break;
                 case "Defence":
@@ -66,8 +72,18 @@ namespace EscapeFromDungeon
                     await message.ShowAsync($"{Player.Name}は防御の体勢を取った！");
                     break;
                 case "Heal":
-                    //player.Heal();
-                    await message.ShowAsync($"{Player.Name}は回復した！");
+                    if (Player.Inventry.Find(item => item.Name == "ポーション") != null)
+                    {
+                        int point = 30;
+                        point = Math.Min(point, Player.MaxHp - Player.Hp);
+                        Player.Hp += point;
+                        Player.Inventry.Remove(Player.Inventry.Find(item => item.Name == "ポーション"));
+                        await message.ShowAsync($"{Player.Name}は{point}回復した！");
+                    }
+                    else
+                    {
+                        await message.ShowAsync("ポーションがない！");
+                    }
                     break;
                 case "Escape":
                     GameManager.gameMode = GameMode.Escaped;
@@ -95,8 +111,48 @@ namespace EscapeFromDungeon
             else
             {
                 int damage = Monster.Attack;
-                Player.Hp -= damage;
-                await message.ShowAsync($"{Monster.Name}の攻撃！{Player.Name}に {damage} ダメージ！");
+
+                if (Monster.Name == "デーモン")
+                {
+                    if (TurnCount % 5 == 4)
+                    {
+                        damage *= 3;
+                        Player.Hp -= damage;
+                        await message.ShowAsync($"{Monster.Name}の強力な攻撃！{Player.Name}に {damage} 大ダメージ！");
+                    }
+                    else if (TurnCount % 5 == 3)
+                    {
+                        await message.ShowAsync($"{Monster.Name}は力をためている！");
+                    }
+                    else
+                    {
+                        Player.Hp -= damage;
+                        await message.ShowAsync($"{Monster.Name}の攻撃！{Player.Name}に {damage} ダメージ！");
+                    }
+                }
+                else if (Monster.Name == "炎スライム" || Monster.Name == "氷スライム" || Monster.Name == "雷スライム")
+                {
+                    if (TurnCount % 4 == 3)
+                    {
+                        damage *= 2;
+                        Player.Hp -= damage;
+                        await message.ShowAsync($"{Monster.Name}の強力な攻撃！{Player.Name}に {damage} 大ダメージ！");
+                    }
+                    else if (TurnCount % 4 == 2)
+                    {
+                        await message.ShowAsync($"{Monster.Name}は力をためている！");
+                    }
+                    else
+                    {
+                        Player.Hp -= damage;
+                        await message.ShowAsync($"{Monster.Name}の攻撃！{Player.Name}に {damage} ダメージ！");
+                    }
+                }
+                else
+                {
+                    Player.Hp -= damage;
+                    await message.ShowAsync($"{Monster.Name}の攻撃！{Player.Name}に {damage} ダメージ！");
+                }
             }
 
             await BattleLoopAsync();

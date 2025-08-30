@@ -109,7 +109,7 @@ namespace EscapeFromDungeon
                     }
                 }
             }
-            Debug.WriteLine($"Draw called. CurrentMessage: {currentMessage}");
+            Debug.WriteLine($"CurrentMessage: {currentMessage}");
         }
 
         public async Task ShowAsync(string messageText)
@@ -143,6 +143,18 @@ namespace EscapeFromDungeon
                 messageIndex = fullMessage.Length;
                 isMessageCompleted = true;
             }
+        }
+
+        public void Reset()
+        {
+            isMessageShowing = false;
+            isMessageCompleted = false;
+            fullMessage = "";
+            currentMessage = "";
+            messageIndex = 0;
+            messageQueue.Clear();
+            isMessageTicking = false;
+            msgTimer.Stop();
         }
 
     }//class
