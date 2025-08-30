@@ -59,7 +59,7 @@
             StateBox.Size = new Size(301, 410);
             StateBox.TabIndex = 1;
             StateBox.TabStop = false;
-            StateBox.Paint += StateBox_Paint;
+            StateBox.Paint += StateBoxPaint;
             // 
             // label1
             // 
@@ -80,7 +80,7 @@
             MsgBox.Size = new Size(477, 102);
             MsgBox.TabIndex = 3;
             MsgBox.TabStop = false;
-            MsgBox.Paint += MsgBox_Paint;
+            MsgBox.Paint += MsgBoxPaint;
             // 
             // lblAttack
             // 
@@ -93,9 +93,9 @@
             lblAttack.TabIndex = 4;
             lblAttack.Text = "攻撃";
             lblAttack.TextAlign = ContentAlignment.MiddleCenter;
-            lblAttack.Click += lblAttack_Click;
-            lblAttack.MouseLeave += LblAttack_MouseLeave;
-            lblAttack.MouseHover += LblAttack_MouseHover;
+            lblAttack.Click += lblAttackClickAsynk;
+            lblAttack.MouseLeave += LblAttackMouseLeave;
+            lblAttack.MouseHover += LblAttackMouseHover;
             // 
             // lblHeal
             // 
@@ -108,9 +108,9 @@
             lblHeal.TabIndex = 5;
             lblHeal.Text = "回復";
             lblHeal.TextAlign = ContentAlignment.MiddleCenter;
-            lblHeal.Click += lblHeal_Click;
-            lblHeal.MouseLeave += LblHeal_MouseLeave;
-            lblHeal.MouseHover += LblHeal_MouseHover;
+            lblHeal.Click += lblHealClickAsync;
+            lblHeal.MouseLeave += LblHealMouseLeave;
+            lblHeal.MouseHover += LblHealMouseHover;
             // 
             // lblDefence
             // 
@@ -123,9 +123,9 @@
             lblDefence.TabIndex = 6;
             lblDefence.Text = "防御";
             lblDefence.TextAlign = ContentAlignment.MiddleCenter;
-            lblDefence.Click += lblDefence_Click;
-            lblDefence.MouseLeave += LblDefence_MouseLeave;
-            lblDefence.MouseHover += LblDefence_MouseHover;
+            lblDefence.Click += lblDefenceClickAsync;
+            lblDefence.MouseLeave += LblDefenceMouseLeave;
+            lblDefence.MouseHover += LblDefenceMouseHover;
             // 
             // lblEscape
             // 
@@ -138,9 +138,9 @@
             lblEscape.TabIndex = 7;
             lblEscape.Text = "逃げる";
             lblEscape.TextAlign = ContentAlignment.MiddleCenter;
-            lblEscape.Click += lblEscape_Click;
-            lblEscape.MouseLeave += LblEscape_MouseLeave;
-            lblEscape.MouseHover += LblEscape_MouseHover;
+            lblEscape.Click += lblEscapeClickAsync;
+            lblEscape.MouseLeave += LblEscapeMouseLeave;
+            lblEscape.MouseHover += LblEscapeMouseHover;
             // 
             // Form1
             // 
@@ -163,7 +163,7 @@
             MinimizeBox = false;
             Name = "Form1";
             Text = "EscapeFromDungeon";
-            KeyDown += MainForm_KeyDown;
+            KeyDown += MainFormKeyDown;
             ((System.ComponentModel.ISupportInitialize)mapDrawBox).EndInit();
             ((System.ComponentModel.ISupportInitialize)StateBox).EndInit();
             ((System.ComponentModel.ISupportInitialize)MsgBox).EndInit();

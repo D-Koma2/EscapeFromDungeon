@@ -38,10 +38,23 @@ namespace EscapeFromDungeon
             // 数値表示
             string hpText = $"HP: {player.Hp} / {player.MaxHp}";
             string state = $"状態： {player.Status.ToString()}";
-            using (Font font = new Font("Arial", 10))
+            string limitText = $"リミット: {player.Limit}";
+            string inventoryTitle = "所持品:";
+            using (Font font = new("Arial", 10))
             {
                 g.DrawString(hpText, font, Brushes.White, barX + 10, barY + 2);
                 g.DrawString(state, font, Brushes.White, barX + 10, barY + 26);
+                g.DrawString(limitText, font, Brushes.White, barX + 10, barY + 48);
+                g.DrawString(inventoryTitle, font, Brushes.White, barX + 10, barY + 76);
+
+                int num = barY + 52;
+                Font font2 = font;
+
+                foreach (var item in player.Inventry)
+                {
+                    num += 24;
+                    g.DrawString(item.Name, font2, Brushes.White, barX + 80, num);
+                }
             }
 
         }

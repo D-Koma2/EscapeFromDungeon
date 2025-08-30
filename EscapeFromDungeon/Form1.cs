@@ -21,17 +21,17 @@ namespace EscapeFromDungeon
         public static DateTime battleInputUnlockTime;
 
         private DateTime lastInputTime = DateTime.MinValue;
-        private readonly TimeSpan inputCooldown = TimeSpan.FromMilliseconds(300);
+        private readonly TimeSpan inputCooldown = TimeSpan.FromMilliseconds(500);
 
         private bool isWaiting = false;
 
         public Form1()
         {
             InitializeComponent();
-            init();
+            Init();
         }
 
-        private void init()
+        private void Init()
         {
             gameManager = new GameManager();//最初に生成する事!
             drawInfo = new DrawInfo();
@@ -43,10 +43,10 @@ namespace EscapeFromDungeon
             gameManager.Battle.SetMonsterVisible = SetMonsterVisible;
             gameManager.Battle.ChangeLblText = ChangeLblText;
             gameManager.ChangeLblText = ChangeLblText;
-            gameManager.KeyUpPressed = () => lblAttack_Click(this, EventArgs.Empty);
-            gameManager.KeyLeftPressed = () => lblDefence_Click(this, EventArgs.Empty);
-            gameManager.KeyRightPressed = () => lblHeal_Click(this, EventArgs.Empty);
-            gameManager.KeyDownPressed = () => lblEscape_Click(this, EventArgs.Empty);
+            gameManager.KeyUpPressed = () => lblAttackClickAsynk(this, EventArgs.Empty);
+            gameManager.KeyLeftPressed = () => lblDefenceClickAsync(this, EventArgs.Empty);
+            gameManager.KeyRightPressed = () => lblHealClickAsync(this, EventArgs.Empty);
+            gameManager.KeyDownPressed = () => lblEscapeClickAsync(this, EventArgs.Empty);
 
             ChangeLblText();
 
@@ -67,7 +67,7 @@ namespace EscapeFromDungeon
         {
             gameManager.Map.ClearBrightness(overlayImg);
             gameManager.Map.DrawBrightness(overlayImg);
-            playerImg.Image = gameManager.player.playerImage;
+            playerImg.Image = gameManager.Player.playerImage;
             gameManager.PlayerVisible(playerImg);
             overlayImg.Invalidate();
             StateBox.Invalidate();
@@ -127,7 +127,7 @@ namespace EscapeFromDungeon
                 Size = new(Map.tileSize, Map.tileSize),
                 Location = new Point(Map.playerPos.X * Map.tileSize, Map.playerPos.Y * Map.tileSize),
                 BackColor = Color.Transparent,
-                Image = gameManager.player.playerImage,
+                Image = gameManager.Player.playerImage,
                 Parent = overlayImg
             };
 
@@ -150,22 +150,22 @@ namespace EscapeFromDungeon
             monsterImg.BringToFront();
         }//InitPictureBoxes
 
-        private void MainForm_KeyDown(object sender, KeyEventArgs e)
+        private void MainFormKeyDown(object sender, KeyEventArgs e)
         {
             gameManager.KeyInput(e.KeyCode, mapImage, overlayImg);
         }
 
-        private void StateBox_Paint(object sender, PaintEventArgs e)
+        private void StateBoxPaint(object sender, PaintEventArgs e)
         {
-            drawInfo.DrawStatus(e.Graphics, gameManager.player);
+            drawInfo.DrawStatus(e.Graphics, gameManager.Player);
         }
 
-        private void MsgBox_Paint(object sender, PaintEventArgs e)
+        private void MsgBoxPaint(object sender, PaintEventArgs e)
         {
             gameManager.Message.Draw(e.Graphics);
         }
 
-        private async void lblAttack_Click(object sender, EventArgs e)
+        private async void lblAttackClickAsynk(object sender, EventArgs e)
         {
             if (isBattleInputLocked && DateTime.Now < battleInputUnlockTime) return;
             if (isWaiting) return;
@@ -177,10 +177,10 @@ namespace EscapeFromDungeon
             if (GameManager.gameMode == GameMode.Battle)
             {
                 SetBattleButtonsEnabled(false);
-                await gameManager.Battle.PlayerTurn("Attack");
-                await gameManager.BattleCheck();
+                await gameManager.Battle.PlayerTurnAsync("Attack");
+                await gameManager.BattleCheckAsync();
             }
-            if (GameManager.gameMode == GameMode.Explore)
+            else if (GameManager.gameMode == GameMode.Explore)
             {
                 gameManager.KeyInput(Keys.Up, mapImage, overlayImg);
             }
@@ -188,7 +188,7 @@ namespace EscapeFromDungeon
             isWaiting = false;
         }
 
-        private async void lblDefence_Click(object sender, EventArgs e)
+        private async void lblDefenceClickAsync(object sender, EventArgs e)
         {
             if (isBattleInputLocked && DateTime.Now < battleInputUnlockTime) return;
             if (isWaiting) return;
@@ -200,10 +200,10 @@ namespace EscapeFromDungeon
             if (GameManager.gameMode == GameMode.Battle)
             {
                 SetBattleButtonsEnabled(false);
-                await gameManager.Battle.PlayerTurn("Defence");
-                await gameManager.BattleCheck();
+                await gameManager.Battle.PlayerTurnAsync("Defence");
+                await gameManager.BattleCheckAsync();
             }
-            if (GameManager.gameMode == GameMode.Explore)
+            else if (GameManager.gameMode == GameMode.Explore)
             {
                 gameManager.KeyInput(Keys.Left, mapImage, overlayImg);
             }
@@ -211,7 +211,7 @@ namespace EscapeFromDungeon
             isWaiting = false;
         }
 
-        private async void lblHeal_Click(object sender, EventArgs e)
+        private async void lblHealClickAsync(object sender, EventArgs e)
         {
             if (isBattleInputLocked && DateTime.Now < battleInputUnlockTime) return;
             if (isWaiting) return;
@@ -223,10 +223,10 @@ namespace EscapeFromDungeon
             if (GameManager.gameMode == GameMode.Battle)
             {
                 SetBattleButtonsEnabled(false);
-                await gameManager.Battle.PlayerTurn("Heal");
-                await gameManager.BattleCheck();
+                await gameManager.Battle.PlayerTurnAsync("Heal");
+                await gameManager.BattleCheckAsync();
             }
-            if (GameManager.gameMode == GameMode.Explore)
+            else if (GameManager.gameMode == GameMode.Explore)
             {
                 gameManager.KeyInput(Keys.Right, mapImage, overlayImg);
             }
@@ -234,7 +234,7 @@ namespace EscapeFromDungeon
             isWaiting = false;
         }
 
-        private async void lblEscape_Click(object sender, EventArgs e)
+        private async void lblEscapeClickAsync(object sender, EventArgs e)
         {
             if (isBattleInputLocked && DateTime.Now < battleInputUnlockTime) return;
             if (isWaiting) return;
@@ -246,10 +246,10 @@ namespace EscapeFromDungeon
             if (GameManager.gameMode == GameMode.Battle)
             {
                 SetBattleButtonsEnabled(false);
-                await gameManager.Battle.PlayerTurn("Escape");
-                await gameManager.BattleCheck();
+                await gameManager.Battle.PlayerTurnAsync("Escape");
+                await gameManager.BattleCheckAsync();
             }
-            if (GameManager.gameMode == GameMode.Explore)
+            else if (GameManager.gameMode == GameMode.Explore)
             {
                 gameManager.KeyInput(Keys.Down, mapImage, overlayImg);
             }
@@ -267,26 +267,26 @@ namespace EscapeFromDungeon
 
         private void SetMonsterVisible(bool visible) => monsterImg.Visible = visible;
 
-        private void LblAttack_MouseHover(object sender, EventArgs e) => lblAttack.BackColor = btnSelectCol;
+        private void LblAttackMouseHover(object sender, EventArgs e) => lblAttack.BackColor = btnSelectCol;
 
-        private void LblAttack_MouseLeave(object sender, EventArgs e) => lblAttack.BackColor = btnBaseCol;
+        private void LblAttackMouseLeave(object sender, EventArgs e) => lblAttack.BackColor = btnBaseCol;
 
-        private void LblDefence_MouseHover(object sender, EventArgs e) => lblDefence.BackColor = btnSelectCol;
+        private void LblDefenceMouseHover(object sender, EventArgs e) => lblDefence.BackColor = btnSelectCol;
 
-        private void LblDefence_MouseLeave(object sender, EventArgs e) => lblDefence.BackColor = btnBaseCol;
+        private void LblDefenceMouseLeave(object sender, EventArgs e) => lblDefence.BackColor = btnBaseCol;
 
-        private void LblHeal_MouseHover(object sender, EventArgs e) => lblHeal.BackColor = btnSelectCol;
+        private void LblHealMouseHover(object sender, EventArgs e) => lblHeal.BackColor = btnSelectCol;
 
-        private void LblHeal_MouseLeave(object sender, EventArgs e) => lblHeal.BackColor = btnBaseCol;
+        private void LblHealMouseLeave(object sender, EventArgs e) => lblHeal.BackColor = btnBaseCol;
 
-        private void LblEscape_MouseHover(object sender, EventArgs e) => lblEscape.BackColor = btnSelectCol;
+        private void LblEscapeMouseHover(object sender, EventArgs e) => lblEscape.BackColor = btnSelectCol;
 
-        private void LblEscape_MouseLeave(object sender, EventArgs e) => lblEscape.BackColor = btnBaseCol;
+        private void LblEscapeMouseLeave(object sender, EventArgs e) => lblEscape.BackColor = btnBaseCol;
 
         // デバッグ用
         private void DispPoint()
         {
-            label1.Text = $"XY:({Map.playerPos.X}, {Map.playerPos.Y}) limit:{gameManager.player.Limit} " +
+            label1.Text = $"XY:({Map.playerPos.X}, {Map.playerPos.Y}) limit:{gameManager.Player.Limit} " +
                 $"mi:({mapImage.Location.X},{mapImage.Location.Y}) " +
                 $"oi:({overlayImg.Location.X},{overlayImg.Location.Y}) pi:({playerImg.Location.X},{playerImg.Location.Y})";
         }

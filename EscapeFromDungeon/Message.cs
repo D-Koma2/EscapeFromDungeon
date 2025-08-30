@@ -12,7 +12,7 @@ namespace EscapeFromDungeon
     {
         private const int timerInterval = 16;
         public bool isMessageShowing = false;// メッセージ送り用フィールド
-        public bool isMessageCompleted = false;// メッセージが完了したかどうか
+        private bool isMessageCompleted = false;// メッセージが完了したかどうか
         private string fullMessage = "";// フルメッセージ（改行を含む）
         private string currentMessage = "";// 現在表示中のメッセージ
         private int messageIndex = 0;// メッセージの現在のインデックス
@@ -21,15 +21,16 @@ namespace EscapeFromDungeon
         private bool isMessageTicking = false;// メッセージ送り用
         private System.Windows.Forms.Timer msgTimer;
         private Queue<string> messageQueue = new Queue<string>();
+
         public event Action OnMessageCompleted;
 
         public Message()
         {
             msgTimer = new System.Windows.Forms.Timer();
             msgTimer.Interval = timerInterval;
-            msgTimer.Tick += MsgTimer_Tick;
+            msgTimer.Tick += MsgTimerTick;
         }
-        public void MsgTimer_Tick(object sender, EventArgs e)
+        public void MsgTimerTick(object sender, EventArgs e)
         {
             if (!isMessageTicking) return;
 
@@ -46,7 +47,7 @@ namespace EscapeFromDungeon
                 // 次のメッセージがあれば表示
                 if (messageQueue.Count > 0)
                 {
-                    ShowNext();
+                    ShowNextAsync();
                 }
                 else
                 {
@@ -67,12 +68,12 @@ namespace EscapeFromDungeon
 
             if (!isMessageShowing)
             {
-                ShowNext();
+                ShowNextAsync();
                 msgTimer.Start();
             }
         }
 
-        public async void ShowNext()
+        public async void ShowNextAsync()
         {
             if (messageQueue.Count > 0)
             {
@@ -131,10 +132,7 @@ namespace EscapeFromDungeon
                     messageIndex = fullMessage.Length;
                     isMessageCompleted = true;
                 }
-                else
-                {
-                    ShowNext();
-                }
+                else ShowNextAsync();
             }
 
             if (GameManager.gameMode == GameMode.Battle)
@@ -145,7 +143,7 @@ namespace EscapeFromDungeon
             }
         }
 
-        public void Reset()
+        public void Init()
         {
             isMessageShowing = false;
             isMessageCompleted = false;
