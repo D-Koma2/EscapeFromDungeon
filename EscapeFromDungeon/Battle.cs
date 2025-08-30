@@ -23,30 +23,29 @@ namespace EscapeFromDungeon
         {
             this.Player = player;
             this.message = message;
-            this.message.OnMessageCompleted += HandleMessageCompleted;
         }
 
         public async Task<Character> BattleLoopAsync()
         {
-            if (GameManager.gameMode != GameMode.Battle) return null;
-
-            //SetButtonEnabled?.Invoke(true);
-
             if (Monster.Hp <= 0)
             {
-                GameManager.gameMode = GameMode.Explore;
+                GameManager.gameMode = GameMode.BattleEnd;
                 await message.ShowAsync($"{Monster.Name}を倒した！");
                 SetMonsterVisible.Invoke(false);
-                SetButtonEnabled.Invoke(false);
                 return Monster;
             }
             if (Player.Hp <= 0)
             {
-                GameManager.gameMode = GameMode.Gameover;
-                await message.ShowAsync($"{Player.Name}は倒れた！");
+                GameManager.gameMode = GameMode.BattleEnd;
                 SetMonsterVisible.Invoke(false);
-                SetButtonEnabled.Invoke(false);
                 return Player;
+            }
+
+            // 戦闘が続いているときだけボタンを表示
+            if (GameManager.gameMode == GameMode.Battle)
+            {
+                //await message.ShowAsync($"コマンド？");
+                SetButtonEnabled?.Invoke(true);
             }
 
             return null;
@@ -71,14 +70,20 @@ namespace EscapeFromDungeon
                     await message.ShowAsync($"{Player.Name}は回復した！");
                     break;
                 case "Escape":
-                    await message.ShowAsync($"{Player.Name}は逃げ出した！");
-                    GameManager.gameMode = GameMode.Explore;
-                    await BattleLoopAsync();
-                    break;
+                    GameManager.gameMode = GameMode.Escaped;
+                    SetMonsterVisible.Invoke(false);
+                    SetButtonEnabled.Invoke(false);
+                    return;
             }
 
-            if (Monster.Hp > 0) await EnemyTurn();
-            else await BattleLoopAsync();
+            if (Monster.Hp > 0)
+            {
+                await EnemyTurn();
+            }
+            else
+            {
+                await BattleLoopAsync();
+            }
         }
 
         private async Task EnemyTurn()
@@ -95,11 +100,6 @@ namespace EscapeFromDungeon
             }
 
             await BattleLoopAsync();
-        }
-
-        private void HandleMessageCompleted()
-        {
-            SetButtonEnabled?.Invoke(true);
         }
 
     }//class Battle

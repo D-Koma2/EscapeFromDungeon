@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -28,7 +29,6 @@ namespace EscapeFromDungeon
             msgTimer.Interval = timerInterval;
             msgTimer.Tick += MsgTimer_Tick;
         }
-
         public void MsgTimer_Tick(object sender, EventArgs e)
         {
             if (!isMessageTicking) return;
@@ -42,10 +42,19 @@ namespace EscapeFromDungeon
             {
                 isMessageTicking = false;
                 isMessageCompleted = true;
-                if (GameManager.gameMode == GameMode.Battle)
+
+                // 次のメッセージがあれば表示
+                if (messageQueue.Count > 0)
                 {
-                    OnMessageCompleted?.Invoke(); // メッセージ完了通知
+                    ShowNext();
                 }
+                else
+                {
+                    isMessageShowing = false;
+                    msgTimer.Stop();
+                }
+
+                OnMessageCompleted?.Invoke();
             }
         }
 
@@ -55,10 +64,11 @@ namespace EscapeFromDungeon
             // 複数メッセージをキューに分割（$$で区切る）
             var messages = message.Split(new[] { "$$" }, StringSplitOptions.None);
             foreach (var msg in messages) messageQueue.Enqueue(msg);
-            msgTimer.Start();
+
             if (!isMessageShowing)
             {
                 ShowNext();
+                msgTimer.Start();
             }
         }
 
@@ -81,7 +91,7 @@ namespace EscapeFromDungeon
                 isMessageTicking = false;
                 msgTimer.Stop();
 
-                await Task.Delay(1);
+                await Task.Delay(100);
             }
         }
 
@@ -99,6 +109,7 @@ namespace EscapeFromDungeon
                     }
                 }
             }
+            Debug.WriteLine($"Draw called. CurrentMessage: {currentMessage}");
         }
 
         public async Task ShowAsync(string messageText)
@@ -125,7 +136,8 @@ namespace EscapeFromDungeon
                     ShowNext();
                 }
             }
-            else if (GameManager.gameMode == GameMode.Battle)
+
+            if (GameManager.gameMode == GameMode.Battle)
             {
                 currentMessage = fullMessage;
                 messageIndex = fullMessage.Length;

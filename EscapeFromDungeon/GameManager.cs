@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing.Imaging;
+using System.Reflection;
 using System.Windows.Forms;
 
 namespace EscapeFromDungeon
@@ -9,6 +10,8 @@ namespace EscapeFromDungeon
         Title,
         Explore,
         Battle,
+        Escaped,
+        BattleEnd,
         Gameover
     }
 
@@ -19,6 +22,9 @@ namespace EscapeFromDungeon
         private const string monsterCsv = "monster.csv";
         private const string itemCsv = "item.csv";
         private const string playerName = "あなた";
+        private const int ViewShrinkInterval = 33;
+        private const int DamageFloorValue = 3;
+        private const int PoisonDamageValue = 1;
 
         public static GameMode gameMode { get; set; } = GameMode.Explore;
 
@@ -50,7 +56,7 @@ namespace EscapeFromDungeon
 
             player = new Player(playerName, 100, 10);
             Message = new Message();
-            Battle = new Battle(player,Message);
+            Battle = new Battle(player, Message);
 
             waitTimer = new System.Windows.Forms.Timer();
             waitTimer.Tick += UiTimer_Tick;
@@ -79,22 +85,49 @@ namespace EscapeFromDungeon
                 SwitchView(keyCode, overlayBox);
                 Move(keyCode, mapImage, overlayBox);
             }
-            if (gameMode == GameMode.Battle)
+        }
+
+        public async Task BattleCheck()
+        {
+            if (gameMode == GameMode.Escaped)
             {
-                //// メッセージ表示中はメッセージ処理優先
-                //if (Message.isMessageShowing)
-                //{
-                //    // メッセージ表示中はスペースで全文表示 or 次のメッセージ
-                //    if (keyCode == Keys.Space) Message.InputKey();
-                //    return;
-                //}
+                Message.Show($"{player.Name}は逃げ出した！");
+                gameMode = GameMode.Explore;
             }
+
+            if (gameMode == GameMode.BattleEnd)
+            {
+                if (player.Hp > 0)
+                {
+                    Message.Show($"{player.Name}は勝利した!");
+                    DeleteEncountEvent();
+                    gameMode = GameMode.Explore;
+                }
+            }
+
+            if (gameMode == GameMode.Gameover)
+            {
+                Message.Show($"{player.Name}は死にました");
+                Gameover();
+            }
+        }
+
+        private void DeleteEncountEvent()
+        {
+            if(player.Dir == Player.Direction.Up)
+                Map.EventMap[Map.playerPos.X, Map.playerPos.Y - 1] = null; // バトルイベントを消去
+            else if (player.Dir == Player.Direction.Down)
+                Map.EventMap[Map.playerPos.X, Map.playerPos.Y + 1] = null; // バトルイベントを消去
+            else if (player.Dir == Player.Direction.Left)
+                Map.EventMap[Map.playerPos.X - 1, Map.playerPos.Y] = null; // バトルイベントを消去
+            else if (player.Dir == Player.Direction.Right)
+                Map.EventMap[Map.playerPos.X + 1, Map.playerPos.Y] = null; // バトルイベントを消去
         }
 
         private void Move(Keys keyCode, PictureBox mapImage, PictureBox overlayBox)
         {
             Point dir = Point.Empty;
-            int moveAmount = 32; // 移動量（ピクセル）
+            int moveAmount = Map.tileSize; // 移動量（ピクセル）
 
             Point current1 = mapImage.Location;
             Point current2 = overlayBox.Location;
@@ -134,10 +167,18 @@ namespace EscapeFromDungeon
             // 移動可能かチェック
             if (Map.CanMoveTo(newPos.X, newPos.Y))
             {
+                Event evt = CheckEvent(newPos.X, newPos.Y);
+
+                if (evt != null && evt.EventType == EventType.Encount)
+                {
+                    // 戦闘イベントなら移動せずに終了
+                    return;
+                }
+
                 Map.playerPos = newPos;
                 mapImage.Location = current1;
                 overlayBox.Location = current2;
-                CheckEvent(newPos.X, newPos.Y);
+   
                 DamageCheck(newPos.X, newPos.Y);
                 TurnCheck();
                 WaitTimerStart();
@@ -149,11 +190,11 @@ namespace EscapeFromDungeon
             // ダメージ床
             if (Map.BaseMap[x, y] == 3)
             {
-                player.Hp -= 3;
+                player.Hp -= DamageFloorValue;
             }
             if (player.Status == Status.Poison)
             {
-                player.Hp -= 1;
+                player.Hp -= PoisonDamageValue;
             }
         }
 
@@ -184,16 +225,19 @@ namespace EscapeFromDungeon
             turnCount++;
             player.Limit--;
             if (player.Limit <= 0 || player.Hp <= 0) Gameover();
-            if (turnCount % 33 == 0) { Map.viewRadius--; }
+            if (turnCount % ViewShrinkInterval == 0) { Map.viewRadius--; }
         }
 
-        private void CheckEvent(int x, int y)
+        private Event CheckEvent(int x, int y)
         {
             var eventId = Map.EventMap[x, y];
 
-            if (eventId == null) return; // イベントなし
+            if (eventId == null) return null; // イベントなし
 
             Event evt = eventData.Dict[eventId];
+
+            if (!eventData.Dict.ContainsKey(eventId)) return null;
+
             if (evt != null)
             {
                 switch (evt.EventType)
@@ -220,36 +264,28 @@ namespace EscapeFromDungeon
                         break;
                 }
 
-                // 逃げた場合はイベント消去しない
-                if (evt.EventType == EventType.Encount)
+                if (evt.EventType == EventType.Hint || evt.EventType == EventType.Encount)
                 {
-                    //ここに逃げた場合の処理を追加予定
+                    // ヒント以外は一度きり,バトルは逃げた場合残すのでここでは消去しない
                 }
-
-                // ヒント以外は一度きり
-                if (evt.EventType != EventType.Hint)
+                else
                 {
                     Map.EventMap[x, y] = null; // イベントを消去
                 }
+
+                return evt;
             }
+            return null;
         }
 
         private void EncounterEvent(Event evt)
         {
             gameMode = GameMode.Battle;
-            Message.Show($"{evt.Word} が現れた！");
-
-            Battle.Monster = monsterData.Dict[evt.Word];
-
+            var mon = monsterData.Dict[evt.Word];
+            Battle.Monster = new Monster(mon.Name, mon.Hp, mon.Attack, mon.Weak);
+            Message.Show($"{mon.Name}が現れた！");
             Battle.SetButtonEnabled.Invoke(true);
             Battle.SetMonsterVisible.Invoke(true);
-
-            var winner = Battle.BattleLoopAsync().Result;
-
-            if (winner != null && winner.Name == playerName)
-            {
-                Message.Show($"{playerName}は勝利した！");
-            }
         }
 
         private void ItemGetEvent(Event evt)

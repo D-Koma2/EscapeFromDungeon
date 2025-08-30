@@ -17,7 +17,6 @@ namespace EscapeFromDungeon
         private static readonly Color color = Color.FromArgb(255, 54, 83, 83);
         private static readonly Brush transWallBrush = new SolidBrush(color);
 
-
         public static Point playerPos = new Point(6, 6); // マップ上の座標(map.csvの"S"で変更)
         public static Point playerDispPos = new Point(6, 6); //プレイヤー表示座標(map中央固定)
 

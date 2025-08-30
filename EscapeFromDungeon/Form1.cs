@@ -1,5 +1,6 @@
 ﻿
 using EscapeFromDungeon.Properties;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace EscapeFromDungeon
@@ -56,6 +57,7 @@ namespace EscapeFromDungeon
             StateBox.Invalidate();
             MsgBox.Invalidate();
             DispPoint();
+            Debug.WriteLine("Tick");
         }
 
         private void InitPictureBoxes()
@@ -132,26 +134,30 @@ namespace EscapeFromDungeon
 
         private async void lblAttack_Click(object sender, EventArgs e)
         {
-            await gameManager.Battle.PlayerTurn("Attack");
             HideBattleCommands();
+            await gameManager.Battle.PlayerTurn("Attack");
+            await gameManager.BattleCheck();
         }
 
         private async void lblDefence_Click(object sender, EventArgs e)
         {
-            await gameManager.Battle.PlayerTurn("Defence");
             HideBattleCommands();
+            await gameManager.Battle.PlayerTurn("Defence");
+            await gameManager.BattleCheck();
         }
 
         private async void lblHeal_Click(object sender, EventArgs e)
         {
-            await gameManager.Battle.PlayerTurn("Heal");
             HideBattleCommands();
+            await gameManager.Battle.PlayerTurn("Heal");
+            await gameManager.BattleCheck();
         }
 
         private async void lblEscape_Click(object sender, EventArgs e)
         {
-            await gameManager.Battle.PlayerTurn("Escape");
             HideBattleCommands();
+            await gameManager.Battle.PlayerTurn("Escape");
+            await gameManager.BattleCheck();
         }
 
         public void ShowBattleCommands()

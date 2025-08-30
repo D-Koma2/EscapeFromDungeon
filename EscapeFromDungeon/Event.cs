@@ -18,9 +18,9 @@ namespace EscapeFromDungeon
 
     internal class Event
     {
-        public string Id { get; set; }
-        public EventType EventType { get; set; }
-        public string Word { get; set; }
+        public string Id { get; private set; }
+        public EventType EventType { get; private set; }
+        public string Word { get; private set; }
 
         public Event(string id, EventType eventType, string word)
         {
