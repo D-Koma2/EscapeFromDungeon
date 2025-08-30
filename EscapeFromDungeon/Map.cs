@@ -37,10 +37,7 @@ namespace EscapeFromDungeon
         public int Height { get; private set; }
         public Bitmap? MapCanvas { get; private set; }
         public Bitmap? overrayCanvas { get; private set; }
-        public Map(string path)
-        {
-            LoadFromCsv(path);
-        }
+        public Map(string path) => LoadFromCsv(path);
 
         public void LoadFromCsv(string path)
         {

@@ -9,12 +9,8 @@ namespace EscapeFromDungeon
 {
     internal class MonsterData
     {
-        public List<Monster> monsterDatas { get; private set; }
-        public MonsterData(string path)
-        {
-            monsterDatas = new List<Monster>();
-            ReadFromCsv(path);
-        }
+        public Dictionary<string,Monster> Dict { get; private set; } = new Dictionary<string, Monster>();
+        public MonsterData(string path) => ReadFromCsv(path);
 
         public void ReadFromCsv(string path)
         {
@@ -29,7 +25,7 @@ namespace EscapeFromDungeon
                 var attack = int.Parse(cells[2]);
                 var weak = (Weak)Enum.Parse(typeof(Weak), cells[3]);
 
-                monsterDatas.Add(new Monster
+                Dict.Add(name,new Monster
                 (
                     name,
                     hp,

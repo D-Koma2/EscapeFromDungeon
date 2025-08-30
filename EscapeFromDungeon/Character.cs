@@ -53,6 +53,7 @@ namespace EscapeFromDungeon
     internal class Player : Character
     {
         private int limit = 999;
+        public List<Item> Inventry { get; private set; }
 
         public Player(string name, int hp, int attack) : base(name, hp, attack) 
         {
@@ -75,9 +76,8 @@ namespace EscapeFromDungeon
             }
         }
 
-        public List<Item> Inventry { get; private set; }
 
-        public void GetPlayerImage(Direction dir)
+        public void SetDirectionImage(Direction dir)
         {
             switch (dir)
             {

@@ -9,13 +9,9 @@ namespace EscapeFromDungeon
 {
     internal class EventData
     {
-        public List<Event> eventDatas { get; private set; }
+        public Dictionary<string,Event> Dict { get; private set; } = new Dictionary<string, Event>();
 
-        public EventData(string path)
-        {
-            eventDatas = new List<Event>();
-            ReadFromCsv(path);
-        }
+        public EventData(string path) => ReadFromCsv(path);
 
         public void ReadFromCsv(string path)
         {
@@ -29,7 +25,7 @@ namespace EscapeFromDungeon
                 var eventType = (EventType)Enum.Parse(typeof(EventType), cells[1]);
                 var word = cells[2];
 
-                eventDatas.Add(new Event
+                Dict.Add(id, new Event
                 (
                     id,
                     eventType,

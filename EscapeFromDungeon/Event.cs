@@ -9,10 +9,11 @@ namespace EscapeFromDungeon
     public enum EventType
     {
         Message,
+        Hint,
         ItemGet,
         Heal,
         Trap,
-        EnemyEncount
+        Encount
     }
 
     internal class Event

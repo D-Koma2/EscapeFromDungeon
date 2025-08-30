@@ -1,11 +1,18 @@
 ﻿
+using EscapeFromDungeon.Properties;
+using System.Threading.Tasks;
+
 namespace EscapeFromDungeon
 {
     public partial class Form1 : Form
     {
-        private PictureBox mapImage, overlayImg, playerImg;
+        private readonly Color btnBaseCol = Color.DarkGray;
+        private readonly Color btnSelectCol = Color.DarkOrange;
+
+        private PictureBox mapImage, overlayImg, playerImg, monsterImg;
         private GameManager gameManager;
         private DrawInfo drawInfo;
+
         private System.Windows.Forms.Timer timer;//画面表示更新用
         private const int timerInterval = 16; // 約60FPS
 
@@ -17,22 +24,28 @@ namespace EscapeFromDungeon
 
         private void init()
         {
-            gameManager = new GameManager();
+            gameManager = new GameManager();//最初に生成する事!
             drawInfo = new DrawInfo();
 
             InitPictureBoxes();
             MsgBox.Location = new Point(10, 440);
 
+            gameManager.Battle.SetButtonEnabled = SetBattleButtonsEnabled;
+            gameManager.Battle.SetMonsterVisible = SetMonsterVisible;
+
             gameManager.Map.Draw(mapImage);
             gameManager.Map.DrawBrightness(overlayImg);
             gameManager.SetMapPos(mapImage, overlayImg, playerImg);
+
             DispPoint();
+
             timer = new System.Windows.Forms.Timer();
             timer.Interval = timerInterval;
             timer.Tick += Timer_Tick;
             timer.Start();
         }
 
+        // 画面更新タイマーイベント
         private void Timer_Tick(object? sender, EventArgs e)
         {
             gameManager.Map.ClearBrightness(overlayImg);
@@ -84,7 +97,22 @@ namespace EscapeFromDungeon
             };
 
             overlayImg.Controls.Add(playerImg);
-            playerImg.BringToFront(); // mapImageの上に表示
+            playerImg.BringToFront(); // overlayの上に表示
+
+            // モンスター画像
+            monsterImg = new PictureBox
+            {
+                Size = new(Map.tileSize * 8, Map.tileSize * 8),
+                Location = new Point(96, 96),
+                BackColor = Color.Transparent,
+                Image = Resources.Enemy01,
+                SizeMode = PictureBoxSizeMode.StretchImage,
+                BorderStyle = BorderStyle.FixedSingle,
+                Parent = overlayImg,
+                Visible = false
+            };
+
+            monsterImg.BringToFront();
         }
 
         private void MainForm_KeyDown(object sender, KeyEventArgs e)
@@ -102,6 +130,75 @@ namespace EscapeFromDungeon
             gameManager.Message.Draw(e.Graphics);
         }
 
+        private async void lblAttack_Click(object sender, EventArgs e)
+        {
+            await gameManager.Battle.PlayerTurn("Attack");
+            HideBattleCommands();
+        }
+
+        private async void lblDefence_Click(object sender, EventArgs e)
+        {
+            await gameManager.Battle.PlayerTurn("Defence");
+            HideBattleCommands();
+        }
+
+        private async void lblHeal_Click(object sender, EventArgs e)
+        {
+            await gameManager.Battle.PlayerTurn("Heal");
+            HideBattleCommands();
+        }
+
+        private async void lblEscape_Click(object sender, EventArgs e)
+        {
+            await gameManager.Battle.PlayerTurn("Escape");
+            HideBattleCommands();
+        }
+
+        public void ShowBattleCommands()
+        {
+            lblAttack.Visible = true;
+            lblDefence.Visible = true;
+            lblHeal.Visible = true;
+            lblEscape.Visible = true;
+        }
+
+        private void HideBattleCommands()
+        {
+            lblAttack.Visible = false;
+            lblDefence.Visible = false;
+            lblHeal.Visible = false;
+            lblEscape.Visible = false;
+        }
+
+        private void SetBattleButtonsEnabled(bool enabled)
+        {
+            lblAttack.Visible = enabled;
+            lblDefence.Visible = enabled;
+            lblHeal.Visible = enabled;
+            lblEscape.Visible = enabled;
+        }
+
+        private void SetMonsterVisible(bool visible)
+        {
+            monsterImg.Visible = visible;
+        }
+
+        private void LblAttack_MouseHover(object sender, EventArgs e) => lblAttack.BackColor = btnSelectCol;
+
+        private void LblAttack_MouseLeave(object sender, EventArgs e) => lblAttack.BackColor = btnBaseCol;
+
+        private void LblDefence_MouseHover(object sender, EventArgs e) => lblDefence.BackColor = btnSelectCol;
+
+        private void LblDefence_MouseLeave(object sender, EventArgs e) => lblDefence.BackColor = btnBaseCol;
+
+        private void LblHeal_MouseHover(object sender, EventArgs e) => lblHeal.BackColor = btnSelectCol;
+
+        private void LblHeal_MouseLeave(object sender, EventArgs e) => lblHeal.BackColor = btnBaseCol;
+
+        private void LblEscape_MouseHover(object sender, EventArgs e) => lblEscape.BackColor = btnSelectCol;
+
+        private void LblEscape_MouseLeave(object sender, EventArgs e) => lblEscape.BackColor = btnBaseCol;
+
         // デバッグ用
         private void DispPoint()
         {
@@ -109,6 +206,5 @@ namespace EscapeFromDungeon
                 $"mi:({mapImage.Location.X},{mapImage.Location.Y}) " +
                 $"oi:({overlayImg.Location.X},{overlayImg.Location.Y}) pi:({playerImg.Location.X},{playerImg.Location.Y})";
         }
-
     }//class
 }//namespace

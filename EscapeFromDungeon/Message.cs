@@ -20,6 +20,7 @@ namespace EscapeFromDungeon
         private bool isMessageTicking = false;// メッセージ送り用
         private System.Windows.Forms.Timer msgTimer;
         private Queue<string> messageQueue = new Queue<string>();
+        public event Action OnMessageCompleted;
 
         public Message()
         {
@@ -41,20 +42,27 @@ namespace EscapeFromDungeon
             {
                 isMessageTicking = false;
                 isMessageCompleted = true;
+                if (GameManager.gameMode == GameMode.Battle)
+                {
+                    OnMessageCompleted?.Invoke(); // メッセージ完了通知
+                }
             }
         }
 
         // メッセージ表示開始メソッド
         public void Show(string message)
         {
-            // 複数メッセージをキューに分割（例：\n\nで区切る）
+            // 複数メッセージをキューに分割（$$で区切る）
             var messages = message.Split(new[] { "$$" }, StringSplitOptions.None);
             foreach (var msg in messages) messageQueue.Enqueue(msg);
             msgTimer.Start();
-            ShowNext();
+            if (!isMessageShowing)
+            {
+                ShowNext();
+            }
         }
 
-        public void ShowNext()
+        public async void ShowNext()
         {
             if (messageQueue.Count > 0)
             {
@@ -72,6 +80,8 @@ namespace EscapeFromDungeon
                 currentMessage = "";
                 isMessageTicking = false;
                 msgTimer.Stop();
+
+                await Task.Delay(1);
             }
         }
 
@@ -81,7 +91,7 @@ namespace EscapeFromDungeon
             {
                 using (Font font = new Font("MS UI Gothic", 12))
                 {
-                    string[] lines = currentMessage.Split('\n');
+                    string[] lines = currentMessage.Split('$');
                     for (int i = 0; i < lines.Length; i++)
                     {
                         int y = messageY + i * (font.Height + MessageLineMargin);
@@ -91,16 +101,36 @@ namespace EscapeFromDungeon
             }
         }
 
+        public async Task ShowAsync(string messageText)
+        {
+            Show(messageText); // 既存の Show を呼び出す
+            while (!isMessageCompleted)
+            {
+                await Task.Delay(100); // メッセージが完了するまで待機
+            }
+        }
+
         public void InputKey()
         {
-            if (!isMessageCompleted)
+            if (GameManager.gameMode == GameMode.Explore)
             {
-                // 全文一気に表示
+                if (!isMessageCompleted)
+                {
+                    currentMessage = fullMessage;
+                    messageIndex = fullMessage.Length;
+                    isMessageCompleted = true;
+                }
+                else
+                {
+                    ShowNext();
+                }
+            }
+            else if (GameManager.gameMode == GameMode.Battle)
+            {
                 currentMessage = fullMessage;
                 messageIndex = fullMessage.Length;
                 isMessageCompleted = true;
             }
-            else ShowNext();
         }
 
     }//class

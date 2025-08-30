@@ -9,13 +9,9 @@ namespace EscapeFromDungeon
 {
     internal class ItemData
     {
-        public List<Item> ItemDatas { get; private set; }
+        public Dictionary<string, Item> Dict { get; private set; } = new Dictionary<string, Item>();
 
-        public ItemData(string path)
-        {
-            ItemDatas = new List<Item>();
-            ReadFromCsv(path);
-        }
+        public ItemData(string path) => ReadFromCsv(path);
 
         public void ReadFromCsv(string path)
         {
@@ -28,7 +24,7 @@ namespace EscapeFromDungeon
                 var name = cells[0];
                 var description = cells[1];
 
-                ItemDatas.Add(new Item
+                Dict.Add(name, new Item
                 (
                     name,
                     description
