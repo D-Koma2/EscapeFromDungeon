@@ -65,7 +65,7 @@ namespace EscapeFromDungeon
             {
                 case "Attack":
 
-                    //ここで敵の弱点のアイテムを持っていればダメージアップの処理
+                    //敵の弱点のアイテムを持っていればダメージアップの処理
                     if (Monster.Weak != Weak.None)
                     {
                         string itemName = Monster.Weak switch
@@ -81,18 +81,12 @@ namespace EscapeFromDungeon
                             int extraDamage = Player.Attack * 2;
                             Monster.Hp -= extraDamage;
                             await message.ShowAsync($"{Player.Name}は{itemName}で攻撃！{Monster.Name}に {extraDamage} ダメージ！");
-                        }
-                        else
-                        {
-                            Monster.Hp -= Player.Attack;
-                            await message.ShowAsync($"{Player.Name}の攻撃！{Monster.Name}に {Player.Attack} ダメージ！");
+                            break;
                         }
                     }
-                    else
-                    {
-                        Monster.Hp -= Player.Attack;
-                        await message.ShowAsync($"{Player.Name}の攻撃！{Monster.Name}に {Player.Attack} ダメージ！");
-                    }
+
+                    Monster.Hp -= Player.Attack;
+                    await message.ShowAsync($"{Player.Name}の攻撃！{Monster.Name}に {Player.Attack} ダメージ！");
                     break;
                 case "Defence":
                     _isDefending = true;
