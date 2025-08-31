@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace EscapeFromDungeon
 {
@@ -40,7 +42,7 @@ namespace EscapeFromDungeon
         public int MaxHp { get; private set; }
         public string Name { get; private set; }
         public int Attack { get; private set; }
-        public Status Status { get; set; } = Status.Normal;
+        public Status Status { get; private set; } = Status.Normal;
 
         public Character(string name, int hp, int attack)
         {
@@ -49,6 +51,15 @@ namespace EscapeFromDungeon
             Hp = hp;
             Attack = attack;
         }
+
+        public void TakeDamage(int damage)
+        {
+            Hp -= damage;
+            if (Hp < 0) Hp = 0;
+        }
+
+        public void HealStatus() => Status = Status.Normal;
+        public void TakePoison() => Status = Status.Poison;
     }
 
     internal class Player : Character
@@ -84,10 +95,20 @@ namespace EscapeFromDungeon
             if (Hp > MaxHp) Hp = MaxHp;
         }
 
+        public void GetItem(string name, string dsc)
+        {
+            Inventry.Add(new Item(name, dsc));
+        }
+
         public void UseItem(string itemName)
         {
             var usedItem = Inventry.Find(item => item.Name == itemName);
             if (usedItem != null) Inventry.Remove(usedItem);
+        }
+
+        public int GetItemCount(string itemName)
+        {
+            return Inventry.Count(item => item.Name == itemName);
         }
 
         public void SetDirectionImage(Direction dir)

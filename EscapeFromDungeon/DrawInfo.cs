@@ -55,13 +55,13 @@ namespace EscapeFromDungeon
                 g.DrawString(curePoisonCount, font, Brushes.White, barX + 80, barY + 104);
                 g.DrawString(torchCount, font, Brushes.White, barX + 80, barY + 134);
 
-                int num = barY + 138;
+                int num = barY + 134;
                 Font font2 = font;
 
                 foreach (var item in player.Inventry)
                 {
                     if (item.Name == Const.potion || item.Name == Const.curePoison || item.Name == Const.torch) continue;
-                    num += 24;
+                    num += 30;
                     g.DrawString(item.Name, font2, Brushes.White, barX + 80, num);
                 }
             }

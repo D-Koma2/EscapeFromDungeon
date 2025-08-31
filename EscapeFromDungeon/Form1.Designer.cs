@@ -101,8 +101,8 @@
             lblAttack.Text = "攻撃";
             lblAttack.TextAlign = ContentAlignment.MiddleCenter;
             lblAttack.Click += lblAttackClickAsynk;
-            lblAttack.MouseLeave += LblAttackMouseLeave;
-            lblAttack.MouseHover += LblAttackMouseHover;
+            lblAttack.MouseLeave += LabelMouseLeave;
+            lblAttack.MouseHover += LabelMouseHover;
             // 
             // lblHeal
             // 
@@ -117,8 +117,8 @@
             lblHeal.Text = "回復";
             lblHeal.TextAlign = ContentAlignment.MiddleCenter;
             lblHeal.Click += lblHealClickAsync;
-            lblHeal.MouseLeave += LblHealMouseLeave;
-            lblHeal.MouseHover += LblHealMouseHover;
+            lblHeal.MouseLeave += LabelMouseLeave;
+            lblHeal.MouseHover += LabelMouseHover;
             // 
             // lblDefence
             // 
@@ -133,8 +133,8 @@
             lblDefence.Text = "防御";
             lblDefence.TextAlign = ContentAlignment.MiddleCenter;
             lblDefence.Click += lblDefenceClickAsync;
-            lblDefence.MouseLeave += LblDefenceMouseLeave;
-            lblDefence.MouseHover += LblDefenceMouseHover;
+            lblDefence.MouseLeave += LabelMouseLeave;
+            lblDefence.MouseHover += LabelMouseHover;
             // 
             // lblEscape
             // 
@@ -149,8 +149,8 @@
             lblEscape.Text = "逃げる";
             lblEscape.TextAlign = ContentAlignment.MiddleCenter;
             lblEscape.Click += lblEscapeClickAsync;
-            lblEscape.MouseLeave += LblEscapeMouseLeave;
-            lblEscape.MouseHover += LblEscapeMouseHover;
+            lblEscape.MouseLeave += LabelMouseLeave;
+            lblEscape.MouseHover += LabelMouseHover;
             // 
             // lblUsePosion
             // 
@@ -163,7 +163,7 @@
             lblUsePosion.TabIndex = 8;
             lblUsePosion.Text = "使う";
             lblUsePosion.TextAlign = ContentAlignment.MiddleCenter;
-            lblUsePosion.Click += LblUsePosionClick;
+            lblUsePosion.Click += ItemLabelClick;
             // 
             // lblUseCurePoison
             // 
@@ -176,7 +176,7 @@
             lblUseCurePoison.TabIndex = 9;
             lblUseCurePoison.Text = "使う";
             lblUseCurePoison.TextAlign = ContentAlignment.MiddleCenter;
-            lblUseCurePoison.Click += LblUseCurePoisonClick;
+            lblUseCurePoison.Click += ItemLabelClick;
             // 
             // lblUseTorch
             // 
@@ -189,7 +189,7 @@
             lblUseTorch.TabIndex = 10;
             lblUseTorch.Text = "使う";
             lblUseTorch.TextAlign = ContentAlignment.MiddleCenter;
-            lblUseTorch.Click += LblUseTorchClick;
+            lblUseTorch.Click += ItemLabelClick;
             // 
             // Form1
             // 

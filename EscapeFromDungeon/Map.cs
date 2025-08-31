@@ -197,5 +197,10 @@ namespace EscapeFromDungeon
             return false;
         }
 
+        public void DeleteEvent(int x, int y)
+        {
+            EventMap[x, y] = null;
+        }
+
     }//class
 }//namespace

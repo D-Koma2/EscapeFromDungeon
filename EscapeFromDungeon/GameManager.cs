@@ -81,7 +81,22 @@ namespace EscapeFromDungeon
 
                     Move(keyCode, mapImage, overlayBox);
                 }
-                SwitchView(keyCode, overlayBox);
+                else if (keyCode == Keys.P)
+                {
+
+                }
+                else if (keyCode == Keys.O)
+                {
+
+                }
+                else if (keyCode == Keys.I)
+                {
+
+                }
+                else if (keyCode == Keys.V)
+                {
+                    SwitchView(overlayBox);
+                }
             }
             else if (gameMode == GameMode.Battle)
             {
@@ -120,7 +135,7 @@ namespace EscapeFromDungeon
                     Message.Show($"{Player.Name}は勝利した!");
                     await Task.Delay(500);
                     // モンスターを倒したらイベントを消去
-                    Map.EventMap[eventPos.X, eventPos.Y] = null;
+                    Map.DeleteEvent(eventPos.X, eventPos.Y);
                     gameMode = GameMode.Explore;
                     ChangeLblText?.Invoke();
                 }
@@ -195,26 +210,23 @@ namespace EscapeFromDungeon
             // ダメージ床
             if (Map.WalkMap[x, y] == 3)
             {
-                Player.Hp -= DamageFloorValue;
+                Player.TakeDamage(DamageFloorValue);
             }
             if (Player.Status == Status.Poison)
             {
-                Player.Hp -= PoisonDamageValue;
+                Player.TakeDamage(PoisonDamageValue);
             }
         }
 
         //デバッグ用
-        private void SwitchView(Keys keyCode, PictureBox overlayBox)
+        private void SwitchView(PictureBox overlayBox)
         {
-            if (keyCode == Keys.V)
+            IsVisionEnabled = !IsVisionEnabled;
+            if (IsVisionEnabled)
+                Map.DrawBrightness(overlayBox);
+            else
             {
-                IsVisionEnabled = !IsVisionEnabled;
-                if (IsVisionEnabled)
-                    Map.DrawBrightness(overlayBox);
-                else
-                {
-                    Map.ClearBrightness(overlayBox);
-                }
+                Map.ClearBrightness(overlayBox);
             }
         }
 
@@ -266,7 +278,7 @@ namespace EscapeFromDungeon
             }
             else
             {
-                Map.EventMap[x, y] = null; // イベントを消去
+                Map.DeleteEvent(x, y); // イベントを消去
             }
 
             return evt;
@@ -281,7 +293,7 @@ namespace EscapeFromDungeon
             gameMode = GameMode.Battle;
             var mon = _monsterData.Dict[evt.Word];
             Battle.Monster = new Monster(mon.Name, mon.Hp, mon.Attack, mon.Weak);
-            Battle.BattleTurn = 0;
+            Battle.RestBattleTurn();
 
             if (CallDrop != null) await CallDrop.Invoke(600, 10, 4, true);
             ChangeLblText?.Invoke();
@@ -297,7 +309,7 @@ namespace EscapeFromDungeon
             var item = _itemData.Dict[evt.Word];
             var name = item.Name;
             var dsc = item.Description;
-            Player.Inventry.Add(new Item(name, dsc));
+            Player.GetItem(name, dsc);
             Message.Show($"アイテム「{evt.Word}」を取得！");
         }
 
@@ -308,16 +320,16 @@ namespace EscapeFromDungeon
             switch (evt.Id)
             {
                 case "L0":
-                    Player.Hp += 20;
+                    Player.Heal(20);
                     break;
                 case "L1":
-                    Player.Hp += 50;
+                    Player.Heal(50);
                     break;
                 case "L2":
-                    Player.Hp += 100;
+                    Player.Heal(100);
                     break;
                 case "L3":
-                    Player.Status = Status.Normal;
+                    Player.HealStatus();
                     break;
                 default:
                     break;
@@ -331,16 +343,16 @@ namespace EscapeFromDungeon
             switch (evt.Id)
             {
                 case "T0":
-                    Player.Hp -= 5;
+                    Player.TakeDamage(5);
                     break;
                 case "T1":
-                    Player.Hp -= 20;
+                    Player.TakeDamage(20);
                     break;
                 case "T2":
-                    Player.Hp -= 40;
+                    Player.TakeDamage(40);
                     break;
                 case "T3":
-                    Player.Status = Status.Poison;
+                    Player.TakePoison();
                     break;
                 default:
                     break;

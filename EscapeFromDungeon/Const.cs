@@ -24,5 +24,10 @@ namespace EscapeFromDungeon
 
         public const string commndMsg = "コマンド？";
         public const string hpFullMsg = "HPは満タンだ！";
+
+        public const string CommandAtk = "Attack";
+        public const string CommandDef = "Defence";
+        public const string CommandHeal = "Heal";
+        public const string CommandEsc = "Escape";
     }
 }

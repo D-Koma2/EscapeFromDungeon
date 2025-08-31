@@ -15,6 +15,8 @@ namespace EscapeFromDungeon
         private GameManager gameManager;
         private DrawInfo drawInfo;
 
+        private Dictionary<Label, string> itemMap;
+
         private System.Windows.Forms.Timer timer = default!;//画面表示更新用
         private const int timerInterval = 32;
 
@@ -33,6 +35,13 @@ namespace EscapeFromDungeon
             drawInfo = new DrawInfo();
 
             InitPictureBoxes();
+
+            itemMap = new Dictionary<Label, string>
+            {
+                { lblUsePosion, Const.potion },
+                { lblUseCurePoison, Const.curePoison },
+                { lblUseTorch, Const.torch }
+            };
 
             MsgBox.Location = new Point(10, 440);
 
@@ -180,7 +189,7 @@ namespace EscapeFromDungeon
             if (GameManager.gameMode == GameMode.Battle)
             {
                 SetBattleButtonsEnabled(false);
-                await gameManager.Battle.PlayerTurnAsync("Attack");
+                await gameManager.Battle.PlayerTurnAsync(Const.CommandAtk);
                 await gameManager.BattleCheckAsync();
             }
             else if (GameManager.gameMode == GameMode.Explore)
@@ -190,54 +199,19 @@ namespace EscapeFromDungeon
 
             _isWaiting = false;
         }
+        private async void lblAttackClickAsync(object sender, EventArgs e)
+            => await HandleBattleOrExploreAsync(Const.CommandAtk, Keys.Up);
 
         private async void lblDefenceClickAsync(object sender, EventArgs e)
-        {
-            if (isBattleInputLocked && DateTime.Now < battleInputUnlockTime) return;
-            if (_isWaiting) return;
-            if (DateTime.Now - lastInputTime < inputCooldown) return;
-
-            _isWaiting = true;
-            lastInputTime = DateTime.Now;
-
-            if (GameManager.gameMode == GameMode.Battle)
-            {
-                SetBattleButtonsEnabled(false);
-                await gameManager.Battle.PlayerTurnAsync("Defence");
-                await gameManager.BattleCheckAsync();
-            }
-            else if (GameManager.gameMode == GameMode.Explore)
-            {
-                gameManager.KeyInput(Keys.Left, mapImage, overlayImg);
-            }
-
-            _isWaiting = false;
-        }
+            => await HandleBattleOrExploreAsync(Const.CommandDef, Keys.Left);
 
         private async void lblHealClickAsync(object sender, EventArgs e)
-        {
-            if (isBattleInputLocked && DateTime.Now < battleInputUnlockTime) return;
-            if (_isWaiting) return;
-            if (DateTime.Now - lastInputTime < inputCooldown) return;
-
-            _isWaiting = true;
-            lastInputTime = DateTime.Now;
-
-            if (GameManager.gameMode == GameMode.Battle)
-            {
-                SetBattleButtonsEnabled(false);
-                await gameManager.Battle.PlayerTurnAsync("Heal");
-                await gameManager.BattleCheckAsync();
-            }
-            else if (GameManager.gameMode == GameMode.Explore)
-            {
-                gameManager.KeyInput(Keys.Right, mapImage, overlayImg);
-            }
-
-            _isWaiting = false;
-        }
+            => await HandleBattleOrExploreAsync(Const.CommandHeal, Keys.Right);
 
         private async void lblEscapeClickAsync(object sender, EventArgs e)
+            => await HandleBattleOrExploreAsync(Const.CommandEsc, Keys.Down);
+
+        private async Task HandleBattleOrExploreAsync(string command, Keys exploreKey)
         {
             if (isBattleInputLocked && DateTime.Now < battleInputUnlockTime) return;
             if (_isWaiting) return;
@@ -249,12 +223,12 @@ namespace EscapeFromDungeon
             if (GameManager.gameMode == GameMode.Battle)
             {
                 SetBattleButtonsEnabled(false);
-                await gameManager.Battle.PlayerTurnAsync("Escape");
+                await gameManager.Battle.PlayerTurnAsync(command);
                 await gameManager.BattleCheckAsync();
             }
             else if (GameManager.gameMode == GameMode.Explore)
             {
-                gameManager.KeyInput(Keys.Down, mapImage, overlayImg);
+                gameManager.KeyInput(exploreKey, mapImage, overlayImg);
             }
 
             _isWaiting = false;
@@ -370,69 +344,67 @@ namespace EscapeFromDungeon
         {
             if (GameManager.gameMode != GameMode.Battle)
             {
-                int potionCount = gameManager.Player.Inventry.Count(item => item.Name == Const.potion);
+                int potionCount = gameManager.Player.GetItemCount(Const.potion);
                 lblHeal.Visible = potionCount > 0;
             }
         }
 
         private void SetMonsterVisible(bool visible) => monsterImg.Visible = visible;
 
-        private void LblAttackMouseHover(object sender, EventArgs e) => lblAttack.BackColor = btnSelectCol;
+        private void LabelMouseHover(object sender, EventArgs e)
+        {
+            if (sender is Label lbl) lbl.BackColor = btnSelectCol;
+        }
 
-        private void LblAttackMouseLeave(object sender, EventArgs e) => lblAttack.BackColor = btnBaseCol;
-
-        private void LblDefenceMouseHover(object sender, EventArgs e) => lblDefence.BackColor = btnSelectCol;
-
-        private void LblDefenceMouseLeave(object sender, EventArgs e) => lblDefence.BackColor = btnBaseCol;
-
-        private void LblHealMouseHover(object sender, EventArgs e) => lblHeal.BackColor = btnSelectCol;
-
-        private void LblHealMouseLeave(object sender, EventArgs e) => lblHeal.BackColor = btnBaseCol;
-
-        private void LblEscapeMouseHover(object sender, EventArgs e) => lblEscape.BackColor = btnSelectCol;
-
-        private void LblEscapeMouseLeave(object sender, EventArgs e) => lblEscape.BackColor = btnBaseCol;
+        private void LabelMouseLeave(object sender, EventArgs e)
+        {
+            if (sender is Label lbl) lbl.BackColor = btnBaseCol;
+        }
 
         private void VisiblelblUse()
         {
-            int potionCount = gameManager.Player.Inventry.Count(item => item.Name == Const.potion);
-            int curePoisonCount = gameManager.Player.Inventry.Count(item => item.Name == Const.curePoison);
-            int torchCount = gameManager.Player.Inventry.Count(item => item.Name == Const.torch);
+            int potionCount = gameManager.Player.GetItemCount(Const.potion);
+            int curePoisonCount = gameManager.Player.GetItemCount(Const.curePoison);
+            int torchCount = gameManager.Player.GetItemCount(Const.torch);
             lblUsePosion.Visible = GameManager.gameMode == GameMode.Explore && potionCount > 0;
             lblUseCurePoison.Visible = GameManager.gameMode == GameMode.Explore && curePoisonCount > 0;
             lblUseTorch.Visible = GameManager.gameMode == GameMode.Explore && torchCount > 0;
         }
 
-        private void LblUsePosionClick(object sender, EventArgs e)
+        private void ItemLabelClick(object sender, EventArgs e)
         {
-            if(gameManager.Player.Hp == gameManager.Player.MaxHp)
+            if (sender is Label lbl && itemMap.TryGetValue(lbl, out string itemName))
             {
-                gameManager.Message.Show(Const.hpFullMsg);
-            }
-            else
-            {
-                gameManager.Player.Heal(30);
-                var item = Const.potion;
-                gameManager.Message.Show($"{item}を使った！");
-                gameManager.Player.UseItem(item);
+                UseItem(itemName);
             }
         }
 
-        private void LblUseCurePoisonClick(object sender, EventArgs e)
+        private void UseItem(string itemName)
         {
-            gameManager.Player.Status = Status.Normal;
-            var item = Const.curePoison;
-            gameManager.Message.Show($"{item}を使った！");
-            gameManager.Player.UseItem(item);
+            switch (itemName)
+            {
+                case Const.potion:
+                    if (gameManager.Player.Hp == gameManager.Player.MaxHp)
+                    {
+                        gameManager.Message.Show(Const.hpFullMsg);
+                        return;
+                    }
+                    gameManager.Player.Heal(30);
+                    break;
+
+                case Const.curePoison:
+                    gameManager.Player.HealStatus();
+                    break;
+
+                case Const.torch:
+                    Map.viewRadius = 12;
+                    break;
+            }
+
+            gameManager.Message.Show($"{itemName}を使った！");
+            gameManager.Player.UseItem(itemName);
         }
 
-        private void LblUseTorchClick(object sender, EventArgs e)
-        {
-            Map.viewRadius = 12;
-            var item = Const.torch;
-            gameManager.Message.Show($"{item}を使った！");
-            gameManager.Player.UseItem(item);
-        }
 
         // デバッグ用
         private void DispPoint()
