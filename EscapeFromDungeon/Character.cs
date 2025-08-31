@@ -18,6 +18,7 @@ namespace EscapeFromDungeon
         None,
         Fire,
         Ice,
+        Thunder,
         Heavy,
         Holy
     }
@@ -77,6 +78,17 @@ namespace EscapeFromDungeon
             }
         }
 
+        public void Heal(int amount)
+        {
+            Hp += amount;
+            if (Hp > MaxHp) Hp = MaxHp;
+        }
+
+        public void UseItem(string itemName)
+        {
+            var usedItem = Inventry.Find(item => item.Name == itemName);
+            if (usedItem != null) Inventry.Remove(usedItem);
+        }
 
         public void SetDirectionImage(Direction dir)
         {

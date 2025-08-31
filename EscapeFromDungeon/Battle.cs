@@ -19,6 +19,9 @@ namespace EscapeFromDungeon
         public Action<bool>? SetButtonEnabled;
         public Action<bool>? SetMonsterVisible;
         public Action? ChangeLblText;
+        public Func<int, int, int, int, Task>? CallShaker;
+        public Func<int, int, int, bool, Task>? CallDrop;
+        public Func<int, int, Task>? CallShrink;
 
         public Battle(Player player, Message message)
         {
@@ -34,7 +37,14 @@ namespace EscapeFromDungeon
                 GameManager.gameMode = GameMode.BattleEnd;
                 await message.ShowAsync($"{Monster.Name}を倒した！");
                 await Task.Delay(500);
-                SetMonsterVisible?.Invoke(false);
+                if (Monster.Name == Const.demon)
+                {
+                    if (CallDrop != null) await CallDrop.Invoke(600, 2, 8, false);
+                }
+                else
+                {
+                    if (CallDrop != null) await CallDrop.Invoke(600, 16, 8, false);
+                }
                 SetButtonEnabled?.Invoke(true);
                 ChangeLblText?.Invoke();
                 return;
@@ -51,7 +61,7 @@ namespace EscapeFromDungeon
             // 戦闘が続いているときだけボタンを表示
             if (GameManager.gameMode == GameMode.Battle)
             {
-                await message.ShowAsync($"コマンド？");
+                await message.ShowAsync(Const.commndMsg);
                 SetButtonEnabled?.Invoke(true);
             }
         }//BattleLoopAsync
@@ -70,48 +80,49 @@ namespace EscapeFromDungeon
                     {
                         string itemName = Monster.Weak switch
                         {
-                            Weak.Fire => "炎の剣",
-                            Weak.Ice => "氷の剣",
-                            Weak.Heavy => "おおきづち",
-                            Weak.Holy => "聖なる剣",
+                            Weak.Fire => Const.fireWepon,
+                            Weak.Ice => Const.iceWepon,
+                            Weak.Heavy => Const.hitWepon,
+                            Weak.Holy => Const.holyWepon,
                             _ => ""
                         };
                         if (Player.Inventry.Any(item => item.Name == itemName))
                         {
-                            int extraDamage = Player.Attack * 2;
+                            int extraDamage = Player.Attack * 3;
                             Monster.Hp -= extraDamage;
-                            await message.ShowAsync($"{Player.Name}は{itemName}で攻撃！{Monster.Name}に {extraDamage} ダメージ！");
+                            await message.ShowAsync($"{Player.Name}は{itemName}で攻撃！{Monster.Name}に {extraDamage} 大ダメージ！");
+                            if (CallShaker != null) await CallShaker.Invoke(2, 2, 400, 30);
                             break;
                         }
                     }
 
                     Monster.Hp -= Player.Attack;
                     await message.ShowAsync($"{Player.Name}の攻撃！{Monster.Name}に {Player.Attack} ダメージ！");
+                    if (CallShaker != null) await CallShaker.Invoke(2, 1, 400, 30);
                     break;
                 case "Defence":
                     _isDefending = true;
                     await message.ShowAsync($"{Player.Name}は防御の体勢を取った！");
                     break;
                 case "Heal":
-                    if (Player.Inventry.Find(item => item.Name == "ポーション") != null)//仮 HPMAｘのときは押せないようにする予定
+                    if (Player.Inventry.Find(item => item.Name == Const.potion) != null)
                     {
                         int point = 30;
                         point = Math.Min(point, Player.MaxHp - Player.Hp);
                         Player.Hp += point;
-                        var item = Player.Inventry.Find(item => item.Name == "ポーション");
-                        if (item != null) Player.Inventry.Remove(item);
+                        Player.UseItem(Const.potion);
                         await message.ShowAsync($"{Player.Name}は{point}回復した！");
                     }
                     else
                     {
-                        await message.ShowAsync("ポーションがない！");//仮 所持してないときはボタンを押せないようにする予定
+                        await message.ShowAsync($"{Const.potion}を持っていなかった！");
                     }
                     break;
                 case "Escape":
                     GameManager.gameMode = GameMode.Escaped;
-                    SetMonsterVisible?.Invoke(false);
                     SetButtonEnabled?.Invoke(true);
-                    await Task.Delay(500);
+                    if (CallShrink != null) await CallShrink.Invoke(30, 2);
+                    await message.ShowAsync($"{Player.Name}は逃げ出した！");
                     return;
             }
 
@@ -130,13 +141,14 @@ namespace EscapeFromDungeon
             {
                 int damage = Monster.Attack;
 
-                if (Monster.Name == "デーモン")
+                if (Monster.Name == Const.demon)
                 {
                     if (BattleTurn % 5 == 4)
                     {
                         damage *= 3;
                         Player.Hp -= damage;
                         await message.ShowAsync($"{Monster.Name}の強力な攻撃！{Player.Name}は {damage} 大ダメージ！");
+                        if (CallShaker != null) await CallShaker.Invoke(1, 1, 400, 30);
                     }
                     else if (BattleTurn % 5 == 3)
                     {
@@ -146,15 +158,17 @@ namespace EscapeFromDungeon
                     {
                         Player.Hp -= damage;
                         await message.ShowAsync($"{Monster.Name}の攻撃！{Player.Name}は {damage} ダメージ！");
+                        if (CallShaker != null) await CallShaker.Invoke(1, 1, 400, 30);
                     }
                 }
-                else if (Monster.Name == "炎スライム" || Monster.Name == "氷スライム" || Monster.Name == "雷スライム")
+                else if (Monster.Name == Const.fireSlime || Monster.Name == Const.iceSlime || Monster.Name == Const.thunderSlime)
                 {
                     if (BattleTurn % 4 == 3)
                     {
                         damage *= 2;
                         Player.Hp -= damage;
                         await message.ShowAsync($"{Monster.Name}の強力な攻撃！{Player.Name}は {damage} 大ダメージ！");
+                        if (CallShaker != null) await CallShaker.Invoke(1, 2, 400, 30);
                     }
                     else if (BattleTurn % 4 == 2)
                     {
@@ -164,17 +178,27 @@ namespace EscapeFromDungeon
                     {
                         Player.Hp -= damage;
                         await message.ShowAsync($"{Monster.Name}の攻撃！{Player.Name}は {damage} ダメージ！");
+                        if (CallShaker != null) await CallShaker.Invoke(1, 1, 400, 30);
                     }
                 }
                 else
                 {
                     Player.Hp -= damage;
                     await message.ShowAsync($"{Monster.Name}の攻撃！{Player.Name}は {damage} ダメージ！");
+                    if (CallShaker != null) await CallShaker.Invoke(1, 1, 400, 30);
                 }
             }
 
             await Task.Delay(500);
             BattleTurn++;
+            if (Player.Status == Status.Poison)
+            {
+                int poisonDamage = 3;
+                Player.Hp -= poisonDamage;
+                await message.ShowAsync($"{Player.Name}は毒のダメージを受けた！{poisonDamage}ダメージ！");
+                if (CallShaker != null) await CallShaker.Invoke(1, 1, 400, 30);
+                await Task.Delay(500);
+            }
             await BattleLoopAsync();
         }//EnemyTurn
 

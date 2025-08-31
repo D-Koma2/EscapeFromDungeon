@@ -36,6 +36,9 @@
             lblHeal = new Label();
             lblDefence = new Label();
             lblEscape = new Label();
+            lblUsePosion = new Label();
+            lblUseCurePoison = new Label();
+            lblUseTorch = new Label();
             ((System.ComponentModel.ISupportInitialize)mapDrawBox).BeginInit();
             ((System.ComponentModel.ISupportInitialize)StateBox).BeginInit();
             ((System.ComponentModel.ISupportInitialize)MsgBox).BeginInit();
@@ -46,7 +49,8 @@
             mapDrawBox.Anchor = AnchorStyles.None;
             mapDrawBox.BackColor = Color.Black;
             mapDrawBox.BackgroundImageLayout = ImageLayout.None;
-            mapDrawBox.Location = new Point(11, 11);
+            mapDrawBox.BorderStyle = BorderStyle.FixedSingle;
+            mapDrawBox.Location = new Point(12, 12);
             mapDrawBox.Name = "mapDrawBox";
             mapDrawBox.Size = new Size(416, 416);
             mapDrawBox.TabIndex = 0;
@@ -54,7 +58,8 @@
             // 
             // StateBox
             // 
-            StateBox.Location = new Point(454, 17);
+            StateBox.BorderStyle = BorderStyle.FixedSingle;
+            StateBox.Location = new Point(444, 12);
             StateBox.Name = "StateBox";
             StateBox.Size = new Size(301, 410);
             StateBox.TabIndex = 1;
@@ -74,7 +79,8 @@
             // MsgBox
             // 
             MsgBox.Anchor = AnchorStyles.None;
-            MsgBox.BackColor = Color.FromArgb(64, 64, 64);
+            MsgBox.BackColor = Color.Indigo;
+            MsgBox.BorderStyle = BorderStyle.FixedSingle;
             MsgBox.Location = new Point(11, 439);
             MsgBox.Name = "MsgBox";
             MsgBox.Size = new Size(477, 102);
@@ -86,8 +92,9 @@
             // 
             lblAttack.Anchor = AnchorStyles.None;
             lblAttack.BackColor = Color.Gray;
-            lblAttack.BorderStyle = BorderStyle.Fixed3D;
-            lblAttack.Location = new Point(596, 442);
+            lblAttack.BorderStyle = BorderStyle.FixedSingle;
+            lblAttack.Cursor = Cursors.Hand;
+            lblAttack.Location = new Point(584, 439);
             lblAttack.Name = "lblAttack";
             lblAttack.Size = new Size(69, 37);
             lblAttack.TabIndex = 4;
@@ -101,8 +108,9 @@
             // 
             lblHeal.Anchor = AnchorStyles.None;
             lblHeal.BackColor = Color.Gray;
-            lblHeal.BorderStyle = BorderStyle.Fixed3D;
-            lblHeal.Location = new Point(671, 473);
+            lblHeal.BorderStyle = BorderStyle.FixedSingle;
+            lblHeal.Cursor = Cursors.Hand;
+            lblHeal.Location = new Point(659, 463);
             lblHeal.Name = "lblHeal";
             lblHeal.Size = new Size(69, 37);
             lblHeal.TabIndex = 5;
@@ -116,8 +124,9 @@
             // 
             lblDefence.Anchor = AnchorStyles.None;
             lblDefence.BackColor = Color.Gray;
-            lblDefence.BorderStyle = BorderStyle.Fixed3D;
-            lblDefence.Location = new Point(521, 473);
+            lblDefence.BorderStyle = BorderStyle.FixedSingle;
+            lblDefence.Cursor = Cursors.Hand;
+            lblDefence.Location = new Point(509, 463);
             lblDefence.Name = "lblDefence";
             lblDefence.Size = new Size(69, 41);
             lblDefence.TabIndex = 6;
@@ -131,8 +140,9 @@
             // 
             lblEscape.Anchor = AnchorStyles.None;
             lblEscape.BackColor = Color.Gray;
-            lblEscape.BorderStyle = BorderStyle.Fixed3D;
-            lblEscape.Location = new Point(596, 500);
+            lblEscape.BorderStyle = BorderStyle.FixedSingle;
+            lblEscape.Cursor = Cursors.Hand;
+            lblEscape.Location = new Point(584, 490);
             lblEscape.Name = "lblEscape";
             lblEscape.Size = new Size(69, 41);
             lblEscape.TabIndex = 7;
@@ -142,12 +152,54 @@
             lblEscape.MouseLeave += LblEscapeMouseLeave;
             lblEscape.MouseHover += LblEscapeMouseHover;
             // 
+            // lblUsePosion
+            // 
+            lblUsePosion.Anchor = AnchorStyles.None;
+            lblUsePosion.BackColor = Color.DimGray;
+            lblUsePosion.Cursor = Cursors.Hand;
+            lblUsePosion.Location = new Point(467, 96);
+            lblUsePosion.Name = "lblUsePosion";
+            lblUsePosion.Size = new Size(62, 21);
+            lblUsePosion.TabIndex = 8;
+            lblUsePosion.Text = "使う";
+            lblUsePosion.TextAlign = ContentAlignment.MiddleCenter;
+            lblUsePosion.Click += LblUsePosionClick;
+            // 
+            // lblUseCurePoison
+            // 
+            lblUseCurePoison.Anchor = AnchorStyles.None;
+            lblUseCurePoison.BackColor = Color.DimGray;
+            lblUseCurePoison.Cursor = Cursors.Hand;
+            lblUseCurePoison.Location = new Point(467, 126);
+            lblUseCurePoison.Name = "lblUseCurePoison";
+            lblUseCurePoison.Size = new Size(62, 20);
+            lblUseCurePoison.TabIndex = 9;
+            lblUseCurePoison.Text = "使う";
+            lblUseCurePoison.TextAlign = ContentAlignment.MiddleCenter;
+            lblUseCurePoison.Click += LblUseCurePoisonClick;
+            // 
+            // lblUseTorch
+            // 
+            lblUseTorch.Anchor = AnchorStyles.None;
+            lblUseTorch.BackColor = Color.DimGray;
+            lblUseTorch.Cursor = Cursors.Hand;
+            lblUseTorch.Location = new Point(467, 156);
+            lblUseTorch.Name = "lblUseTorch";
+            lblUseTorch.Size = new Size(62, 23);
+            lblUseTorch.TabIndex = 10;
+            lblUseTorch.Text = "使う";
+            lblUseTorch.TextAlign = ContentAlignment.MiddleCenter;
+            lblUseTorch.Click += LblUseTorchClick;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.Black;
             ClientSize = new Size(782, 553);
+            Controls.Add(lblUseTorch);
+            Controls.Add(lblUseCurePoison);
+            Controls.Add(lblUsePosion);
             Controls.Add(lblEscape);
             Controls.Add(lblDefence);
             Controls.Add(lblHeal);
@@ -181,5 +233,8 @@
         private Label lblHeal;
         private Label lblDefence;
         private Label lblEscape;
+        private Label lblUsePosion;
+        private Label lblUseCurePoison;
+        private Label lblUseTorch;
     }
 }

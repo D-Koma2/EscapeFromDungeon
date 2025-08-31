@@ -1,6 +1,7 @@
 ﻿
 using EscapeFromDungeon.Properties;
 using System.Diagnostics;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 
 namespace EscapeFromDungeon
@@ -35,6 +36,10 @@ namespace EscapeFromDungeon
 
             MsgBox.Location = new Point(10, 440);
 
+            gameManager.CallDrop = DropEnemyAsync;
+            gameManager.Battle.CallDrop = DropEnemyAsync;
+            gameManager.Battle.CallShaker = ShakeAsync;
+            gameManager.Battle.CallShrink = ShrinkEnemyAsync;
             gameManager.Battle.SetButtonEnabled = SetBattleButtonsEnabled;
             gameManager.Battle.SetMonsterVisible = SetMonsterVisible;
             gameManager.Battle.ChangeLblText = ChangeLblText;
@@ -68,6 +73,7 @@ namespace EscapeFromDungeon
             overlayImg.Invalidate();
             StateBox.Invalidate();
             MsgBox.Invalidate();
+            VisiblelblUse();
             DispPoint();
         }
 
@@ -139,9 +145,10 @@ namespace EscapeFromDungeon
                 Image = Resources.Enemy01,
                 SizeMode = PictureBoxSizeMode.StretchImage,
                 BorderStyle = BorderStyle.FixedSingle,
-                Parent = overlayImg,
                 Visible = false
             };
+
+            this.Controls.Add(monsterImg);
 
             monsterImg.BringToFront();
         }//InitPictureBoxes
@@ -253,12 +260,119 @@ namespace EscapeFromDungeon
             _isWaiting = false;
         }
 
+        public async Task ShakeAsync(int targetNum, int critical, int durationMs = 500, int intervalMs = 30)
+        {
+            PictureBox target = default!;
+            if (targetNum == 1) target = MsgBox;
+            else if (targetNum == 2) target = monsterImg;
+
+            var originalLocation = target.Location;
+            var rand = new Random();
+            int shakeCount = durationMs / intervalMs;
+
+            for (int i = 0; i < shakeCount; i++)
+            {
+                int offsetX, offsetY;
+                if (critical == 2)
+                {
+                    // クリティカルヒット時は大きく揺らす
+                    offsetX = rand.Next(-12, 13);
+                    offsetY = rand.Next(-12, 13);
+                }
+                else
+                {
+                    // 通常の揺れ
+                    offsetX = rand.Next(-6, 7);
+                    offsetY = rand.Next(-6, 7);
+                }
+
+                target.Location = new Point(originalLocation.X + offsetX, originalLocation.Y + offsetY);
+
+                await Task.Delay(intervalMs);
+            }
+
+            target.Location = originalLocation;
+        }
+
+        public async Task DropEnemyAsync(int dropDistance = 600, int step = 10, int intervalMs = 16, bool isIntro = false)
+        {
+            Point originalLocation = monsterImg.Location;
+
+            if (isIntro)
+            {
+                // バトル開始時：上から落ちてくる
+                int startY = originalLocation.Y - dropDistance;
+                monsterImg.Location = new Point(originalLocation.X, startY);
+                monsterImg.Visible = true;
+
+                int steps = dropDistance / step;
+                for (int i = 0; i < steps; i++)
+                {
+                    monsterImg.Location = new Point(originalLocation.X, monsterImg.Location.Y + step);
+                    await Task.Delay(intervalMs);
+                }
+
+                monsterImg.Location = originalLocation;
+            }
+            else
+            {
+                // 敵撃破時：下に落ちて消える
+                int steps = dropDistance / step;
+                for (int i = 0; i < steps; i++)
+                {
+                    monsterImg.Location = new Point(originalLocation.X, monsterImg.Location.Y + step);
+                    await Task.Delay(intervalMs);
+                }
+
+                monsterImg.Visible = false;
+                monsterImg.Location = originalLocation;
+            }
+        }
+
+        public async Task ShrinkEnemyAsync(int steps = 20, int intervalMs = 30)
+        {
+            var originalSize = monsterImg.Size;
+            var originalLocation = monsterImg.Location;
+
+            for (int i = 0; i < steps; i++)
+            {
+                // 割合を計算（徐々に小さく）
+                float scale = 1f - (i + 1f) / steps;
+
+                int newWidth = (int)(originalSize.Width * scale);
+                int newHeight = (int)(originalSize.Height * scale);
+
+                // 中心を保つように位置を調整
+                int offsetX = (originalSize.Width - newWidth) / 2;
+                int offsetY = (originalSize.Height - newHeight) / 2;
+
+                monsterImg.Size = new Size(newWidth, newHeight);
+                monsterImg.Location = new Point(originalLocation.X + offsetX, originalLocation.Y + offsetY);
+
+                await Task.Delay(intervalMs);
+            }
+
+            // 完了後に非表示＆サイズ・位置を初期化
+            monsterImg.Visible = false;
+            monsterImg.Size = originalSize;
+            monsterImg.Location = originalLocation;
+        }
+
         private void SetBattleButtonsEnabled(bool enabled)
         {
             lblAttack.Visible = enabled;
             lblDefence.Visible = enabled;
             lblHeal.Visible = enabled;
             lblEscape.Visible = enabled;
+        }
+
+        public void LblHealVisible()
+        {
+            if (GameManager.gameMode != GameMode.Battle)
+            {
+                int potionCount = gameManager.Player.Inventry.Count(item => item.Name == Const.potion);
+                lblHeal.Visible = potionCount > 0;
+            }
         }
 
         private void SetMonsterVisible(bool visible) => monsterImg.Visible = visible;
@@ -278,6 +392,47 @@ namespace EscapeFromDungeon
         private void LblEscapeMouseHover(object sender, EventArgs e) => lblEscape.BackColor = btnSelectCol;
 
         private void LblEscapeMouseLeave(object sender, EventArgs e) => lblEscape.BackColor = btnBaseCol;
+
+        private void VisiblelblUse()
+        {
+            int potionCount = gameManager.Player.Inventry.Count(item => item.Name == Const.potion);
+            int curePoisonCount = gameManager.Player.Inventry.Count(item => item.Name == Const.curePoison);
+            int torchCount = gameManager.Player.Inventry.Count(item => item.Name == Const.torch);
+            lblUsePosion.Visible = GameManager.gameMode == GameMode.Explore && potionCount > 0;
+            lblUseCurePoison.Visible = GameManager.gameMode == GameMode.Explore && curePoisonCount > 0;
+            lblUseTorch.Visible = GameManager.gameMode == GameMode.Explore && torchCount > 0;
+        }
+
+        private void LblUsePosionClick(object sender, EventArgs e)
+        {
+            if(gameManager.Player.Hp == gameManager.Player.MaxHp)
+            {
+                gameManager.Message.Show(Const.hpFullMsg);
+            }
+            else
+            {
+                gameManager.Player.Heal(30);
+                var item = Const.potion;
+                gameManager.Message.Show($"{item}を使った！");
+                gameManager.Player.UseItem(item);
+            }
+        }
+
+        private void LblUseCurePoisonClick(object sender, EventArgs e)
+        {
+            gameManager.Player.Status = Status.Normal;
+            var item = Const.curePoison;
+            gameManager.Message.Show($"{item}を使った！");
+            gameManager.Player.UseItem(item);
+        }
+
+        private void LblUseTorchClick(object sender, EventArgs e)
+        {
+            Map.viewRadius = 12;
+            var item = Const.torch;
+            gameManager.Message.Show($"{item}を使った！");
+            gameManager.Player.UseItem(item);
+        }
 
         // デバッグ用
         private void DispPoint()

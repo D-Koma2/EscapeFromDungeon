@@ -40,18 +40,27 @@ namespace EscapeFromDungeon
             string state = $"状態： {player.Status.ToString()}";
             string limitText = $"リミット: {player.Limit}";
             string inventoryTitle = "所持品:";
+            string potionCount = Const.potion + " x " + player.Inventry.Count(item => item.Name == Const.potion).ToString();
+            string curePoisonCount = Const.curePoison + " x " + player.Inventry.Count(item => item.Name == Const.curePoison).ToString();
+            string torchCount = Const.torch + " x " + player.Inventry.Count(item => item.Name == Const.torch).ToString();
+
             using (Font font = new("Arial", 10))
             {
                 g.DrawString(hpText, font, Brushes.White, barX + 10, barY + 2);
-                g.DrawString(state, font, Brushes.White, barX + 10, barY + 26);
-                g.DrawString(limitText, font, Brushes.White, barX + 10, barY + 48);
-                g.DrawString(inventoryTitle, font, Brushes.White, barX + 10, barY + 76);
+                g.DrawString(state, font, Brushes.White, barX + 30, barY + 26);
+                g.DrawString(limitText, font, Brushes.White, barX + 30, barY + 48);
+                //g.DrawString(inventoryTitle, font, Brushes.White, barX + 10, barY + 136);
 
-                int num = barY + 52;
+                g.DrawString(potionCount, font, Brushes.White, barX + 80, barY + 74);
+                g.DrawString(curePoisonCount, font, Brushes.White, barX + 80, barY + 104);
+                g.DrawString(torchCount, font, Brushes.White, barX + 80, barY + 134);
+
+                int num = barY + 138;
                 Font font2 = font;
 
                 foreach (var item in player.Inventry)
                 {
+                    if (item.Name == Const.potion || item.Name == Const.curePoison || item.Name == Const.torch) continue;
                     num += 24;
                     g.DrawString(item.Name, font2, Brushes.White, barX + 80, num);
                 }

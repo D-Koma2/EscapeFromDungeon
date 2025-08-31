@@ -45,6 +45,7 @@ namespace EscapeFromDungeon
         public Action? KeyDownPressed;
         public Action? KeyLeftPressed;
         public Action? KeyRightPressed;
+        public Func<int, int, int, bool, Task>? CallDrop;
 
         private EventData _eventData;
         private MonsterData _monsterData;
@@ -107,7 +108,6 @@ namespace EscapeFromDungeon
         {
             if (gameMode == GameMode.Escaped)
             {
-                Message.Show($"{Player.Name}は逃げ出した！");
                 await Task.Delay(500);
                 gameMode = GameMode.Explore;
                 ChangeLblText?.Invoke();
@@ -283,15 +283,13 @@ namespace EscapeFromDungeon
             Battle.Monster = new Monster(mon.Name, mon.Hp, mon.Attack, mon.Weak);
             Battle.BattleTurn = 0;
 
-            Battle.SetMonsterVisible?.Invoke(true);
+            if (CallDrop != null) await CallDrop.Invoke(600, 10, 4, true);
             ChangeLblText?.Invoke();
 
             await Message.ShowAsync($"{mon.Name}が現れた！");
-            await Task.Delay(500);
-
-            await Message.ShowAsync($"コマンド？");
+            await Message.ShowAsync(Const.commndMsg);
             Battle.SetButtonEnabled?.Invoke(true);
-            await Task.Delay(100);
+            await Task.Delay(200);
         }
 
         private void ItemGetEvent(Event evt)
@@ -333,10 +331,13 @@ namespace EscapeFromDungeon
             switch (evt.Id)
             {
                 case "T0":
-                    Player.Hp -= 1;
+                    Player.Hp -= 5;
                     break;
                 case "T1":
                     Player.Hp -= 20;
+                    break;
+                case "T2":
+                    Player.Hp -= 40;
                     break;
                 case "T3":
                     Player.Status = Status.Poison;
@@ -346,9 +347,11 @@ namespace EscapeFromDungeon
             }
         }
 
-        private void Gameover()
+        private async void Gameover()
         {
-            MessageBox.Show("Game Over!");
+            gameMode = GameMode.Gameover;
+            await Message.ShowAsync($"ゲームーオーバー");
+            await Task.Delay(2000);
             Application.Exit();
         }
 

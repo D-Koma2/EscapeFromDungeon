@@ -110,7 +110,7 @@ namespace EscapeFromDungeon
                     }
                 }
             }
-            Debug.WriteLine($"CurrentMessage: {currentMessage}");
+            //Debug.WriteLine($"CurrentMessage: {currentMessage}");
         }
 
         public async Task ShowAsync(string messageText)
