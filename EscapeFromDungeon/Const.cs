@@ -8,6 +8,8 @@ namespace EscapeFromDungeon
 {
     internal static class Const
     {
+        public static readonly string[] separator = new[] { "\r\n", "\r", "\n" };
+
         public const string potion = "ポーション";
         public const string curePoison = "毒消し草";
         public const string torch = "松明";

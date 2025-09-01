@@ -35,9 +35,12 @@ namespace EscapeFromDungeon
         public int Height { get; private set; }
         public Bitmap MapCanvas { get; private set; }
         public Bitmap overrayCanvas { get; private set; }
+
         public Map(string path)
         {
-            var lines = File.ReadAllLines(path);
+            //var lines = File.ReadAllLines(path);
+            var lines = Resources.map.Split(Const.separator, StringSplitOptions.None);
+            if (lines.Last().Trim() == "") lines = lines.Take(lines.Length - 1).ToArray();//最終行が空行なら削除
             Height = lines.Length;
             Width = lines[0].Split(',').Length;
             WalkMap = new int[Width, Height];

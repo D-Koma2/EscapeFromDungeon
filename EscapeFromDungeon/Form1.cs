@@ -1,6 +1,7 @@
 ﻿
 using EscapeFromDungeon.Properties;
 using System.Diagnostics;
+using System.Drawing;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 
@@ -95,17 +96,17 @@ namespace EscapeFromDungeon
         {
             if (GameManager.gameMode == GameMode.Battle)
             {
-                lblAttack.Text = "攻撃";
-                lblDefence.Text = "防御";
-                lblHeal.Text = "回復";
-                lblEscape.Text = "逃げる";
+                lblAttack.Text = "[↑] 攻撃";
+                lblDefence.Text = "[←] 防御";
+                lblHeal.Text = "[→] 回復";
+                lblEscape.Text = "[↓] 逃げる";
             }
             else
             {
-                lblAttack.Text = "↑";
-                lblDefence.Text = "←";
-                lblHeal.Text = "→";
-                lblEscape.Text = "↓";
+                lblAttack.Text = "[↑] 移動";
+                lblDefence.Text = "[←] 移動";
+                lblHeal.Text = "[→] 移動";
+                lblEscape.Text = "[↓] 移動";
             }
         }
 
@@ -232,10 +233,10 @@ namespace EscapeFromDungeon
             lastInputTime = DateTime.Now;
 
             SetLblCol(exploreKey, btnSelectCol);
+            await Task.Delay(100);
 
             if (GameManager.gameMode == GameMode.Battle)
             {
-                await Task.Delay(200);
                 SetBattleButtonsEnabled(false);
                 await gameManager.Battle.PlayerTurnAsync(command);
                 await gameManager.BattleCheckAsync();
@@ -376,16 +377,6 @@ namespace EscapeFromDungeon
 
         private void SetMonsterVisible(bool visible) => monsterImg.Visible = visible;
 
-        private void LabelMouseHover(object sender, EventArgs e)
-        {
-            if (sender is Label lbl) lbl.BackColor = btnSelectCol;
-        }
-
-        private void LabelMouseLeave(object sender, EventArgs e)
-        {
-            if (sender is Label lbl) lbl.BackColor = btnBaseCol;
-        }
-
         private void VisiblelblUse()
         {
             int potionCount = gameManager.Player.GetItemCount(Const.potion);
@@ -404,14 +395,18 @@ namespace EscapeFromDungeon
             }
         }
 
-        private void UseItem(string itemName)
+        private async Task UseItem(string itemName)
         {
+            SetUseLblCol(itemName, btnSelectCol);
+
             switch (itemName)
             {
                 case Const.potion:
                     if (gameManager.Player.Hp == gameManager.Player.MaxHp)
                     {
                         gameManager.Message.Show(Const.hpFullMsg);
+                        await Task.Delay(200);
+                        SetUseLblCol(itemName, btnBaseCol);
                         return;
                     }
                     gameManager.Player.Heal(30);
@@ -428,13 +423,32 @@ namespace EscapeFromDungeon
 
             gameManager.Message.Show($"{itemName}を使った！");
             gameManager.Player.UseItem(itemName);
+            await Task.Delay(200);
+            SetUseLblCol(itemName, btnBaseCol);
+        }
+
+        private void SetUseLblCol(string item, Color color)
+        {
+            switch (item)
+            {
+                case Const.potion:
+                    lblUsePosion.BackColor = color;
+                    break;
+                case Const.curePoison:
+                    lblUseCurePoison.BackColor = color;
+                    break;
+                case Const.torch:
+                    lblUseTorch.BackColor = color;
+                    break;
+                default:
+                    break;
+            }
         }
 
         // デバッグ用
         private void DispPoint()
         {
-            label1.Text = $"XY:({Map.playerPos.X}, {Map.playerPos.Y}) limit:{gameManager.Player.Limit} " +
-                $"mi:({mapImage.Location.X},{mapImage.Location.Y}) " +
+            label1.Text = $"XY:({Map.playerPos.X},{Map.playerPos.Y}) mi:({mapImage.Location.X},{mapImage.Location.Y}) " +
                 $"oi:({overlayImg.Location.X},{overlayImg.Location.Y}) pi:({playerImg.Location.X},{playerImg.Location.Y})";
         }
 

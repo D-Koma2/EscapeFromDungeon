@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EscapeFromDungeon.Properties;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -13,7 +14,9 @@ namespace EscapeFromDungeon
 
         public ItemData(string path)
         {
-            var lines = File.ReadAllLines(path).Skip(1);//１行目スキップ
+            //var lines = File.ReadAllLines(path).Skip(1);//１行目スキップ
+            var lines = Resources.Item.Split(Const.separator, StringSplitOptions.None).Skip(1).ToArray();//１行目スキップ
+            if (lines.Last().Trim() == "") lines = lines.Take(lines.Length - 1).ToArray();//最終行が空行なら削除
 
             foreach (var item in lines)
             {

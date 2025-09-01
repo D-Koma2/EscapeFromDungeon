@@ -50,7 +50,7 @@
             mapDrawBox.BackColor = Color.Black;
             mapDrawBox.BackgroundImageLayout = ImageLayout.None;
             mapDrawBox.BorderStyle = BorderStyle.FixedSingle;
-            mapDrawBox.Location = new Point(12, 12);
+            mapDrawBox.Location = new Point(30, 12);
             mapDrawBox.Name = "mapDrawBox";
             mapDrawBox.Size = new Size(416, 416);
             mapDrawBox.TabIndex = 0;
@@ -58,10 +58,11 @@
             // 
             // StateBox
             // 
+            StateBox.BackColor = Color.FromArgb(0, 0, 64);
             StateBox.BorderStyle = BorderStyle.FixedSingle;
-            StateBox.Location = new Point(444, 12);
+            StateBox.Location = new Point(452, 12);
             StateBox.Name = "StateBox";
-            StateBox.Size = new Size(301, 410);
+            StateBox.Size = new Size(301, 416);
             StateBox.TabIndex = 1;
             StateBox.TabStop = false;
             StateBox.Paint += StateBoxPaint;
@@ -69,8 +70,9 @@
             // label1
             // 
             label1.AutoSize = true;
-            label1.BackColor = Color.White;
-            label1.Location = new Point(-1, -1);
+            label1.BackColor = Color.FromArgb(0, 0, 64);
+            label1.ForeColor = Color.White;
+            label1.Location = new Point(21, 516);
             label1.Name = "label1";
             label1.Size = new Size(26, 20);
             label1.TabIndex = 2;
@@ -91,103 +93,95 @@
             // lblAttack
             // 
             lblAttack.Anchor = AnchorStyles.None;
-            lblAttack.BackColor = Color.Gray;
+            lblAttack.BackColor = Color.DarkGray;
             lblAttack.BorderStyle = BorderStyle.FixedSingle;
             lblAttack.Cursor = Cursors.Hand;
-            lblAttack.Location = new Point(600, 444);
+            lblAttack.Location = new Point(595, 443);
             lblAttack.Name = "lblAttack";
-            lblAttack.Size = new Size(69, 37);
+            lblAttack.Size = new Size(80, 40);
             lblAttack.TabIndex = 4;
-            lblAttack.Text = "攻撃";
+            lblAttack.Text = "[↑] 攻撃";
             lblAttack.TextAlign = ContentAlignment.MiddleCenter;
             lblAttack.Click += lblAttackClickAsync;
-            lblAttack.MouseLeave += LabelMouseLeave;
-            lblAttack.MouseHover += LabelMouseHover;
             // 
             // lblHeal
             // 
             lblHeal.Anchor = AnchorStyles.None;
-            lblHeal.BackColor = Color.Gray;
+            lblHeal.BackColor = Color.DarkGray;
             lblHeal.BorderStyle = BorderStyle.FixedSingle;
             lblHeal.Cursor = Cursors.Hand;
-            lblHeal.Location = new Point(675, 468);
+            lblHeal.Location = new Point(685, 467);
             lblHeal.Name = "lblHeal";
-            lblHeal.Size = new Size(69, 37);
+            lblHeal.Size = new Size(80, 40);
             lblHeal.TabIndex = 5;
-            lblHeal.Text = "回復";
+            lblHeal.Text = "[→] 回復";
             lblHeal.TextAlign = ContentAlignment.MiddleCenter;
             lblHeal.Click += lblHealClickAsync;
-            lblHeal.MouseLeave += LabelMouseLeave;
-            lblHeal.MouseHover += LabelMouseHover;
             // 
             // lblDefence
             // 
             lblDefence.Anchor = AnchorStyles.None;
-            lblDefence.BackColor = Color.Gray;
+            lblDefence.BackColor = Color.DarkGray;
             lblDefence.BorderStyle = BorderStyle.FixedSingle;
             lblDefence.Cursor = Cursors.Hand;
-            lblDefence.Location = new Point(525, 468);
+            lblDefence.Location = new Point(505, 467);
             lblDefence.Name = "lblDefence";
-            lblDefence.Size = new Size(69, 41);
+            lblDefence.Size = new Size(80, 40);
             lblDefence.TabIndex = 6;
-            lblDefence.Text = "防御";
+            lblDefence.Text = "[←] 防御";
             lblDefence.TextAlign = ContentAlignment.MiddleCenter;
             lblDefence.Click += lblDefenceClickAsync;
-            lblDefence.MouseLeave += LabelMouseLeave;
-            lblDefence.MouseHover += LabelMouseHover;
             // 
             // lblEscape
             // 
             lblEscape.Anchor = AnchorStyles.None;
-            lblEscape.BackColor = Color.Gray;
+            lblEscape.BackColor = Color.DarkGray;
             lblEscape.BorderStyle = BorderStyle.FixedSingle;
             lblEscape.Cursor = Cursors.Hand;
-            lblEscape.Location = new Point(600, 495);
+            lblEscape.Location = new Point(595, 494);
             lblEscape.Name = "lblEscape";
-            lblEscape.Size = new Size(69, 41);
+            lblEscape.Size = new Size(80, 40);
             lblEscape.TabIndex = 7;
-            lblEscape.Text = "逃げる";
+            lblEscape.Text = "[↓] 逃げる";
             lblEscape.TextAlign = ContentAlignment.MiddleCenter;
             lblEscape.Click += lblEscapeClickAsync;
-            lblEscape.MouseLeave += LabelMouseLeave;
-            lblEscape.MouseHover += LabelMouseHover;
             // 
             // lblUsePosion
             // 
             lblUsePosion.Anchor = AnchorStyles.None;
-            lblUsePosion.BackColor = Color.DimGray;
+            lblUsePosion.BackColor = Color.DarkGray;
             lblUsePosion.Cursor = Cursors.Hand;
-            lblUsePosion.Location = new Point(467, 96);
+            lblUsePosion.Location = new Point(475, 95);
             lblUsePosion.Name = "lblUsePosion";
             lblUsePosion.Size = new Size(62, 21);
             lblUsePosion.TabIndex = 8;
-            lblUsePosion.Text = "使う";
+            lblUsePosion.Text = "[p] 使う";
             lblUsePosion.TextAlign = ContentAlignment.MiddleCenter;
             lblUsePosion.Click += ItemLabelClick;
             // 
             // lblUseCurePoison
             // 
             lblUseCurePoison.Anchor = AnchorStyles.None;
-            lblUseCurePoison.BackColor = Color.DimGray;
+            lblUseCurePoison.BackColor = Color.DarkGray;
             lblUseCurePoison.Cursor = Cursors.Hand;
-            lblUseCurePoison.Location = new Point(467, 126);
+            lblUseCurePoison.Location = new Point(475, 125);
             lblUseCurePoison.Name = "lblUseCurePoison";
             lblUseCurePoison.Size = new Size(62, 20);
             lblUseCurePoison.TabIndex = 9;
-            lblUseCurePoison.Text = "使う";
+            lblUseCurePoison.Text = "[O] 使う";
             lblUseCurePoison.TextAlign = ContentAlignment.MiddleCenter;
             lblUseCurePoison.Click += ItemLabelClick;
             // 
             // lblUseTorch
             // 
             lblUseTorch.Anchor = AnchorStyles.None;
-            lblUseTorch.BackColor = Color.DimGray;
+            lblUseTorch.BackColor = Color.DarkGray;
             lblUseTorch.Cursor = Cursors.Hand;
-            lblUseTorch.Location = new Point(467, 156);
+            lblUseTorch.Location = new Point(475, 155);
             lblUseTorch.Name = "lblUseTorch";
             lblUseTorch.Size = new Size(62, 23);
             lblUseTorch.TabIndex = 10;
-            lblUseTorch.Text = "使う";
+            lblUseTorch.Text = "[ I ] 使う";
             lblUseTorch.TextAlign = ContentAlignment.MiddleCenter;
             lblUseTorch.Click += ItemLabelClick;
             // 
@@ -195,7 +189,7 @@
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackColor = Color.Black;
+            BackColor = Color.FromArgb(0, 0, 32);
             ClientSize = new Size(782, 553);
             Controls.Add(lblUseTorch);
             Controls.Add(lblUseCurePoison);
