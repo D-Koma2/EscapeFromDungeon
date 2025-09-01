@@ -12,7 +12,7 @@ namespace EscapeFromDungeon
 {
     internal class Map
     {
-        private static readonly Brush damageBrush = Brushes.Purple;
+        //private static readonly Brush damageBrush = Brushes.Purple;//ダメージ床
         private static readonly Brush passableBrush = Brushes.LightGray;
         private static readonly Brush blockedBrush = Brushes.DarkSlateGray;
         private static readonly Color color = Color.FromArgb(255, 54, 83, 83);
@@ -103,33 +103,30 @@ namespace EscapeFromDungeon
                     {
                         Rectangle rect = new Rectangle(x * tileSize, y * tileSize, tileSize, tileSize);
 
-                        Brush brush;
-
-                        if (WalkMap[x, y] == 0 || WalkMap[x, y] == 9)
+                        if (WalkMap[x, y] == 0)
                         {
-                            brush = passableBrush;
-                        }
-                        else if (WalkMap[x, y] == 2)
-                        {
-                            brush = transWallBrush;
+                            g.FillRectangle(passableBrush, rect);
                         }
                         else if (WalkMap[x, y] == 3)
                         {
-                            brush = damageBrush;
+                            g.DrawImage(Resources.poisonTile, x * tileSize, y * tileSize);
+                        }
+                        else if (WalkMap[x, y] == 2)
+                        {
+                            g.FillRectangle(transWallBrush, rect);
+                        }
+                        else if (WalkMap[x, y] == 9)
+                        {
+                            g.FillRectangle(passableBrush, rect);
+                            g.DrawImage(Resources.EnemySimbol1, x * tileSize, y * tileSize);
+                            WalkMap[x, y] = 0;
                         }
                         else
                         {
-                            brush = blockedBrush;
+                            g.FillRectangle(blockedBrush, rect);
                         }
 
-                        g.FillRectangle(brush, rect);
                         DrawWallLines(g, x, y);
-
-                        if (WalkMap[x, y] == 9)
-                        {
-                            g.DrawImage(Resources.EnemySimbol, x * tileSize, y * tileSize);
-                            WalkMap[x, y] = 0;
-                        }
                     }
                 }
             }
@@ -137,16 +134,14 @@ namespace EscapeFromDungeon
             mapImage.Image = MapCanvas;
         }//Draw
 
-        public void DelEnemySimbolDraw(PictureBox mapImage, int x, int y)
+        //敵シンボル位置を床で上書きする(壁ラインが消えるので、描画サイズは上下左右1ピクセルずつ減らす)
+        public void DelEnemySimbolDraw(int x, int y)
         {
             using (Graphics g = Graphics.FromImage(MapCanvas))
             {
-                Rectangle rect = new Rectangle(x * tileSize, y * tileSize, tileSize, tileSize);
+                Rectangle rect = new Rectangle(x * tileSize + 1, y * tileSize + 1, tileSize - 2, tileSize - 2);
                 g.FillRectangle(passableBrush, rect);
-                DrawWallLines(g, x, y);
             }
-
-            mapImage.Image = MapCanvas;
         }
 
         // 壁ライン描画

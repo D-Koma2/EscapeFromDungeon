@@ -153,9 +153,19 @@ namespace EscapeFromDungeon.Properties {
         /// <summary>
         ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
         /// </summary>
-        internal static System.Drawing.Bitmap EnemySimbol {
+        internal static System.Drawing.Bitmap EnemySimbol1 {
             get {
-                object obj = ResourceManager.GetObject("EnemySimbol", resourceCulture);
+                object obj = ResourceManager.GetObject("EnemySimbol1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
+        internal static System.Drawing.Bitmap EnemySimbol2 {
+            get {
+                object obj = ResourceManager.GetObject("EnemySimbol2", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -166,6 +176,16 @@ namespace EscapeFromDungeon.Properties {
         internal static System.Drawing.Bitmap Left {
             get {
                 object obj = ResourceManager.GetObject("Left", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
+        internal static System.Drawing.Bitmap poisonTile {
+            get {
+                object obj = ResourceManager.GetObject("poisonTile", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

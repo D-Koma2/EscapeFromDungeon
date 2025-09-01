@@ -79,7 +79,7 @@
             // MsgBox
             // 
             MsgBox.Anchor = AnchorStyles.None;
-            MsgBox.BackColor = Color.Indigo;
+            MsgBox.BackColor = Color.FromArgb(0, 0, 64);
             MsgBox.BorderStyle = BorderStyle.FixedSingle;
             MsgBox.Location = new Point(11, 439);
             MsgBox.Name = "MsgBox";
@@ -94,13 +94,13 @@
             lblAttack.BackColor = Color.Gray;
             lblAttack.BorderStyle = BorderStyle.FixedSingle;
             lblAttack.Cursor = Cursors.Hand;
-            lblAttack.Location = new Point(584, 439);
+            lblAttack.Location = new Point(600, 444);
             lblAttack.Name = "lblAttack";
             lblAttack.Size = new Size(69, 37);
             lblAttack.TabIndex = 4;
             lblAttack.Text = "攻撃";
             lblAttack.TextAlign = ContentAlignment.MiddleCenter;
-            lblAttack.Click += lblAttackClickAsynk;
+            lblAttack.Click += lblAttackClickAsync;
             lblAttack.MouseLeave += LabelMouseLeave;
             lblAttack.MouseHover += LabelMouseHover;
             // 
@@ -110,7 +110,7 @@
             lblHeal.BackColor = Color.Gray;
             lblHeal.BorderStyle = BorderStyle.FixedSingle;
             lblHeal.Cursor = Cursors.Hand;
-            lblHeal.Location = new Point(659, 463);
+            lblHeal.Location = new Point(675, 468);
             lblHeal.Name = "lblHeal";
             lblHeal.Size = new Size(69, 37);
             lblHeal.TabIndex = 5;
@@ -126,7 +126,7 @@
             lblDefence.BackColor = Color.Gray;
             lblDefence.BorderStyle = BorderStyle.FixedSingle;
             lblDefence.Cursor = Cursors.Hand;
-            lblDefence.Location = new Point(509, 463);
+            lblDefence.Location = new Point(525, 468);
             lblDefence.Name = "lblDefence";
             lblDefence.Size = new Size(69, 41);
             lblDefence.TabIndex = 6;
@@ -142,7 +142,7 @@
             lblEscape.BackColor = Color.Gray;
             lblEscape.BorderStyle = BorderStyle.FixedSingle;
             lblEscape.Cursor = Cursors.Hand;
-            lblEscape.Location = new Point(584, 490);
+            lblEscape.Location = new Point(600, 495);
             lblEscape.Name = "lblEscape";
             lblEscape.Size = new Size(69, 41);
             lblEscape.TabIndex = 7;
@@ -216,6 +216,7 @@
             Name = "Form1";
             Text = "EscapeFromDungeon";
             KeyDown += MainFormKeyDown;
+            KeyUp += FormKeyUp;
             ((System.ComponentModel.ISupportInitialize)mapDrawBox).EndInit();
             ((System.ComponentModel.ISupportInitialize)StateBox).EndInit();
             ((System.ComponentModel.ISupportInitialize)MsgBox).EndInit();

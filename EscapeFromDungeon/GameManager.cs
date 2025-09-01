@@ -45,6 +45,11 @@ namespace EscapeFromDungeon
         public Action? KeyDownPressed;
         public Action? KeyLeftPressed;
         public Action? KeyRightPressed;
+
+        public Action? KeyIPressed;
+        public Action? KeyPPressed;
+        public Action? KeyOPressed;
+
         public Func<int, int, int, bool, Task>? CallDrop;
 
         private EventData _eventData;
@@ -83,15 +88,15 @@ namespace EscapeFromDungeon
                 }
                 else if (keyCode == Keys.P)
                 {
-
+                    KeyPPressed?.Invoke();
                 }
                 else if (keyCode == Keys.O)
                 {
-
+                    KeyOPressed?.Invoke();
                 }
                 else if (keyCode == Keys.I)
                 {
-
+                    KeyIPressed?.Invoke();
                 }
                 else if (keyCode == Keys.V)
                 {
@@ -136,6 +141,8 @@ namespace EscapeFromDungeon
                     await Task.Delay(500);
                     // モンスターを倒したらイベントを消去
                     Map.DeleteEvent(eventPos.X, eventPos.Y);
+                    //マップ上の敵シンボルを消す
+                    Map.DelEnemySimbolDraw(eventPos.X, eventPos.Y);
                     gameMode = GameMode.Explore;
                     ChangeLblText?.Invoke();
                 }
@@ -358,7 +365,6 @@ namespace EscapeFromDungeon
                     break;
             }
         }
-
         private async void Gameover()
         {
             gameMode = GameMode.Gameover;
