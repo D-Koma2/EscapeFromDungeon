@@ -196,10 +196,18 @@ namespace EscapeFromDungeon
             _battleTurn++;
             if (Player.Status == Status.Poison)
             {
-                int poisonDamage = 3;
-                Player.TakeDamage(poisonDamage);
-                await message.ShowAsync($"{Player.Name}は毒のダメージを受けた！{poisonDamage}ダメージ！");
-                if (CallShaker != null) await CallShaker.Invoke(1, 1, 400, 30);
+                if (Player.GetItemCount(Const.curePoison) > 0)
+                {
+                    await message.ShowAsync($"{Player.Name}は{Const.curePoison}を使った！");
+                    Player.HealStatus();
+                }
+                else
+                {
+                    int poisonDamage = 3;
+                    Player.TakeDamage(poisonDamage);
+                    await message.ShowAsync($"{Player.Name}は毒のダメージを受けた！{poisonDamage}ダメージ！");
+                    if (CallShaker != null) await CallShaker.Invoke(1, 1, 400, 30);
+                }
                 await Task.Delay(500);
             }
             await BattleLoopAsync();

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EscapeFromDungeon.Properties;
+using System;
 using System.Collections.Generic;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -71,6 +72,18 @@ namespace EscapeFromDungeon
                         case "12"://通れる壁
                             WalkMap[x, y] = 2;
                             break;
+                        case "E1"://敵
+                        case "E2":
+                        case "E3":
+                        case "E4":
+                        case "E5":
+                        case "E6":
+                        case "E7":
+                        case "E8":
+                        case "E9":
+                            EventMap[x, y] = cells[x];
+                            WalkMap[x, y] = 9;
+                            break;
                         default:
                             EventMap[x, y] = cells[x];
                             WalkMap[x, y] = 0;
@@ -92,7 +105,7 @@ namespace EscapeFromDungeon
 
                         Brush brush;
 
-                        if (WalkMap[x, y] == 0)
+                        if (WalkMap[x, y] == 0 || WalkMap[x, y] == 9)
                         {
                             brush = passableBrush;
                         }
@@ -111,12 +124,30 @@ namespace EscapeFromDungeon
 
                         g.FillRectangle(brush, rect);
                         DrawWallLines(g, x, y);
+
+                        if (WalkMap[x, y] == 9)
+                        {
+                            g.DrawImage(Resources.EnemySimbol, x * tileSize, y * tileSize);
+                            WalkMap[x, y] = 0;
+                        }
                     }
                 }
             }
 
             mapImage.Image = MapCanvas;
         }//Draw
+
+        public void DelEnemySimbolDraw(PictureBox mapImage, int x, int y)
+        {
+            using (Graphics g = Graphics.FromImage(MapCanvas))
+            {
+                Rectangle rect = new Rectangle(x * tileSize, y * tileSize, tileSize, tileSize);
+                g.FillRectangle(passableBrush, rect);
+                DrawWallLines(g, x, y);
+            }
+
+            mapImage.Image = MapCanvas;
+        }
 
         // 壁ライン描画
         private void DrawWallLines(Graphics g, int x, int y)

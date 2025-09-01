@@ -97,10 +97,10 @@ namespace EscapeFromDungeon
             }
             else
             {
-                lblAttack.Text = "↑";
-                lblDefence.Text = "←";
-                lblHeal.Text = "→";
-                lblEscape.Text = "↓";
+                lblAttack.Text = "[↑]";
+                lblDefence.Text = "[←]";
+                lblHeal.Text = "[→]";
+                lblEscape.Text = "[↓]";
             }
         }
 
@@ -113,7 +113,7 @@ namespace EscapeFromDungeon
             mapImage = new PictureBox
             {
                 Size = new Size(gameManager.Map.Width * Map.tileSize, gameManager.Map.Height * Map.tileSize),
-                Location = new Point(0, 0),
+                Location = Point.Empty,
                 Image = gameManager.Map.MapCanvas,
                 SizeMode = PictureBoxSizeMode.Normal
             };
@@ -124,7 +124,7 @@ namespace EscapeFromDungeon
             overlayImg = new PictureBox
             {
                 Size = mapDrawBox.Size,
-                Location = new Point(0, 0),
+                Location = Point.Empty,
                 BackColor = Color.Transparent,
                 Image = gameManager.Map.overrayCanvas,
                 Parent = mapImage // mapImageの上に重ねる
