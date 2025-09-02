@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
+using WindowsFormsAppTest2;
 
 namespace EscapeFromDungeon
 {
@@ -16,6 +17,8 @@ namespace EscapeFromDungeon
         private GameManager gameManager;
         private DrawInfo drawInfo;
 
+        private FadeForm fade = default!;
+
         private Dictionary<Label, string> itemMap;
 
         private System.Windows.Forms.Timer timer = default!;//画面表示更新用
@@ -25,13 +28,14 @@ namespace EscapeFromDungeon
         public static DateTime battleInputUnlockTime;
 
         private DateTime lastInputTime = DateTime.MinValue;
-        private readonly TimeSpan inputCooldown = TimeSpan.FromMilliseconds(500);
+        private readonly TimeSpan inputCooldown = TimeSpan.FromMilliseconds(300);
 
         private bool _isWaiting = false;
 
         public Form1()
         {
             InitializeComponent();
+
             gameManager = new GameManager();//最初に生成する事!
             drawInfo = new DrawInfo();
 
@@ -54,6 +58,7 @@ namespace EscapeFromDungeon
             gameManager.Battle.SetMonsterVisible = SetMonsterVisible;
             gameManager.Battle.ChangeLblText = ChangeLblText;
             gameManager.ChangeLblText = ChangeLblText;
+            gameManager.SetMonsterImg = SetMonsterImage;
 
             gameManager.KeyUpPressed = () => lblAttackClickAsync(this, EventArgs.Empty);
             gameManager.KeyLeftPressed = () => lblDefenceClickAsync(this, EventArgs.Empty);
@@ -71,6 +76,8 @@ namespace EscapeFromDungeon
             gameManager.SetMapPos(mapImage, overlayImg, playerImg);
 
             DispPoint();
+
+            FadeSetup();
 
             timer = new System.Windows.Forms.Timer();
             timer.Interval = timerInterval;
@@ -91,7 +98,14 @@ namespace EscapeFromDungeon
             VisiblelblUse();
             DispPoint();
         }
-
+        private void FadeSetup()
+        {
+            fade = new FadeForm(this, FadeForm.FadeDir.FadeOut); // MainForm を渡す
+            gameManager.StartFade = fade.StartFade;
+            // MainForm が移動したら FadeForm も追従
+            this.LocationChanged += (_, __) => fade.FollowOwner();
+            fade.Show();
+        }
         public void ChangeLblText()
         {
             if (GameManager.gameMode == GameMode.Battle)
@@ -154,10 +168,7 @@ namespace EscapeFromDungeon
             // モンスター画像
             monsterImg = new PictureBox
             {
-                Size = new(Map.tileSize * 8, Map.tileSize * 8),
-                Location = new Point(96, 96),
                 BackColor = Color.Transparent,
-                Image = Resources.Enemy01,
                 SizeMode = PictureBoxSizeMode.StretchImage,
                 BorderStyle = BorderStyle.FixedSingle,
                 Visible = false
@@ -167,6 +178,13 @@ namespace EscapeFromDungeon
 
             monsterImg.BringToFront();
         }//InitPictureBoxes
+
+        public void SetMonsterImage(Image img)
+        {
+            monsterImg.Image = img;
+            monsterImg.Location = new Point(96, 96);
+            monsterImg.Size = new Size(Map.tileSize * 8, Map.tileSize * 8);
+        }
 
         private void MainFormKeyDown(object sender, KeyEventArgs e)
         {
@@ -395,7 +413,7 @@ namespace EscapeFromDungeon
             }
         }
 
-        private async Task UseItem(string itemName)
+        private async void UseItem(string itemName)
         {
             SetUseLblCol(itemName, btnSelectCol);
 
@@ -449,7 +467,7 @@ namespace EscapeFromDungeon
         private void DispPoint()
         {
             label1.Text = $"XY:({Map.playerPos.X},{Map.playerPos.Y}) mi:({mapImage.Location.X},{mapImage.Location.Y}) " +
-                $"oi:({overlayImg.Location.X},{overlayImg.Location.Y}) pi:({playerImg.Location.X},{playerImg.Location.Y})";
+                $"oi:({overlayImg.Location.X},{overlayImg.Location.Y}) mode:({GameManager.gameMode})";
         }
 
     }//class

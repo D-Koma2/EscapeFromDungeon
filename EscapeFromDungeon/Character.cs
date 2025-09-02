@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EscapeFromDungeon.Properties;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -138,9 +139,12 @@ namespace EscapeFromDungeon
     class Monster : Character
     {
         public Weak Weak { get; set; } = Weak.None;
-        public Monster(string name, int hp, int attack, Weak weak) : base(name, hp, attack) 
+
+        public string ImageName {  get; set; }
+        public Monster(string name, int hp, int attack, Weak weak, string image) : base(name, hp, attack) 
         {
             Weak = weak;
+            ImageName = image;
         }
     }
 }

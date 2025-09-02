@@ -28,7 +28,7 @@ namespace EscapeFromDungeon
         {
             this.Player = player;
             this.message = message;
-            Monster = new Monster("仮モンスター", 1, 1, Weak.None);
+            Monster = new Monster("仮モンスター", 1, 1, Weak.None, "monster01");
         }
 
         public void RestBattleTurn() => _battleTurn = 0;

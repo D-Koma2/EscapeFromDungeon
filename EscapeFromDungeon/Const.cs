@@ -9,6 +9,8 @@ namespace EscapeFromDungeon
     internal static class Const
     {
         public static readonly string[] separator = new[] { "\r\n", "\r", "\n" };
+        public static readonly string title = "Escape From Dungeon";
+        public static readonly string gameOver = "Game Over";
 
         public const string potion = "ポーション";
         public const string curePoison = "毒消し草";

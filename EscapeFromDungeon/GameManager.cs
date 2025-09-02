@@ -1,7 +1,10 @@
-﻿using System;
+﻿using EscapeFromDungeon.Properties;
+using System;
 using System.Drawing.Imaging;
 using System.Reflection;
+using System.Resources;
 using System.Windows.Forms;
+using WindowsFormsAppTest2;
 
 namespace EscapeFromDungeon
 {
@@ -17,7 +20,7 @@ namespace EscapeFromDungeon
 
     internal class GameManager
     {
-        public static GameMode gameMode { get; set; } = GameMode.Explore;
+        public static GameMode gameMode { get; set; } = GameMode.Title;
         // true: 視界制限あり、false: 全体表示デバッグ用
         public static bool IsVisionEnabled { get; set; } = true;
 
@@ -49,8 +52,10 @@ namespace EscapeFromDungeon
         public Action? KeyIPressed;
         public Action? KeyPPressed;
         public Action? KeyOPressed;
+        public Action<FadeForm.FadeDir>? StartFade;
 
         public Func<int, int, int, bool, Task>? CallDrop;
+        public Action<Image>? SetMonsterImg;
 
         private EventData _eventData;
         private MonsterData _monsterData;
@@ -299,7 +304,12 @@ namespace EscapeFromDungeon
 
             gameMode = GameMode.Battle;
             var mon = _monsterData.Dict[evt.Word];
-            Battle.Monster = new Monster(mon.Name, mon.Hp, mon.Attack, mon.Weak);
+            Battle.Monster = new Monster(mon.Name, mon.Hp, mon.Attack, mon.Weak, mon.ImageName);
+
+            //モンスターイメージを変更
+            Image? img = Resources.ResourceManager.GetObject(mon.ImageName) as Image;
+            if(img != null) SetMonsterImg?.Invoke(img);
+
             Battle.RestBattleTurn();
 
             if (CallDrop != null) await CallDrop.Invoke(600, 10, 4, true);
@@ -365,12 +375,10 @@ namespace EscapeFromDungeon
                     break;
             }
         }
-        private async void Gameover()
+        private void Gameover()
         {
             gameMode = GameMode.Gameover;
-            await Message.ShowAsync($"ゲームーオーバー");
-            await Task.Delay(2000);
-            Application.Exit();
+            StartFade(FadeForm.FadeDir.FadeIn);
         }
 
         // マップとプレイヤーの位置調整
