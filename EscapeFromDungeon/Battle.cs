@@ -28,7 +28,7 @@ namespace EscapeFromDungeon
         {
             this.Player = player;
             this.message = message;
-            Monster = new Monster("仮モンスター", 1, 1, Weak.None, "monster01");
+            Monster = new Monster("仮モンスター", 1, 1, Weak.None, "Enemy01");
         }
 
         public void RestBattleTurn() => _battleTurn = 0;
@@ -85,6 +85,7 @@ namespace EscapeFromDungeon
                         {
                             Weak.Fire => Const.fireWepon,
                             Weak.Ice => Const.iceWepon,
+                            Weak.Thunder => Const.thunderWepon,
                             Weak.Heavy => Const.hitWepon,
                             Weak.Holy => Const.holyWepon,
                             _ => ""
@@ -153,7 +154,7 @@ namespace EscapeFromDungeon
                         await message.ShowAsync($"{Monster.Name}の強力な攻撃！{Player.Name}は {damage} 大ダメージ！");
                         if (CallShaker != null) await CallShaker.Invoke(1, 1, 400, 30);
                     }
-                    else if (_battleTurn % 5 == 3)
+                    else if (_battleTurn == 3)
                     {
                         await message.ShowAsync($"{Monster.Name}は力をためている！");
                     }
@@ -176,6 +177,22 @@ namespace EscapeFromDungeon
                     else if (_battleTurn % 4 == 2)
                     {
                         await message.ShowAsync($"{Monster.Name}は力をためている！");
+                    }
+                    else
+                    {
+                        Player.TakeDamage(damage);
+                        await message.ShowAsync($"{Monster.Name}の攻撃！{Player.Name}は {damage} ダメージ！");
+                        if (CallShaker != null) await CallShaker.Invoke(1, 1, 400, 30);
+                    }
+                }
+                else if (Monster.Name == Const.fireSlimeG || Monster.Name == Const.iceSlimeG || Monster.Name == Const.thunderSlimeG)
+                {
+                    if (_battleTurn % 4 == 3)
+                    {
+                        damage *= 2;
+                        Player.TakeDamage(damage);
+                        await message.ShowAsync($"{Monster.Name}の強力な攻撃！{Player.Name}は {damage} 大ダメージ！");
+                        if (CallShaker != null) await CallShaker.Invoke(1, 2, 400, 30);
                     }
                     else
                     {

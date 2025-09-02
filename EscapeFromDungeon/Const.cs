@@ -17,12 +17,17 @@ namespace EscapeFromDungeon
         public const string torch = "松明";
 
         public const string demon = "デーモン";
+        public const string SlimeG = "強そうなスライム";
         public const string fireSlime = "炎スライム";
         public const string iceSlime = "氷スライム";
         public const string thunderSlime = "雷スライム";
+        public const string fireSlimeG = "強そうな炎スライム";
+        public const string iceSlimeG = "強そうな氷スライム";
+        public const string thunderSlimeG = "強そうな雷スライム";
 
         public const string fireWepon = "炎の剣";
         public const string iceWepon = "氷の剣";
+        public const string thunderWepon = "雷の剣";
         public const string holyWepon = "聖なる剣";
         public const string hitWepon = "おおきづち";
 
