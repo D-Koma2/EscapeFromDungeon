@@ -52,7 +52,7 @@ namespace EscapeFromDungeon
             TimerSetUp();
             FadeSetup();
 
-            DispPoint();
+            //DispPoint();
         }
 
         public void InitGame()
@@ -65,7 +65,7 @@ namespace EscapeFromDungeon
             SetLabelBaseCol();
             InitDraw();
 
-            DispPoint();
+            //DispPoint();
         }
 
         private void InitDraw()
@@ -131,7 +131,7 @@ namespace EscapeFromDungeon
             StateBox.Invalidate();
             MsgBox.Invalidate();
             VisiblelblUse();
-            DispPoint();
+            //DispPoint();
         }
 
         public void ChangeLblText()
@@ -173,7 +173,7 @@ namespace EscapeFromDungeon
                 Size = mapDrawBox.Size,
                 Location = Point.Empty,
                 BackColor = Color.Transparent,
-                Image = gameManager.Map.overrayCanvas,
+                Image = gameManager.Map.OverrayCanvas,
                 Parent = mapImage // mapImageの上に重ねる
             };
 
@@ -436,7 +436,7 @@ namespace EscapeFromDungeon
 
         private void ItemLabelClick(object sender, EventArgs e)
         {
-            if (sender is Label lbl && itemMap.TryGetValue(lbl, out string itemName))
+            if (sender is Label lbl && itemMap.TryGetValue(lbl, out string? itemName))
             {
                 UseItem(itemName);
             }

@@ -39,7 +39,7 @@ namespace EscapeFromDungeon
             string hpText = $"HP: {player.Hp} / {player.MaxHp}";
             string state = $"状態： {player.Status.ToString()}";
             string limitText = $"リミット: {player.Limit}";
-            string inventoryTitle = "所持品:";
+            //string inventoryTitle = "所持品:";
             string potionCount = Const.potion + " x " + player.Inventry.Count(item => item.Name == Const.potion).ToString();
             string curePoisonCount = Const.curePoison + " x " + player.Inventry.Count(item => item.Name == Const.curePoison).ToString();
             string torchCount = Const.torch + " x " + player.Inventry.Count(item => item.Name == Const.torch).ToString();

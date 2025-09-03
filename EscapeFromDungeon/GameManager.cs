@@ -205,7 +205,7 @@ namespace EscapeFromDungeon
             // 移動可能かチェック
             if (Map.CanMoveTo(newPos.X, newPos.Y))
             {
-                Event evt = CheckEvent(newPos.X, newPos.Y);
+                Event? evt = CheckEvent(newPos.X, newPos.Y);
 
                 if (evt == null) Message.Init(); // メッセージリセット
 
@@ -261,7 +261,7 @@ namespace EscapeFromDungeon
             if (invertCount % ViewShrinkInterval == 0) Map.AddViewRadius(-1);
         }
 
-        private Event CheckEvent(int x, int y)
+        private Event? CheckEvent(int x, int y)
         {
             var eventId = Map.EventMap[x, y];
 
@@ -390,7 +390,7 @@ namespace EscapeFromDungeon
         private void Gameover()
         {
             SetLabelBaseCol?.Invoke();
-            StartFade(FadeForm.FadeDir.FadeIn);
+            if (StartFade is not null) StartFade(FadeForm.FadeDir.FadeIn);
         }
 
         // マップとプレイヤーの位置調整

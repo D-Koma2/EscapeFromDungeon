@@ -12,6 +12,15 @@ namespace EscapeFromDungeon
 {
     internal class Map
     {
+        enum WalkType
+        {
+            Passable = 0,
+            Wall = 1,
+            SemiWall = 2,
+            Damage = 3,
+            Enemy = 9
+        }
+
         //private static readonly Brush damageBrush = Brushes.Purple;//ダメージ床
         private static readonly Brush passableBrush = Brushes.LightGray;
         private static readonly Brush blockedBrush = Brushes.DarkSlateGray;
@@ -26,6 +35,7 @@ namespace EscapeFromDungeon
         private static int minViewRadius = 1;
 
         public const int tileSize = 32;
+
         public int MapX { get; set; }
         public int MapY { get; set; }
 
@@ -36,70 +46,67 @@ namespace EscapeFromDungeon
         public int Width { get; private set; }
         public int Height { get; private set; }
         public Bitmap MapCanvas { get; private set; }
-        public Bitmap overrayCanvas { get; private set; }
+        public Bitmap OverrayCanvas { get; private set; }
 
-#pragma warning disable CS8618 
+        Dictionary<string, int> walkMapCodes;
+
+        private string[] lines;
+
         public Map(string path)
-#pragma warning restore CS8618
         {
-            InitMap(path);
-        }
-
-        public void InitMap(string path)
-        {
-            var lines = File.ReadAllLines(path);
-            //var lines = Resources.map.Split(Const.separator, StringSplitOptions.None);
+            lines = File.ReadAllLines(path);
+            //lines = Resources.map.Split(Const.separator, StringSplitOptions.None);
             if (lines.Last().Trim() == "") lines = lines.Take(lines.Length - 1).ToArray();//最終行が空行なら削除
             Height = lines.Length;
             Width = lines[0].Split(',').Length;
             WalkMap = new int[Width, Height];
             EventMap = new string[Width, Height];
             MapCanvas = new Bitmap(Width * tileSize, Height * tileSize);
-            overrayCanvas = new Bitmap(Width * tileSize, Height * tileSize);
+            OverrayCanvas = new Bitmap(Width * tileSize, Height * tileSize);
 
+            walkMapCodes = new()
+            {
+                { "00", 0 },//通路
+                { "XX", 3 },//ダメージ床
+                { "11", 1 },//壁
+                { "12", 2 }//半透明壁
+            };
+
+            InitMap(path);
+        }
+
+        public void InitMap(string path)
+        {
             for (int y = 0; y < Height; y++)
             {
                 var cells = lines[y].Split(',');
                 for (int x = 0; x < Width; x++)
                 {
-                    switch (cells[x].Trim())
+                    string code = cells[x].Trim();
+
+                    if (code == "SS")//スタート地点
                     {
-                        case "SS"://スタート地点
-                            playerPos = new Point(x, y);
-                            WalkMap[x, y] = 0;
-                            break;
-                        case "GG"://ゴール
-                            EventMap[x, y] = cells[x];
-                            WalkMap[x, y] = 0;
-                            break;
-                        case "00"://通路
-                            WalkMap[x, y] = 0;
-                            break;
-                        case "XX"://ダメージ床
-                            WalkMap[x, y] = 3;
-                            break;
-                        case "11"://壁
-                            WalkMap[x, y] = 1;
-                            break;
-                        case "12"://通れる壁
-                            WalkMap[x, y] = 2;
-                            break;
-                        case "E1"://敵
-                        case "E2":
-                        case "E3":
-                        case "E4":
-                        case "E5":
-                        case "E6":
-                        case "E7":
-                        case "E8":
-                        case "E9":
-                            EventMap[x, y] = cells[x];
-                            WalkMap[x, y] = 9;
-                            break;
-                        default:
-                            EventMap[x, y] = cells[x];
-                            WalkMap[x, y] = 0;
-                            break;
+                        playerPos = new Point(x, y);
+                        WalkMap[x, y] = 0;
+                    }
+                    else if (code == "GG")//ゴール地点
+                    {
+                        EventMap[x, y] = code;
+                        WalkMap[x, y] = 0;
+                    }
+                    else if (code.StartsWith("E"))//敵シンボル
+                    {
+                        EventMap[x, y] = code;
+                        WalkMap[x, y] = 9;
+                    }
+                    else if (walkMapCodes.ContainsKey(code))//通路、壁、半透明壁、ダメージ床
+                    {
+                        WalkMap[x, y] = walkMapCodes[code];
+                    }
+                    else//イベント
+                    {
+                        EventMap[x, y] = code;
+                        WalkMap[x, y] = 0;
                     }
                 }
             }
@@ -121,25 +128,25 @@ namespace EscapeFromDungeon
                     {
                         Rectangle rect = new Rectangle(x * tileSize, y * tileSize, tileSize, tileSize);
 
-                        if (WalkMap[x, y] == 0)
+                        if (WalkMap[x, y] == 0)//通路
                         {
                             g.FillRectangle(passableBrush, rect);
                         }
-                        else if (WalkMap[x, y] == 3)
+                        else if (WalkMap[x, y] == 3)//ダメージ床
                         {
                             g.DrawImage(Resources.poisonTile, x * tileSize, y * tileSize);
                         }
-                        else if (WalkMap[x, y] == 2)
+                        else if (WalkMap[x, y] == 2)//半透明壁
                         {
                             g.FillRectangle(transWallBrush, rect);
                         }
-                        else if (WalkMap[x, y] == 9)
+                        else if (WalkMap[x, y] == 9)//敵シンボル
                         {
                             g.FillRectangle(passableBrush, rect);
                             g.DrawImage(Resources.EnemySimbol1, x * tileSize, y * tileSize);
                             WalkMap[x, y] = 0;
                         }
-                        else
+                        else//壁
                         {
                             g.FillRectangle(blockedBrush, rect);
                         }
@@ -186,7 +193,7 @@ namespace EscapeFromDungeon
 
         public void DrawBrightness(PictureBox overlayBox)
         {
-            using (Graphics g = Graphics.FromImage(overrayCanvas))
+            using (Graphics g = Graphics.FromImage(OverrayCanvas))
             {
                 for (int y = 0; y < Height; y++)
                 {
@@ -229,8 +236,8 @@ namespace EscapeFromDungeon
 
         public void ClearBrightness(PictureBox overlayBox)
         {
-            overrayCanvas = new Bitmap(Width * tileSize, Height * tileSize);
-            overlayBox.Image = overrayCanvas;
+            OverrayCanvas = new Bitmap(Width * tileSize, Height * tileSize);
+            overlayBox.Image = OverrayCanvas;
         }
 
         public bool CanMoveTo(int x, int y)
@@ -243,7 +250,7 @@ namespace EscapeFromDungeon
 
         public void DeleteEvent(int x, int y)
         {
-            EventMap[x, y] = null;
+            EventMap[x, y] = null!;
         }
 
     }//class

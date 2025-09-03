@@ -78,6 +78,16 @@ namespace EscapeFromDungeon
             {
                 case Const.CommandAtk:
 
+                    //最強武器を持っていればすべての敵にダメージアップの処理
+                    if (Player.Inventry.Any(item => item.Name == Const.superWepon))
+                    {
+                        int extraDamage = Player.Attack * 3;
+                        Monster.TakeDamage(extraDamage);
+                        await message.ShowAsync($"{Player.Name}は{Const.superWepon}で {Monster.Name}に {extraDamage} 大ダメージ！");
+                        if (CallShaker != null) await CallShaker.Invoke(2, 2, 400, 30);
+                        break;
+                    }
+
                     //敵の弱点アイテムを持っていればダメージアップの処理
                     if (Monster.Weak != Weak.None)
                     {
@@ -86,7 +96,7 @@ namespace EscapeFromDungeon
                             Weak.Fire => Const.fireWepon,
                             Weak.Ice => Const.iceWepon,
                             Weak.Thunder => Const.thunderWepon,
-                            Weak.Heavy => Const.hitWepon,
+                            Weak.Heavy => Const.heavyWepon,
                             Weak.Holy => Const.holyWepon,
                             _ => ""
                         };
@@ -94,7 +104,7 @@ namespace EscapeFromDungeon
                         {
                             int extraDamage = Player.Attack * 3;
                             Monster.TakeDamage(extraDamage);
-                            await message.ShowAsync($"{Player.Name}は{itemName}で攻撃！{Monster.Name}に {extraDamage} 大ダメージ！");
+                            await message.ShowAsync($"{Player.Name}は{itemName}で {Monster.Name}に {extraDamage} 大ダメージ！");
                             if (CallShaker != null) await CallShaker.Invoke(2, 2, 400, 30);
                             break;
                         }

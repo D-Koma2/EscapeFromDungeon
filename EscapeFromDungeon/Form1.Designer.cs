@@ -77,6 +77,7 @@
             label1.Size = new Size(26, 20);
             label1.TabIndex = 2;
             label1.Text = "XY";
+            label1.Visible = false;
             // 
             // MsgBox
             // 
@@ -85,7 +86,7 @@
             MsgBox.BorderStyle = BorderStyle.FixedSingle;
             MsgBox.Location = new Point(11, 439);
             MsgBox.Name = "MsgBox";
-            MsgBox.Size = new Size(477, 102);
+            MsgBox.Size = new Size(498, 102);
             MsgBox.TabIndex = 3;
             MsgBox.TabStop = false;
             MsgBox.Paint += MsgBoxPaint;
@@ -96,7 +97,7 @@
             lblAttack.BackColor = Color.DarkGray;
             lblAttack.BorderStyle = BorderStyle.FixedSingle;
             lblAttack.Cursor = Cursors.Hand;
-            lblAttack.Location = new Point(595, 443);
+            lblAttack.Location = new Point(605, 445);
             lblAttack.Name = "lblAttack";
             lblAttack.Size = new Size(80, 40);
             lblAttack.TabIndex = 4;
@@ -110,7 +111,7 @@
             lblHeal.BackColor = Color.DarkGray;
             lblHeal.BorderStyle = BorderStyle.FixedSingle;
             lblHeal.Cursor = Cursors.Hand;
-            lblHeal.Location = new Point(685, 467);
+            lblHeal.Location = new Point(695, 469);
             lblHeal.Name = "lblHeal";
             lblHeal.Size = new Size(80, 40);
             lblHeal.TabIndex = 5;
@@ -124,7 +125,7 @@
             lblDefence.BackColor = Color.DarkGray;
             lblDefence.BorderStyle = BorderStyle.FixedSingle;
             lblDefence.Cursor = Cursors.Hand;
-            lblDefence.Location = new Point(505, 467);
+            lblDefence.Location = new Point(515, 469);
             lblDefence.Name = "lblDefence";
             lblDefence.Size = new Size(80, 40);
             lblDefence.TabIndex = 6;
@@ -138,7 +139,7 @@
             lblEscape.BackColor = Color.DarkGray;
             lblEscape.BorderStyle = BorderStyle.FixedSingle;
             lblEscape.Cursor = Cursors.Hand;
-            lblEscape.Location = new Point(595, 494);
+            lblEscape.Location = new Point(605, 496);
             lblEscape.Name = "lblEscape";
             lblEscape.Size = new Size(80, 40);
             lblEscape.TabIndex = 7;

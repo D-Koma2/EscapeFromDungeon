@@ -30,7 +30,7 @@ namespace EscapeFromDungeon
             msgTimer.Interval = timerInterval;
             msgTimer.Tick += MsgTimerTick;
         }
-        public void MsgTimerTick(object sender, EventArgs e)
+        public void MsgTimerTick(object? sender, EventArgs e)
         {
             if (!isMessageTicking) return;
 
