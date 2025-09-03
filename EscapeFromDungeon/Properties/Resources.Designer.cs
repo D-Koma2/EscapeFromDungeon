@@ -153,6 +153,16 @@ namespace EscapeFromDungeon.Properties {
         /// <summary>
         ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
         /// </summary>
+        internal static System.Drawing.Bitmap Enemy09 {
+            get {
+                object obj = ResourceManager.GetObject("Enemy09", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
         internal static System.Drawing.Bitmap EnemySimbol1 {
             get {
                 object obj = ResourceManager.GetObject("EnemySimbol1", resourceCulture);
@@ -175,20 +185,20 @@ namespace EscapeFromDungeon.Properties {
         ///I0,ItemGet,ポーション
         ///I1,ItemGet,毒消し草
         ///I2,ItemGet,松明
-        ///I3,ItemGet,バールのようなもの
+        ///I3,ItemGet,バールかな？
         ///I4,ItemGet,炎の剣
         ///I5,ItemGet,氷の剣
         ///I6,ItemGet,雷の剣
         ///I7,ItemGet,聖なる剣
         ///I8,ItemGet,エクスカリバール
         ///E1,Encount,スライム
-        ///E2,Encount,強そうなスライム
+        ///E2,Encount,強力スライム
         ///E3,Encount,炎スライム
         ///E4,Encount,氷スライム
         ///E5,Encount,雷スライム
-        ///E6,Encount,強そうな炎スライム
-        ///E7,Encount,強そうな氷スライム
-        ///E8,Encount,強そうな雷スライム
+        ///E6,Encount,強力炎スライム
+        ///E7,Encount,強力氷スライム
+        ///E8,Encount,強力雷スライム
         ///E9,Encount,デーモン
         ///L0,Heal,HPが20回復した!
         ///L1,Heal,HPが50回復した!
@@ -196,7 +206,8 @@ namespace EscapeFromDungeon.Properties {
         ///L3,Heal,毒が治った!
         ///T0,Trap,罠だ！5のダメージを受けた!
         ///T1,Trap,痛い罠だ！20のダメージを受けた!
-        ///T2,Trap,すごく痛い罠だ！40のダメージを受けた!        /// [残りの文字列は切り詰められました]&quot;; に類似しているローカライズされた文字列を検索します。
+        ///T2,Trap,すごく痛い罠だ！40のダメージを受けた!
+        ///T3,Trap,毒に [残りの文字列は切り詰められました]&quot;; に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string Event {
             get {
@@ -209,7 +220,7 @@ namespace EscapeFromDungeon.Properties {
         ///ポーション,HPを30回復
         ///毒消し草,毒を治す
         ///松明,周囲を明るくする
-        ///バールのようなもの,攻撃に打撃効果
+        ///バールかな？,攻撃に打撃効果
         ///炎の剣,攻撃に炎の効果
         ///氷の剣,攻撃に氷の効果
         ///雷の剣,攻撃に雷の効果
@@ -234,9 +245,9 @@ namespace EscapeFromDungeon.Properties {
         
         /// <summary>
         ///   11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11
-        ///11,00,00,00,11,00,T2,11,00,00,00,00,00,00,00,00,00,00,00,12,E2,00,00,00,00,00,I0,11,00,00,00,00,00,00,00,XX,00,00,00,11
+        ///11,00,00,00,11,00,T2,11,00,00,00,00,00,00,00,00,00,00,00,12,E4,00,00,00,00,00,I0,11,00,00,00,00,00,00,00,XX,00,00,00,11
         ///11,00,11,00,11,00,11,11,00,11,11,XX,XX,11,00,11,00,11,00,11,11,00,00,11,00,11,11,11,00,11,11,XX,00,11,00,11,00,11,00,11
-        ///11,00,11,00,00,00,00,00,00,00,00,11,11,11,00,11,T2,11,00,11,XX,12,11,11,00,00,00,11,00,XX,XX,XX,00,11,00,00,00,11,00,11
+        ///11,00,11,00,00,00,00,00,00,00,HK,11,11,11,00,11,T2,11,00,11,XX,12,11,11,00,00,00,11,00,XX,XX,XX,00,11,00,00,00,11,00,11
         ///11,00,11,11,11,11,12,11,11,1 [残りの文字列は切り詰められました]&quot;; に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string map {
@@ -247,15 +258,15 @@ namespace EscapeFromDungeon.Properties {
         
         /// <summary>
         ///   モンスター名,HP,Atk,Weak
-        ///スライム,20,1,None
-        ///強そうなスライム,40,5,Thunder
-        ///炎スライム,30,8,Ice
-        ///氷スライム,30,9,Fire
-        ///雷スライム,30,10,Heavy
-        ///強そうな炎スライム,80,10,Ice
-        ///強そうな氷スライム,80,10,Fire
-        ///強そうな雷スライム,90,15,Heavy
-        ///デーモン,200,20,Holy に類似しているローカライズされた文字列を検索します。
+        ///スライム,20,1,None,Enemy01
+        ///強力スライム,40,5,Thunder,Enemy02
+        ///炎スライム,30,8,Ice,Enemy03
+        ///氷スライム,30,9,Fire,Enemy04
+        ///雷スライム,30,10,Heavy,Enemy05
+        ///強力炎スライム,80,10,Ice,Enemy06
+        ///強力氷スライム,80,10,Fire,Enemy07
+        ///強力雷スライム,90,15,Heavy,Enemy08
+        ///デーモン,200,20,Holy,Enemy09 に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string Monster {
             get {

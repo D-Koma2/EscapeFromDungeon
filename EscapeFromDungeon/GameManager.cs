@@ -34,7 +34,7 @@ namespace EscapeFromDungeon
         private const string _playerName = "あなた";
         private const int _playerHp = 100;
         private const int _playerAttack = 10;
-        private const int _limitMax = 555;
+        private const int _limitMax = 999;
 
         public Player Player { get; private set; }
         public Map Map { get; private set; }
@@ -132,6 +132,7 @@ namespace EscapeFromDungeon
         {
             Player.Init(_playerHp,_limitMax);
             eventPos = Point.Empty;
+            IsVisionEnabled = true;
         }
 
         public async Task BattleCheckAsync()
