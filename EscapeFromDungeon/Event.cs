@@ -13,7 +13,8 @@ namespace EscapeFromDungeon
         ItemGet,
         Heal,
         Trap,
-        Encount
+        Encount,
+        GameClear
     }
 
     internal class Event

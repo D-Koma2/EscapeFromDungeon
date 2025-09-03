@@ -10,19 +10,19 @@ namespace EscapeFromDungeon
 {
     public partial class Form1 : Form
     {
-        private readonly Color btnBaseCol = Color.DarkGray;
-        private readonly Color btnSelectCol = Color.DarkOrange;
+        private readonly Color lblBaseCol = Color.DarkGray;
+        private readonly Color lblSelectCol = Color.DarkOrange;
 
         private PictureBox mapImage = default!, overlayImg = default!, playerImg = default!, monsterImg = default!;
+        private FadeForm fade = default!;
         private GameManager gameManager;
         private DrawInfo drawInfo;
 
-        private FadeForm fade = default!;
-
-        private Dictionary<Label, string> itemMap;
-
         private System.Windows.Forms.Timer timer = default!;//画面表示更新用
         private const int timerInterval = 32;
+        private const int targetIsPlayer = 1;
+        private const int targetIsEnemy = 2;
+        private Dictionary<Label, string> itemMap;
 
         public static bool isBattleInputLocked = false;
         public static DateTime battleInputUnlockTime;
@@ -36,11 +36,6 @@ namespace EscapeFromDungeon
         {
             InitializeComponent();
 
-            gameManager = new GameManager();//最初に生成する事!
-            drawInfo = new DrawInfo();
-
-            InitPictureBoxes();
-
             itemMap = new Dictionary<Label, string>
             {
                 { lblUsePosion, Const.potion },
@@ -48,18 +43,41 @@ namespace EscapeFromDungeon
                 { lblUseTorch, Const.torch }
             };
 
-            MsgBox.Location = new Point(10, 440);
+            gameManager = new GameManager();//最初に生成する事!
+            SetupGameManagerEvents();//GameManager生成の後に呼ぶ
+            InitPictureBoxes();
+            drawInfo = new DrawInfo();
 
-            gameManager.CallDrop = DropEnemyAsync;
-            gameManager.Battle.CallDrop = DropEnemyAsync;
-            gameManager.Battle.CallShaker = ShakeAsync;
-            gameManager.Battle.CallShrink = ShrinkEnemyAsync;
-            gameManager.Battle.SetButtonEnabled = SetBattleButtonsEnabled;
-            gameManager.Battle.SetMonsterVisible = SetMonsterVisible;
-            gameManager.Battle.ChangeLblText = ChangeLblText;
-            gameManager.ChangeLblText = ChangeLblText;
-            gameManager.SetMonsterImg = SetMonsterImage;
+            InitDraw();
+            TimerSetUp();
+            FadeSetup();
 
+            DispPoint();
+        }
+
+        public void InitGame()
+        {
+            GameManager.gameMode = GameMode.Title;
+            gameManager.Map.InitMap(Const.mapCsv);
+            gameManager.Init();
+            gameManager.Message.Init();
+            Map.AddViewRadius(Map.maxViewRadius);
+            SetLabelBaseCol();
+            InitDraw();
+
+            DispPoint();
+        }
+
+        private void InitDraw()
+        {
+            ChangeLblText();
+            gameManager.Map.Draw(mapImage);
+            gameManager.Map.DrawBrightness(overlayImg);
+            gameManager.SetMapPos(mapImage, overlayImg, playerImg);
+        }
+
+        private void SetupGameManagerEvents()
+        {
             gameManager.KeyUpPressed = () => lblAttackClickAsync(this, EventArgs.Empty);
             gameManager.KeyLeftPressed = () => lblDefenceClickAsync(this, EventArgs.Empty);
             gameManager.KeyRightPressed = () => lblHealClickAsync(this, EventArgs.Empty);
@@ -69,16 +87,33 @@ namespace EscapeFromDungeon
             gameManager.KeyOPressed = () => UseItem(Const.curePoison);
             gameManager.KeyIPressed = () => UseItem(Const.torch);
 
-            ChangeLblText();
+            gameManager.ChangeLblText = ChangeLblText;
+            gameManager.SetMonsterImg = SetMonsterImage;
+            gameManager.SetLabelBaseCol = SetLabelBaseCol;
 
-            gameManager.Map.Draw(mapImage);
-            gameManager.Map.DrawBrightness(overlayImg);
-            gameManager.SetMapPos(mapImage, overlayImg, playerImg);
+            gameManager.CallDrop = DropEnemyAsync;
+            gameManager.Battle.CallDrop = DropEnemyAsync;
+            gameManager.Battle.CallShaker = ShakeAsync;
+            gameManager.Battle.CallShrink = ShrinkEnemyAsync;
 
-            DispPoint();
+            gameManager.Battle.SetButtonEnabled = SetLabelVisible;
+            gameManager.Battle.SetMonsterVisible = SetMonsterImgVisible;
+            gameManager.Battle.ChangeLblText = ChangeLblText;
+        }
 
-            FadeSetup();
+        private void FadeSetup()
+        {
+            fade = new FadeForm(this, FadeForm.FadeDir.FadeOut); // MainForm を渡す
+            gameManager.StartFade = fade.StartFade;
 
+            // MainForm が移動したら FadeForm も追従
+            this.LocationChanged += (_, __) => fade.FollowOwner();
+            fade.InitStart = () => InitGame();
+            fade.Show();
+        }
+
+        private void TimerSetUp()
+        {
             timer = new System.Windows.Forms.Timer();
             timer.Interval = timerInterval;
             timer.Tick += Timer_Tick;
@@ -98,32 +133,24 @@ namespace EscapeFromDungeon
             VisiblelblUse();
             DispPoint();
         }
-        private void FadeSetup()
-        {
-            fade = new FadeForm(this, FadeForm.FadeDir.FadeOut); // MainForm を渡す
-            gameManager.StartFade = fade.StartFade;
-            // MainForm が移動したら FadeForm も追従
-            this.LocationChanged += (_, __) => fade.FollowOwner();
-            fade.Show();
-        }
+
         public void ChangeLblText()
         {
             if (GameManager.gameMode == GameMode.Battle)
             {
-                lblAttack.Text = "[↑] 攻撃";
-                lblDefence.Text = "[←] 防御";
-                lblHeal.Text = "[→] 回復";
-                lblEscape.Text = "[↓] 逃げる";
+                lblAttack.Text = Const.attackLabelText;
+                lblDefence.Text = Const.defenceLabelText;
+                lblHeal.Text = Const.healLabelText;
+                lblEscape.Text = Const.escapeLabelText;
             }
             else
             {
-                lblAttack.Text = "[↑] 移動";
-                lblDefence.Text = "[←] 移動";
-                lblHeal.Text = "[→] 移動";
-                lblEscape.Text = "[↓] 移動";
+                lblAttack.Text = Const.upMoveText;
+                lblDefence.Text = Const.leftMoveText;
+                lblHeal.Text = Const.rightMoveText;
+                lblEscape.Text = Const.downMoveText;
             }
         }
-
         private void InitPictureBoxes()
         {
             //マップ画像の枠　入れ子の親
@@ -177,6 +204,8 @@ namespace EscapeFromDungeon
             this.Controls.Add(monsterImg);
 
             monsterImg.BringToFront();
+
+            MsgBox.Location = new Point(10, 440);
         }//InitPictureBoxes
 
         public void SetMonsterImage(Image img)
@@ -188,13 +217,13 @@ namespace EscapeFromDungeon
 
         private void MainFormKeyDown(object sender, KeyEventArgs e)
         {
-            SetLblCol(e.KeyCode, btnSelectCol);
+            SetLblCol(e.KeyCode, lblSelectCol);
             gameManager.KeyInput(e.KeyCode, mapImage, overlayImg);
         }
 
         private void FormKeyUp(object sender, KeyEventArgs e)
         {
-            SetLblCol(e.KeyCode, btnBaseCol);
+            SetLblCol(e.KeyCode, lblBaseCol);
         }
 
         private void SetLblCol(Keys keyCode, Color color)
@@ -240,7 +269,7 @@ namespace EscapeFromDungeon
         private async void lblEscapeClickAsync(object sender, EventArgs e)
             => await HandleBattleOrExploreAsync(Const.CommandEsc, Keys.Down);
 
-        //ここは上下左右ラベルのマウスクリック時に呼ばれる
+        //ここは上下左右ラベルのマウスクリック・対応キー入力時に呼ばれる
         private async Task HandleBattleOrExploreAsync(string command, Keys exploreKey)
         {
             if (isBattleInputLocked && DateTime.Now < battleInputUnlockTime) return;
@@ -250,12 +279,12 @@ namespace EscapeFromDungeon
             _isWaiting = true;
             lastInputTime = DateTime.Now;
 
-            SetLblCol(exploreKey, btnSelectCol);
+            SetLblCol(exploreKey, lblSelectCol);
             await Task.Delay(100);
 
             if (GameManager.gameMode == GameMode.Battle)
             {
-                SetBattleButtonsEnabled(false);
+                SetLabelVisible(false);
                 await gameManager.Battle.PlayerTurnAsync(command);
                 await gameManager.BattleCheckAsync();
             }
@@ -264,16 +293,16 @@ namespace EscapeFromDungeon
                 gameManager.KeyInput(exploreKey, mapImage, overlayImg);
             }
 
-            SetLblBaseCol();
+            SetLabelBaseCol();
 
             _isWaiting = false;
         }
 
-        public async Task ShakeAsync(int targetNum, int critical, int durationMs = 500, int intervalMs = 30)
+        public async Task ShakeAsync(int shakeTarget, int critical, int durationMs = 500, int intervalMs = 30)
         {
             PictureBox target = default!;
-            if (targetNum == 1) target = MsgBox;
-            else if (targetNum == 2) target = monsterImg;
+            if (shakeTarget == targetIsPlayer) target = MsgBox;
+            else if (shakeTarget == targetIsEnemy) target = monsterImg;
 
             var originalLocation = target.Location;
             var rand = new Random();
@@ -367,24 +396,24 @@ namespace EscapeFromDungeon
             monsterImg.Location = originalLocation;
         }
 
-        private void SetBattleButtonsEnabled(bool enabled)
+        private void SetLabelVisible(bool isVisible)
         {
-            lblAttack.Visible = enabled;
-            lblDefence.Visible = enabled;
-            lblHeal.Visible = enabled;
-            lblEscape.Visible = enabled;
-            SetLblBaseCol();
+            lblAttack.Visible = isVisible;
+            lblDefence.Visible = isVisible;
+            lblHeal.Visible = isVisible;
+            lblEscape.Visible = isVisible;
+            SetLabelBaseCol();
         }
 
-        private void SetLblBaseCol()
+        private void SetLabelBaseCol()
         {
-            lblDefence.BackColor = btnBaseCol;
-            lblHeal.BackColor = btnBaseCol;
-            lblAttack.BackColor = btnBaseCol;
-            lblEscape.BackColor = btnBaseCol;
+            lblDefence.BackColor = lblBaseCol;
+            lblHeal.BackColor = lblBaseCol;
+            lblAttack.BackColor = lblBaseCol;
+            lblEscape.BackColor = lblBaseCol;
         }
 
-        public void LblHealVisible()
+        public void LabelHealVisible()
         {
             if (GameManager.gameMode != GameMode.Battle)
             {
@@ -393,7 +422,7 @@ namespace EscapeFromDungeon
             }
         }
 
-        private void SetMonsterVisible(bool visible) => monsterImg.Visible = visible;
+        private void SetMonsterImgVisible(bool visible) => monsterImg.Visible = visible;
 
         private void VisiblelblUse()
         {
@@ -415,7 +444,7 @@ namespace EscapeFromDungeon
 
         private async void UseItem(string itemName)
         {
-            SetUseLblCol(itemName, btnSelectCol);
+            SetUseLabelCol(itemName, lblSelectCol);
 
             switch (itemName)
             {
@@ -424,7 +453,7 @@ namespace EscapeFromDungeon
                     {
                         gameManager.Message.Show(Const.hpFullMsg);
                         await Task.Delay(200);
-                        SetUseLblCol(itemName, btnBaseCol);
+                        SetUseLabelCol(itemName, lblBaseCol);
                         return;
                     }
                     gameManager.Player.Heal(30);
@@ -435,17 +464,17 @@ namespace EscapeFromDungeon
                     break;
 
                 case Const.torch:
-                    Map.viewRadius = 12;
+                    Map.AddViewRadius(4);
                     break;
             }
 
             gameManager.Message.Show($"{itemName}を使った！");
             gameManager.Player.UseItem(itemName);
             await Task.Delay(200);
-            SetUseLblCol(itemName, btnBaseCol);
+            SetUseLabelCol(itemName, lblBaseCol);
         }
 
-        private void SetUseLblCol(string item, Color color)
+        private void SetUseLabelCol(string item, Color color)
         {
             switch (item)
             {

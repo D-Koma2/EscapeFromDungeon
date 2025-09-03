@@ -37,25 +37,27 @@
             // 
             StartBtn.Anchor = AnchorStyles.None;
             StartBtn.AutoSize = true;
-            StartBtn.Location = new Point(340, 295);
+            StartBtn.Location = new Point(340, 316);
             StartBtn.Name = "StartBtn";
             StartBtn.Size = new Size(95, 30);
             StartBtn.TabIndex = 0;
+            StartBtn.TabStop = false;
             StartBtn.Text = "ゲームスタート";
             StartBtn.UseVisualStyleBackColor = true;
-            StartBtn.Click += button1_Click;
+            StartBtn.Click += StartButtonClick;
             // 
             // ExitBtn
             // 
             ExitBtn.Anchor = AnchorStyles.None;
             ExitBtn.AutoSize = true;
-            ExitBtn.Location = new Point(340, 352);
+            ExitBtn.Location = new Point(340, 363);
             ExitBtn.Name = "ExitBtn";
             ExitBtn.Size = new Size(95, 30);
             ExitBtn.TabIndex = 1;
+            ExitBtn.TabStop = false;
             ExitBtn.Text = "終了する";
             ExitBtn.UseVisualStyleBackColor = true;
-            ExitBtn.Click += button2_Click;
+            ExitBtn.Click += ExitButtonClick;
             // 
             // TitleLbl
             // 
@@ -81,6 +83,7 @@
             Controls.Add(StartBtn);
             DoubleBuffered = true;
             FormBorderStyle = FormBorderStyle.None;
+            KeyPreview = true;
             MaximizeBox = false;
             MinimizeBox = false;
             Name = "FadeForm";
@@ -89,6 +92,7 @@
             StartPosition = FormStartPosition.Manual;
             Text = "FadeForm";
             TopMost = true;
+            Shown += FadeForm_Shown;
             ResumeLayout(false);
             PerformLayout();
 

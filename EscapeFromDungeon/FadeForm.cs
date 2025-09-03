@@ -1,16 +1,19 @@
 ﻿using EscapeFromDungeon;
 using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
 
 namespace WindowsFormsAppTest2
 {
-
     public partial class FadeForm : Form
     {
         private System.Windows.Forms.Timer fadeTimer;
+        private const int timerInterval = 16;
         public enum FadeDir { FadeIn, FadeOut }
         private FadeDir fadeDirection;
+
+        public Action? InitStart;
 
         public FadeForm(Form mainForm, FadeDir fadeDirection)
         {
@@ -29,7 +32,10 @@ namespace WindowsFormsAppTest2
             this.Owner = mainForm;
             FollowOwner();// 手動で位置指定
 
-            fadeTimer = new System.Windows.Forms.Timer { Interval = 16 };
+            StartBtn.Text = Const.startMenu;
+            ExitBtn.Text = Const.exitMenu;
+
+            fadeTimer = new System.Windows.Forms.Timer { Interval = timerInterval };
             fadeTimer.Tick += FadeTimer_Tick;
         }
 
@@ -42,7 +48,7 @@ namespace WindowsFormsAppTest2
             this.Show();
         }
 
-        private void FadeTimer_Tick(object sender, EventArgs e)
+        private void FadeTimer_Tick(object? sender, EventArgs e)
         {
             if (fadeDirection == FadeDir.FadeOut)
             {
@@ -61,7 +67,7 @@ namespace WindowsFormsAppTest2
             }
             else
             {
-                if (this.Opacity < 1.0) { this.Opacity += 0.02; }
+                if (this.Opacity < 1.0) { this.Opacity += 0.01; }
                 else
                 {
                     fadeTimer.Stop();
@@ -71,12 +77,27 @@ namespace WindowsFormsAppTest2
                         GameManager.gameMode = GameMode.Explore;
                         this.Hide();
                     }
-                    else if (GameManager.gameMode == GameMode.Gameover)
+                    else if (GameManager.gameMode == GameMode.Gameover || GameManager.gameMode == GameMode.GameClear)
                     {
-                        TitleLbl.Text = "Game Over";
+                        if (GameManager.gameMode == GameMode.Gameover)
+                        {
+                            TitleLbl.Text = Const.gameOver;
+                        }
+                        else
+                        {
+                            TitleLbl.Text = Const.gameClear;
+                        }
+
+                        this.KeyPreview = true;
+                        StartBtn.Text = Const.retry;
                         TitleLbl.Visible = true;
-                        //StartBtn.Visible = true;
+                        StartBtn.Visible = true;
                         ExitBtn.Visible = true;
+                        this.Activate();
+                        this.KeyPreview = true;
+                        this.Focus();
+                        StartBtn.Focus();
+                        GameManager.gameMode = GameMode.Reset;
                     }
                 }
             }
@@ -97,16 +118,27 @@ namespace WindowsFormsAppTest2
             }
         }
 
-        private void button2_Click(object sender, EventArgs e)
+        private void StartButtonClick(object sender, EventArgs e)
+        {
+            StartBtn.Visible = false;
+            ExitBtn.Visible = false;
+            TitleLbl.Visible = false;
+            InitStart?.Invoke();
+            StartFade(FadeDir.FadeOut);
+        }
+
+        private void ExitButtonClick(object sender, EventArgs e)
         {
             Application.Exit();
         }
 
-        private void button1_Click(object sender, EventArgs e)
+
+        private void FadeForm_Shown(object sender, EventArgs e)
         {
-            StartBtn.Visible = false;
-            ExitBtn.Visible = false;
-            StartFade(FadeDir.FadeOut);
+            this.Activate();
+            this.KeyPreview = true;
+            this.Focus();
+            StartBtn.Focus();
         }
     }
 }

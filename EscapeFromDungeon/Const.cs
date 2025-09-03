@@ -8,9 +8,32 @@ namespace EscapeFromDungeon
 {
     internal static class Const
     {
+        public static readonly string mapCsv = "map.csv";
+        public static readonly string eventCsv = "event.csv";
+        public static readonly string monsterCsv = "monster.csv";
+        public static readonly string itemCsv = "item.csv";
+
         public static readonly string[] separator = new[] { "\r\n", "\r", "\n" };
         public static readonly string title = "Escape From Dungeon";
         public static readonly string gameOver = "Game Over";
+        public static readonly string retry = "リトライ？";
+        public static readonly string gameClear = "Thank You For Playing!!";
+
+        public static readonly string commndMsg = "コマンド？";
+        public static readonly string hpFullMsg = "HPは満タンだ！";
+
+        public static readonly string attackLabelText = "[↑] 攻撃";
+        public static readonly string defenceLabelText = "[←] 防御";
+        public static readonly string healLabelText = "[→] 回復";
+        public static readonly string escapeLabelText = "[↓] 逃げる";
+        public static readonly string upMoveText = "[↑] 移動";
+        public static readonly string leftMoveText = "[←] 移動";
+        public static readonly string rightMoveText = "[→] 移動";
+        public static readonly string downMoveText = "[↓] 移動";
+
+        public static readonly string startMenu = "スタート";
+        public static readonly string retryMenu = "リトライ？";
+        public static readonly string exitMenu = "終了する";
 
         public const string potion = "ポーション";
         public const string curePoison = "毒消し草";
@@ -30,9 +53,6 @@ namespace EscapeFromDungeon
         public const string thunderWepon = "雷の剣";
         public const string holyWepon = "聖なる剣";
         public const string hitWepon = "おおきづち";
-
-        public const string commndMsg = "コマンド？";
-        public const string hpFullMsg = "HPは満タンだ！";
 
         public const string CommandAtk = "Attack";
         public const string CommandDef = "Defence";

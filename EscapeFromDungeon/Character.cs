@@ -134,6 +134,17 @@ namespace EscapeFromDungeon
                     break;
             }
         }
+
+        public void Init(int hp, int limit)
+        {
+            Hp = MaxHp;
+            Hp = hp;
+            Limit = limit;
+            HealStatus();
+            Inventry.Clear();
+            Dir = Direction.Up;
+            SetDirectionImage(Dir);
+        }
     }
 
     class Monster : Character

@@ -28,10 +28,10 @@ namespace EscapeFromDungeon
         {
             this.Player = player;
             this.message = message;
-            Monster = new Monster("仮モンスター", 1, 1, Weak.None, "Enemy01");
+            Monster = new Monster("仮スライム君", 1, 1, Weak.None, "Enemy01");
         }
 
-        public void RestBattleTurn() => _battleTurn = 0;
+        public void InitBattleTurn() => _battleTurn = 0;
 
         public async Task BattleLoopAsync()
         {
@@ -61,7 +61,7 @@ namespace EscapeFromDungeon
                 return;
             }
 
-            // 戦闘が続いているときだけボタンを表示
+            // 戦闘が続いているときはボタンを表示
             if (GameManager.gameMode == GameMode.Battle)
             {
                 await message.ShowAsync(Const.commndMsg);
@@ -78,7 +78,7 @@ namespace EscapeFromDungeon
             {
                 case Const.CommandAtk:
 
-                    //敵の弱点のアイテムを持っていればダメージアップの処理
+                    //敵の弱点アイテムを持っていればダメージアップの処理
                     if (Monster.Weak != Weak.None)
                     {
                         string itemName = Monster.Weak switch
@@ -131,8 +131,14 @@ namespace EscapeFromDungeon
             }
 
             await Task.Delay(500);
+
             if (Monster.Hp > 0) await EnemyTurnAsync();
-            else await BattleLoopAsync();
+            else
+            {
+                _battleTurn++;
+                await BattleLoopAsync();
+            }
+
         }//PlayerTurn
 
         private async Task EnemyTurnAsync()
@@ -210,7 +216,14 @@ namespace EscapeFromDungeon
             }
 
             await Task.Delay(500);
+            await IsStatusPoison();
+
             _battleTurn++;
+            await BattleLoopAsync();
+        }//EnemyTurn
+
+        private async Task IsStatusPoison()
+        {
             if (Player.Status == Status.Poison)
             {
                 if (Player.GetItemCount(Const.curePoison) > 0)
@@ -227,8 +240,7 @@ namespace EscapeFromDungeon
                 }
                 await Task.Delay(500);
             }
-            await BattleLoopAsync();
-        }//EnemyTurn
+        }
 
     }//class Battle
 }//namespace EscapeFromDungeon

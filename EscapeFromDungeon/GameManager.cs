@@ -1,4 +1,5 @@
 ﻿using EscapeFromDungeon.Properties;
+using Microsoft.VisualBasic;
 using System;
 using System.Drawing.Imaging;
 using System.Reflection;
@@ -15,7 +16,9 @@ namespace EscapeFromDungeon
         Battle,
         Escaped,
         BattleEnd,
-        Gameover
+        Gameover,
+        GameClear,
+        Reset
     }
 
     internal class GameManager
@@ -24,11 +27,6 @@ namespace EscapeFromDungeon
         // true: 視界制限あり、false: 全体表示デバッグ用
         public static bool IsVisionEnabled { get; set; } = true;
 
-        private const string mapCsv = "map.csv";
-        private const string eventCsv = "event.csv";
-        private const string monsterCsv = "monster.csv";
-        private const string itemCsv = "item.csv";
-
         private const int ViewShrinkInterval = 33;
         private const int DamageFloorValue = 3;
         private const int PoisonDamageValue = 1;
@@ -36,13 +34,14 @@ namespace EscapeFromDungeon
         private const string _playerName = "あなた";
         private const int _playerHp = 100;
         private const int _playerAttack = 10;
-        private const int _limitMax = 999;
+        private const int _limitMax = 555;
 
         public Player Player { get; private set; }
         public Map Map { get; private set; }
         public Message Message { get; private set; }
         public Battle Battle { get; private set; }
 
+        public Action? SetLabelBaseCol;
         public Action? ChangeLblText;
         public Action? KeyUpPressed;
         public Action? KeyDownPressed;
@@ -65,11 +64,11 @@ namespace EscapeFromDungeon
 
         public GameManager()
         {
-            Map = new Map(mapCsv);//最初に生成する事!
+            Map = new Map(Const.mapCsv);//最初に生成する事!
 
-            _eventData = new EventData(eventCsv);
-            _monsterData = new MonsterData(monsterCsv);
-            _itemData = new ItemData(itemCsv);
+            _eventData = new EventData(Const.eventCsv);
+            _monsterData = new MonsterData(Const.monsterCsv);
+            _itemData = new ItemData(Const.itemCsv);
 
             Player = new Player(_playerName, _playerHp, _playerAttack, _limitMax);
             Message = new Message();
@@ -129,6 +128,12 @@ namespace EscapeFromDungeon
             }
         }
 
+        public void Init()
+        {
+            Player.Init(_playerHp,_limitMax);
+            eventPos = Point.Empty;
+        }
+
         public async Task BattleCheckAsync()
         {
             if (gameMode == GameMode.Escaped)
@@ -148,6 +153,7 @@ namespace EscapeFromDungeon
                     Map.DeleteEvent(eventPos.X, eventPos.Y);
                     //マップ上の敵シンボルを消す
                     Map.DelEnemySimbolDraw(eventPos.X, eventPos.Y);
+                    eventPos = Point.Empty;
                     gameMode = GameMode.Explore;
                     ChangeLblText?.Invoke();
                 }
@@ -245,9 +251,14 @@ namespace EscapeFromDungeon
         private void TurnCheck()
         {
             Player.Limit--;
-            if (Player.Limit <= 0 || Player.Hp <= 0) Gameover();
+
+            if (Player.Limit <= 0 || Player.Hp <= 0)
+            {
+                gameMode = GameMode.Gameover; Gameover();
+            }
+
             var invertCount = _limitMax - Player.Limit;
-            if (invertCount % ViewShrinkInterval == 0) Map.viewRadius--;
+            if (invertCount % ViewShrinkInterval == 0) Map.AddViewRadius(-1);
         }
 
         private Event CheckEvent(int x, int y)
@@ -280,15 +291,16 @@ namespace EscapeFromDungeon
                 case EventType.Encount:
                     EncounterEventAsync(evt);
                     break;
+                case EventType.GameClear:
+                    gameMode = GameMode.GameClear;
+                    Gameover();
+                    break;
                 default:
                     break;
             }
 
-            if (evt.EventType == EventType.Hint || evt.EventType == EventType.Encount)
-            {
-                // ヒント以外は一度きり,バトルは逃げた場合残すのでここでは消去しない
-            }
-            else
+            // ヒント以外は一度きり,バトルは逃げた場合残すのでここでは消去しない
+            if (evt.EventType != EventType.Hint && evt.EventType != EventType.Encount)
             {
                 Map.DeleteEvent(x, y); // イベントを消去
             }
@@ -308,9 +320,9 @@ namespace EscapeFromDungeon
 
             //モンスターイメージを変更
             Image? img = Resources.ResourceManager.GetObject(mon.ImageName) as Image;
-            if(img != null) SetMonsterImg?.Invoke(img);
+            if (img != null) SetMonsterImg?.Invoke(img);
 
-            Battle.RestBattleTurn();
+            Battle.InitBattleTurn();
 
             if (CallDrop != null) await CallDrop.Invoke(600, 10, 4, true);
             ChangeLblText?.Invoke();
@@ -377,7 +389,7 @@ namespace EscapeFromDungeon
         }
         private void Gameover()
         {
-            gameMode = GameMode.Gameover;
+            SetLabelBaseCol?.Invoke();
             StartFade(FadeForm.FadeDir.FadeIn);
         }
 

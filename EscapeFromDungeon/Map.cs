@@ -21,7 +21,9 @@ namespace EscapeFromDungeon
         public static Point playerPos = new Point(6, 6); // マップ上の座標(map.csvの"S"で変更)
         public static Point playerDispPos = new Point(6, 6); //プレイヤー表示座標(map中央固定)
 
-        public static int viewRadius = 12;// 歩数やアイテムで変化させる
+        private static int viewRadius = 10;// 歩数やアイテムで変化させる
+        public static int maxViewRadius = 10;
+        private static int minViewRadius = 1;
 
         public const int tileSize = 32;
         public int MapX { get; set; }
@@ -36,7 +38,14 @@ namespace EscapeFromDungeon
         public Bitmap MapCanvas { get; private set; }
         public Bitmap overrayCanvas { get; private set; }
 
+#pragma warning disable CS8618 
         public Map(string path)
+#pragma warning restore CS8618
+        {
+            InitMap(path);
+        }
+
+        public void InitMap(string path)
         {
             var lines = File.ReadAllLines(path);
             //var lines = Resources.map.Split(Const.separator, StringSplitOptions.None);
@@ -94,8 +103,14 @@ namespace EscapeFromDungeon
                     }
                 }
             }
-        }//LoadFromCsv
+        }
 
+        public static void AddViewRadius(int radius)
+        {
+            viewRadius += radius;
+            if (viewRadius > maxViewRadius) viewRadius = maxViewRadius;
+            if (viewRadius < minViewRadius) viewRadius = minViewRadius;
+        }
         public void Draw(PictureBox mapImage)
         {
             using (Graphics g = Graphics.FromImage(MapCanvas))
