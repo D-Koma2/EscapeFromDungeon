@@ -230,7 +230,6 @@ namespace EscapeFromDungeon
             // ダメージ床
             if (Map.WalkMap[x, y] == 3)
             {
-                //ここでformのカラーを変える処理
                 Player.TakeDamage(DamageFloorValue);
             }
             if (Player.Status == Status.Poison)
@@ -316,7 +315,7 @@ namespace EscapeFromDungeon
         private async void EncounterEventAsync(Event evt)
         {
             Form1.isBattleInputLocked = true;
-            Form1.battleInputUnlockTime = DateTime.Now.AddSeconds(1.5); // 1.5秒間ロック
+            Form1.battleInputUnlockTime = DateTime.Now.AddSeconds(2.5); // 指定秒間キー入力をロック
 
             gameMode = GameMode.Battle;
             var mon = _monsterData.Dict[evt.Word];
@@ -332,9 +331,10 @@ namespace EscapeFromDungeon
             ChangeLblText?.Invoke();
 
             await Message.ShowAsync($"{mon.Name}が現れた！");
+            await Task.Delay(500);
             await Message.ShowAsync(Const.commndMsg);
-            Battle.SetButtonEnabled?.Invoke(true);
-            await Task.Delay(200);
+            await Task.Delay(400);
+            Battle.SetLabelVisible?.Invoke(true);
         }
 
         private void ItemGetEvent(Event evt)

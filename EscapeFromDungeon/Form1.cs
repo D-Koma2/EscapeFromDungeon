@@ -99,11 +99,11 @@ namespace EscapeFromDungeon
             gameManager.Battle.CallShaker = ShakeAsync;
             gameManager.Battle.CallShrink = ShrinkEnemyAsync;
 
-            gameManager.Battle.SetButtonEnabled = SetLabelVisible;
+            gameManager.Battle.SetLabelVisible = SetLabelVisible;
             gameManager.Battle.SetMonsterVisible = SetMonsterImgVisible;
             gameManager.Battle.ChangeLblText = ChangeLblText;
 
-            gameManager.Player.Flush = ColorChangeByDamage;
+            gameManager.Player.FlashByDamage = ColorChangeByDamage;
         }
 
         private void FadeSetup()
@@ -265,7 +265,7 @@ namespace EscapeFromDungeon
 
         private void LimitBoxPaint(object sender, PaintEventArgs e)
         {
-            drawInfo.DrawLimitBar(e.Graphics, gameManager.Player);
+            drawInfo.DrawLimitBar(e.Graphics, gameManager.Player, gameManager.limitMax);
         }
 
         private async void lblAttackClickAsync(object sender, EventArgs e)

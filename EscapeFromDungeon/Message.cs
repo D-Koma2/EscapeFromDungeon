@@ -83,6 +83,8 @@ namespace EscapeFromDungeon
                 isMessageShowing = true;
                 isMessageCompleted = false;
                 isMessageTicking = true;
+
+                await Task.Delay(500);
             }
             else
             {
@@ -92,7 +94,7 @@ namespace EscapeFromDungeon
                 isMessageTicking = false;
                 msgTimer.Stop();
 
-                await Task.Delay(100);
+                await Task.Delay(500);
             }
         }
 
@@ -133,13 +135,6 @@ namespace EscapeFromDungeon
                     isMessageCompleted = true;
                 }
                 else ShowNextAsync();
-            }
-
-            if (GameManager.gameMode == GameMode.Battle)
-            {
-                currentMessage = fullMessage;
-                messageIndex = fullMessage.Length;
-                isMessageCompleted = true;
             }
         }
 

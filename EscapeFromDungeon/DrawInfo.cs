@@ -77,9 +77,9 @@ namespace EscapeFromDungeon
 
         }
 
-        public void DrawLimitBar(Graphics g, Player player)
+        public void DrawLimitBar(Graphics g, Player player, int limitMax)
         {
-            float limitRatio = (float)player.Limit / 999; // Limit割合
+            float limitRatio = (float)player.Limit / limitMax; // Limit割合
 
             // 背景（最大Limit）
             g.FillRectangle(Brushes.Red, limitBarX, limitBarY, limitBarWidth, limitBarHeight);

@@ -37,6 +37,7 @@
             // 
             StartBtn.Anchor = AnchorStyles.None;
             StartBtn.AutoSize = true;
+            StartBtn.Cursor = Cursors.Hand;
             StartBtn.Location = new Point(340, 316);
             StartBtn.Name = "StartBtn";
             StartBtn.Size = new Size(95, 30);
@@ -50,6 +51,7 @@
             // 
             ExitBtn.Anchor = AnchorStyles.None;
             ExitBtn.AutoSize = true;
+            ExitBtn.Cursor = Cursors.Hand;
             ExitBtn.Location = new Point(340, 363);
             ExitBtn.Name = "ExitBtn";
             ExitBtn.Size = new Size(95, 30);
