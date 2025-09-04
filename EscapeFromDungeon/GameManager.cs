@@ -229,6 +229,7 @@ namespace EscapeFromDungeon
             // ダメージ床
             if (Map.WalkMap[x, y] == 3)
             {
+                //ここでformのカラーを変える処理
                 Player.TakeDamage(DamageFloorValue);
             }
             if (Player.Status == Status.Poison)

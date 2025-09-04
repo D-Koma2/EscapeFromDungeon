@@ -492,6 +492,26 @@ namespace EscapeFromDungeon
             }
         }
 
+        public async void ColorChangeByDamage()
+        {
+            int red = 0;
+            Color color = Color.FromArgb(255, red, 0, 0);
+
+            for (int i = 0; i < 255; i+=5)
+            {
+                red++;
+                this.BackColor = Color.FromArgb(255, red, 0, 0);
+            }
+
+            await Task.Delay(100);
+
+            for (int i = 255; i > 0; i-=5)
+            {
+                red--;
+                this.BackColor = Color.FromArgb(255, red, 0, 0);
+            }
+        }
+
         // デバッグ用
         private void DispPoint()
         {
