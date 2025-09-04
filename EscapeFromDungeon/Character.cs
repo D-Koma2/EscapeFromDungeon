@@ -45,6 +45,8 @@ namespace EscapeFromDungeon
         public int Attack { get; private set; }
         public Status Status { get; private set; } = Status.Normal;
 
+        public Action? Flush;
+
         public Character(string name, int hp, int attack)
         {
             Name = name;
@@ -57,6 +59,7 @@ namespace EscapeFromDungeon
         {
             Hp -= damage;
             if (Hp < 0) Hp = 0;
+            Flush?.Invoke();
         }
 
         public void HealStatus() => Status = Status.Normal;

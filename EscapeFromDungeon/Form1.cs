@@ -10,6 +10,9 @@ namespace EscapeFromDungeon
 {
     public partial class Form1 : Form
     {
+        public static readonly int tilesOfMapWidth = 13;// 必ず奇数(Playerの表示位置が中心でなくなる)
+        public static readonly int tilesOfMapHeight = 13;// 必ず奇数(Playerの表示位置が中心でなくなる)
+
         private readonly Color lblBaseCol = Color.DarkGray;
         private readonly Color lblSelectCol = Color.DarkOrange;
 
@@ -99,6 +102,8 @@ namespace EscapeFromDungeon
             gameManager.Battle.SetButtonEnabled = SetLabelVisible;
             gameManager.Battle.SetMonsterVisible = SetMonsterImgVisible;
             gameManager.Battle.ChangeLblText = ChangeLblText;
+
+            gameManager.Player.Flush = ColorChangeByDamage;
         }
 
         private void FadeSetup()
@@ -131,6 +136,7 @@ namespace EscapeFromDungeon
             StateBox.Invalidate();
             MsgBox.Invalidate();
             VisiblelblUse();
+            LimitBox.Invalidate();
             //DispPoint();
         }
 
@@ -154,7 +160,7 @@ namespace EscapeFromDungeon
         private void InitPictureBoxes()
         {
             //マップ画像の枠　入れ子の親
-            mapDrawBox.Size = new Size(Map.tileSize * 13, Map.tileSize * 13);
+            mapDrawBox.Size = new Size(Map.tileSize * tilesOfMapWidth, Map.tileSize * tilesOfMapHeight);
 
             // マップ画像　入れ子の子
             mapImage = new PictureBox
@@ -255,6 +261,11 @@ namespace EscapeFromDungeon
         private void MsgBoxPaint(object sender, PaintEventArgs e)
         {
             gameManager.Message.Draw(e.Graphics);
+        }
+
+        private void LimitBoxPaint(object sender, PaintEventArgs e)
+        {
+            drawInfo.DrawLimitBar(e.Graphics, gameManager.Player);
         }
 
         private async void lblAttackClickAsync(object sender, EventArgs e)
@@ -497,7 +508,7 @@ namespace EscapeFromDungeon
             int red = 0;
             Color color = Color.FromArgb(255, red, 0, 0);
 
-            for (int i = 0; i < 255; i+=5)
+            for (int i = 0; i < 255; i += 5)
             {
                 red++;
                 this.BackColor = Color.FromArgb(255, red, 0, 0);
@@ -505,7 +516,7 @@ namespace EscapeFromDungeon
 
             await Task.Delay(100);
 
-            for (int i = 255; i > 0; i-=5)
+            for (int i = 255; i > 0; i -= 5)
             {
                 red--;
                 this.BackColor = Color.FromArgb(255, red, 0, 0);

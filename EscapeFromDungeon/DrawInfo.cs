@@ -14,6 +14,10 @@ namespace EscapeFromDungeon
         private const int barHeight = 20;
         private const int barX = 10;
         private const int barY = 10;
+        private const int limitBarWidth = 36;
+        private const int limitBarHeight = 11 * Map.tileSize + 10;
+        private const int limitBarX = 5;
+        private const int limitBarY = 50;
 
         public void DrawStatus(Graphics g, Player player)
         {
@@ -37,9 +41,7 @@ namespace EscapeFromDungeon
 
             // 数値表示
             string hpText = $"HP: {player.Hp} / {player.MaxHp}";
-            string state = $"状態： {player.Status.ToString()}";
-            string limitText = $"リミット: {player.Limit}";
-            //string inventoryTitle = "所持品:";
+            string inventoryTitle = "所持品:";
             string potionCount = Const.potion + " x " + player.Inventry.Count(item => item.Name == Const.potion).ToString();
             string curePoisonCount = Const.curePoison + " x " + player.Inventry.Count(item => item.Name == Const.curePoison).ToString();
             string torchCount = Const.torch + " x " + player.Inventry.Count(item => item.Name == Const.torch).ToString();
@@ -47,9 +49,16 @@ namespace EscapeFromDungeon
             using (Font font = new("Arial", 10))
             {
                 g.DrawString(hpText, font, Brushes.White, barX + 10, barY + 2);
-                g.DrawString(state, font, Brushes.White, barX + 30, barY + 26);
-                g.DrawString(limitText, font, Brushes.White, barX + 30, barY + 48);
-                //g.DrawString(inventoryTitle, font, Brushes.White, barX + 10, barY + 136);
+                if (player.Status == Status.Poison)
+                {
+                    g.DrawString("状態：毒", font, Brushes.Yellow, barX + 30, barY + 26);
+                }
+                else
+                {
+                    g.DrawString("状態：通常", font, Brushes.White, barX + 30, barY + 26);
+                }
+
+                g.DrawString(inventoryTitle, font, Brushes.White, barX + 30, barY + 48);
 
                 g.DrawString(potionCount, font, Brushes.White, barX + 80, barY + 74);
                 g.DrawString(curePoisonCount, font, Brushes.White, barX + 80, barY + 104);
@@ -66,6 +75,27 @@ namespace EscapeFromDungeon
                 }
             }
 
+        }
+
+        public void DrawLimitBar(Graphics g, Player player)
+        {
+            float limitRatio = (float)player.Limit / 999; // Limit割合
+
+            // 背景（最大Limit）
+            g.FillRectangle(Brushes.Red, limitBarX, limitBarY, limitBarWidth, limitBarHeight);
+
+            // 現在のLimitバー
+            int currentHight = (int)(limitRatio * limitBarHeight);
+            g.FillRectangle(Brushes.Wheat, limitBarX, limitBarY, limitBarWidth, currentHight);
+
+            // 枠線
+            g.DrawRectangle(Pens.White, limitBarX, limitBarY, limitBarWidth, limitBarHeight);
+
+            using (Font font = new("Arial", 10))
+            {
+                g.DrawString(player.Limit.ToString(), font, Brushes.Wheat, 6, 20);
+                g.DrawString("Limit", font, Brushes.Red, 2, 2);
+            }
         }
     }
 }

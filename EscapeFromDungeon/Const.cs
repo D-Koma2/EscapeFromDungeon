@@ -14,10 +14,10 @@ namespace EscapeFromDungeon
         public static readonly string itemCsv = "item.csv";
 
         public static readonly string[] separator = new[] { "\r\n", "\r", "\n" };
-        public static readonly string title = "Escape From Dungeon";
+        public static readonly string title = "Escape\nFrom\nDungeon";
         public static readonly string gameOver = "Game Over";
         public static readonly string retry = "リトライ？";
-        public static readonly string gameClear = "Thank You For Playing!!";
+        public static readonly string gameClear = "Thank You\nFor\nPlaying!!";
 
         public static readonly string commndMsg = "コマンド？";
         public static readonly string hpFullMsg = "HPは満タンだ！";

@@ -166,8 +166,8 @@ namespace EscapeFromDungeon
                     if (_battleTurn % 5 == 4)
                     {
                         damage *= 3;
-                        Player.TakeDamage(damage);
                         await message.ShowAsync($"{Monster.Name}の強力な攻撃！{Player.Name}は {damage} 大ダメージ！");
+                        Player.TakeDamage(damage);
                         if (CallShaker != null) await CallShaker.Invoke(1, 1, 400, 30);
                     }
                     else if (_battleTurn == 3)
@@ -176,8 +176,8 @@ namespace EscapeFromDungeon
                     }
                     else
                     {
-                        Player.TakeDamage(damage);
                         await message.ShowAsync($"{Monster.Name}の攻撃！{Player.Name}は {damage} ダメージ！");
+                        Player.TakeDamage(damage);
                         if (CallShaker != null) await CallShaker.Invoke(1, 1, 400, 30);
                     }
                 }
@@ -186,8 +186,8 @@ namespace EscapeFromDungeon
                     if (_battleTurn % 4 == 3)
                     {
                         damage *= 2;
-                        Player.TakeDamage(damage);
                         await message.ShowAsync($"{Monster.Name}の強力な攻撃！{Player.Name}は {damage} 大ダメージ！");
+                        Player.TakeDamage(damage);
                         if (CallShaker != null) await CallShaker.Invoke(1, 2, 400, 30);
                     }
                     else if (_battleTurn % 4 == 2)
@@ -196,8 +196,8 @@ namespace EscapeFromDungeon
                     }
                     else
                     {
-                        Player.TakeDamage(damage);
                         await message.ShowAsync($"{Monster.Name}の攻撃！{Player.Name}は {damage} ダメージ！");
+                        Player.TakeDamage(damage);
                         if (CallShaker != null) await CallShaker.Invoke(1, 1, 400, 30);
                     }
                 }
@@ -206,21 +206,21 @@ namespace EscapeFromDungeon
                     if (_battleTurn % 4 == 3)
                     {
                         damage *= 2;
-                        Player.TakeDamage(damage);
                         await message.ShowAsync($"{Monster.Name}の強力な攻撃！{Player.Name}は {damage} 大ダメージ！");
+                        Player.TakeDamage(damage);
                         if (CallShaker != null) await CallShaker.Invoke(1, 2, 400, 30);
                     }
                     else
                     {
-                        Player.TakeDamage(damage);
                         await message.ShowAsync($"{Monster.Name}の攻撃！{Player.Name}は {damage} ダメージ！");
+                        Player.TakeDamage(damage);
                         if (CallShaker != null) await CallShaker.Invoke(1, 1, 400, 30);
                     }
                 }
                 else
                 {
-                    Player.TakeDamage(damage);
                     await message.ShowAsync($"{Monster.Name}の攻撃！{Player.Name}は {damage} ダメージ！");
+                    Player.TakeDamage(damage);
                     if (CallShaker != null) await CallShaker.Invoke(1, 1, 400, 30);
                 }
             }

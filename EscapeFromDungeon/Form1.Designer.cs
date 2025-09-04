@@ -39,9 +39,11 @@
             lblUsePosion = new Label();
             lblUseCurePoison = new Label();
             lblUseTorch = new Label();
+            LimitBox = new PictureBox();
             ((System.ComponentModel.ISupportInitialize)mapDrawBox).BeginInit();
             ((System.ComponentModel.ISupportInitialize)StateBox).BeginInit();
             ((System.ComponentModel.ISupportInitialize)MsgBox).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)LimitBox).BeginInit();
             SuspendLayout();
             // 
             // mapDrawBox
@@ -50,7 +52,7 @@
             mapDrawBox.BackColor = Color.Black;
             mapDrawBox.BackgroundImageLayout = ImageLayout.None;
             mapDrawBox.BorderStyle = BorderStyle.FixedSingle;
-            mapDrawBox.Location = new Point(30, 12);
+            mapDrawBox.Location = new Point(12, 12);
             mapDrawBox.Name = "mapDrawBox";
             mapDrawBox.Size = new Size(416, 416);
             mapDrawBox.TabIndex = 0;
@@ -60,9 +62,9 @@
             // 
             StateBox.BackColor = Color.FromArgb(0, 0, 64);
             StateBox.BorderStyle = BorderStyle.FixedSingle;
-            StateBox.Location = new Point(452, 12);
+            StateBox.Location = new Point(488, 12);
             StateBox.Name = "StateBox";
-            StateBox.Size = new Size(301, 416);
+            StateBox.Size = new Size(282, 416);
             StateBox.TabIndex = 1;
             StateBox.TabStop = false;
             StateBox.Paint += StateBoxPaint;
@@ -86,7 +88,7 @@
             MsgBox.BorderStyle = BorderStyle.FixedSingle;
             MsgBox.Location = new Point(11, 439);
             MsgBox.Name = "MsgBox";
-            MsgBox.Size = new Size(498, 102);
+            MsgBox.Size = new Size(506, 102);
             MsgBox.TabIndex = 3;
             MsgBox.TabStop = false;
             MsgBox.Paint += MsgBoxPaint;
@@ -97,7 +99,7 @@
             lblAttack.BackColor = Color.DarkGray;
             lblAttack.BorderStyle = BorderStyle.FixedSingle;
             lblAttack.Cursor = Cursors.Hand;
-            lblAttack.Location = new Point(605, 445);
+            lblAttack.Location = new Point(609, 445);
             lblAttack.Name = "lblAttack";
             lblAttack.Size = new Size(80, 40);
             lblAttack.TabIndex = 4;
@@ -125,7 +127,7 @@
             lblDefence.BackColor = Color.DarkGray;
             lblDefence.BorderStyle = BorderStyle.FixedSingle;
             lblDefence.Cursor = Cursors.Hand;
-            lblDefence.Location = new Point(515, 469);
+            lblDefence.Location = new Point(523, 469);
             lblDefence.Name = "lblDefence";
             lblDefence.Size = new Size(80, 40);
             lblDefence.TabIndex = 6;
@@ -139,7 +141,7 @@
             lblEscape.BackColor = Color.DarkGray;
             lblEscape.BorderStyle = BorderStyle.FixedSingle;
             lblEscape.Cursor = Cursors.Hand;
-            lblEscape.Location = new Point(605, 496);
+            lblEscape.Location = new Point(609, 496);
             lblEscape.Name = "lblEscape";
             lblEscape.Size = new Size(80, 40);
             lblEscape.TabIndex = 7;
@@ -152,7 +154,7 @@
             lblUsePosion.Anchor = AnchorStyles.None;
             lblUsePosion.BackColor = Color.DarkGray;
             lblUsePosion.Cursor = Cursors.Hand;
-            lblUsePosion.Location = new Point(475, 95);
+            lblUsePosion.Location = new Point(497, 95);
             lblUsePosion.Name = "lblUsePosion";
             lblUsePosion.Size = new Size(62, 21);
             lblUsePosion.TabIndex = 8;
@@ -165,7 +167,7 @@
             lblUseCurePoison.Anchor = AnchorStyles.None;
             lblUseCurePoison.BackColor = Color.DarkGray;
             lblUseCurePoison.Cursor = Cursors.Hand;
-            lblUseCurePoison.Location = new Point(475, 125);
+            lblUseCurePoison.Location = new Point(497, 125);
             lblUseCurePoison.Name = "lblUseCurePoison";
             lblUseCurePoison.Size = new Size(62, 20);
             lblUseCurePoison.TabIndex = 9;
@@ -178,7 +180,7 @@
             lblUseTorch.Anchor = AnchorStyles.None;
             lblUseTorch.BackColor = Color.DarkGray;
             lblUseTorch.Cursor = Cursors.Hand;
-            lblUseTorch.Location = new Point(475, 155);
+            lblUseTorch.Location = new Point(497, 155);
             lblUseTorch.Name = "lblUseTorch";
             lblUseTorch.Size = new Size(62, 23);
             lblUseTorch.TabIndex = 10;
@@ -186,12 +188,23 @@
             lblUseTorch.TextAlign = ContentAlignment.MiddleCenter;
             lblUseTorch.Click += ItemLabelClick;
             // 
+            // LimitBox
+            // 
+            LimitBox.Anchor = AnchorStyles.None;
+            LimitBox.Location = new Point(434, 12);
+            LimitBox.Name = "LimitBox";
+            LimitBox.Size = new Size(48, 416);
+            LimitBox.TabIndex = 11;
+            LimitBox.TabStop = false;
+            LimitBox.Paint += LimitBoxPaint;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(0, 0, 32);
             ClientSize = new Size(782, 553);
+            Controls.Add(LimitBox);
             Controls.Add(lblUseTorch);
             Controls.Add(lblUseCurePoison);
             Controls.Add(lblUsePosion);
@@ -215,6 +228,7 @@
             ((System.ComponentModel.ISupportInitialize)mapDrawBox).EndInit();
             ((System.ComponentModel.ISupportInitialize)StateBox).EndInit();
             ((System.ComponentModel.ISupportInitialize)MsgBox).EndInit();
+            ((System.ComponentModel.ISupportInitialize)LimitBox).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -232,5 +246,6 @@
         private Label lblUsePosion;
         private Label lblUseCurePoison;
         private Label lblUseTorch;
+        private PictureBox LimitBox;
     }
 }

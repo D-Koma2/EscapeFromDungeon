@@ -4,6 +4,7 @@ using System;
 using System.Drawing.Imaging;
 using System.Reflection;
 using System.Resources;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using WindowsFormsAppTest2;
 
@@ -34,7 +35,7 @@ namespace EscapeFromDungeon
         private const string _playerName = "あなた";
         private const int _playerHp = 100;
         private const int _playerAttack = 10;
-        private const int _limitMax = 999;
+        public readonly int limitMax = 999;
 
         public Player Player { get; private set; }
         public Map Map { get; private set; }
@@ -70,7 +71,7 @@ namespace EscapeFromDungeon
             _monsterData = new MonsterData(Const.monsterCsv);
             _itemData = new ItemData(Const.itemCsv);
 
-            Player = new Player(_playerName, _playerHp, _playerAttack, _limitMax);
+            Player = new Player(_playerName, _playerHp, _playerAttack, limitMax);
             Message = new Message();
             Battle = new Battle(Player, Message);
         }
@@ -130,7 +131,7 @@ namespace EscapeFromDungeon
 
         public void Init()
         {
-            Player.Init(_playerHp,_limitMax);
+            Player.Init(_playerHp, limitMax);
             eventPos = Point.Empty;
             IsVisionEnabled = true;
         }
@@ -259,7 +260,7 @@ namespace EscapeFromDungeon
                 gameMode = GameMode.Gameover; Gameover();
             }
 
-            var invertCount = _limitMax - Player.Limit;
+            var invertCount = limitMax - Player.Limit;
             if (invertCount % ViewShrinkInterval == 0) Map.AddViewRadius(-1);
         }
 
@@ -294,6 +295,7 @@ namespace EscapeFromDungeon
                     EncounterEventAsync(evt);
                     break;
                 case EventType.GameClear:
+                    Message.Show(evt.Word);
                     gameMode = GameMode.GameClear;
                     Gameover();
                     break;
@@ -389,8 +391,9 @@ namespace EscapeFromDungeon
                     break;
             }
         }
-        private void Gameover()
+        private async void Gameover()
         {
+            await Task.Delay(700);
             SetLabelBaseCol?.Invoke();
             if (StartFade is not null) StartFade(FadeForm.FadeDir.FadeIn);
         }
@@ -398,12 +401,12 @@ namespace EscapeFromDungeon
         // マップとプレイヤーの位置調整
         public void SetMapPos(PictureBox mapImage, PictureBox overlayBox, PictureBox playerImage)
         {
-            int moveX = Map.tileSize * (Map.playerPos.X - 6);
-            int moveY = Map.tileSize * (Map.playerPos.Y - 6);
+            int moveX = Map.tileSize * (Map.playerPos.X - Form1.tilesOfMapWidth / 2);
+            int moveY = Map.tileSize * (Map.playerPos.Y - Form1.tilesOfMapHeight / 2);
 
             mapImage.Location = new Point(-moveX, -moveY);
             overlayBox.Location = new Point(moveX, moveY);
-            playerImage.Location = new Point(Map.tileSize * 6, Map.tileSize * 6);
+            playerImage.Location = new Point(Map.tileSize * (Form1.tilesOfMapWidth / 2), Map.tileSize * (Form1.tilesOfMapHeight / 2));
         }
 
         public void PlayerVisible(PictureBox playerImage)

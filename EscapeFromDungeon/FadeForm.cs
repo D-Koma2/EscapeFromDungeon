@@ -79,15 +79,7 @@ namespace WindowsFormsAppTest2
                     }
                     else if (GameManager.gameMode == GameMode.Gameover || GameManager.gameMode == GameMode.GameClear)
                     {
-                        if (GameManager.gameMode == GameMode.Gameover)
-                        {
-                            TitleLbl.Text = Const.gameOver;
-                        }
-                        else
-                        {
-                            TitleLbl.Text = Const.gameClear;
-                        }
-
+                        TitleLbl.Text = GameManager.gameMode == GameMode.Gameover ? Const.gameOver : Const.gameClear;
                         this.KeyPreview = true;
                         StartBtn.Text = Const.retry;
                         TitleLbl.Visible = true;
@@ -127,11 +119,7 @@ namespace WindowsFormsAppTest2
             StartFade(FadeDir.FadeOut);
         }
 
-        private void ExitButtonClick(object sender, EventArgs e)
-        {
-            Application.Exit();
-        }
-
+        private void ExitButtonClick(object sender, EventArgs e) => Application.Exit();
 
         private void FadeForm_Shown(object sender, EventArgs e)
         {
