@@ -26,7 +26,7 @@ namespace EscapeFromDungeon
         Holy
     }
 
-    class Character
+    public class Character
     {
         private int hp;
 
@@ -66,7 +66,7 @@ namespace EscapeFromDungeon
         public void TakePoison() => Status = Status.Poison;
     }
 
-    internal class Player : Character
+    public class Player : Character
     {
         private int limit;
         public List<Item> Inventry { get; set; }
@@ -150,7 +150,7 @@ namespace EscapeFromDungeon
         }
     }
 
-    class Monster : Character
+    public class Monster : Character
     {
         public Weak Weak { get; set; } = Weak.None;
 

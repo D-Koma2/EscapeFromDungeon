@@ -1,6 +1,7 @@
 ﻿using EscapeFromDungeon.Properties;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,23 +12,29 @@ namespace EscapeFromDungeon
     {
         public Monster Monster { get; set; }
         public Player Player { get; set; }
-        public Message message { get; set; }
 
         private int _battleTurn = 0;
-
-        private bool _isDefending;
+        private bool _isDefending = false;
 
         public Action<bool>? SetLabelVisible;
         public Action<bool>? SetMonsterVisible;
         public Action? ChangeLblText;
-        public Func<int, int, int, int, Task>? CallShaker;
+        public Func<Target, Shake, int, int, Task>? CallShaker;
         public Func<int, int, int, bool, Task>? CallDrop;
         public Func<int, int, Task>? CallShrink;
 
-        public Battle(Player player, Message message)
+        private static readonly Dictionary<Weak, string> weakToItemMap = new()
+        {
+            { Weak.Fire, Const.fireWepon },
+            { Weak.Ice, Const.iceWepon },
+            { Weak.Thunder, Const.thunderWepon },
+            { Weak.Heavy, Const.heavyWepon },
+            { Weak.Holy, Const.holyWepon }
+        };
+
+        public Battle(Player player)
         {
             this.Player = player;
-            this.message = message;
             Monster = new Monster("仮スライム君", 1, 1, Weak.None, "Enemy01");
         }
 
@@ -38,7 +45,7 @@ namespace EscapeFromDungeon
             if (Monster.Hp <= 0)
             {
                 GameManager.gameMode = GameMode.BattleEnd;
-                await message.ShowAsync($"{Monster.Name}を倒した！");
+                await Message.ShowAsync($"{Monster.Name}を倒した！");
                 await Task.Delay(500);
                 var duration = (Monster.Name == Const.demon) ? 2 : 16;
                 if (CallDrop != null) await CallDrop.Invoke(600, duration, 8, false);
@@ -49,23 +56,20 @@ namespace EscapeFromDungeon
             if (Player.Hp <= 0 || Player.Limit <= 0)
             {
                 GameManager.gameMode = GameMode.Gameover;
-                await message.ShowAsync($"{Player.Name}は力尽きた...");
                 await Task.Delay(500);
-                SetMonsterVisible?.Invoke(false);
                 return;
             }
 
             // 戦闘が続いているときはボタンを表示
             if (GameManager.gameMode == GameMode.Battle)
             {
-                await message.ShowAsync(Const.commndMsg);
+                await Message.ShowAsync(Const.commndMsg);
                 SetLabelVisible?.Invoke(true);
             }
         }//BattleLoopAsync
 
         public async Task PlayerTurnAsync(string command)
         {
-            Player.Limit--;
             _isDefending = false;
 
             switch (command)
@@ -73,44 +77,22 @@ namespace EscapeFromDungeon
                 case Const.CommandAtk:
 
                     //最強武器を持っていればすべての敵にダメージアップの処理
-                    if (Player.Inventry.Any(item => item.Name == Const.superWepon))
-                    {
-                        int extraDamage = Player.Attack * 3;
-                        Monster.TakeDamage(extraDamage);
-                        await message.ShowAsync($"{Player.Name}は{Const.superWepon}で攻撃！${Monster.Name}に {extraDamage} の大ダメージ！");
-                        if (CallShaker != null) await CallShaker.Invoke(2, 2, 400, 30);
-                        break;
-                    }
+                    if (await PlayerWeakAttack(Const.superWepon)) break;
 
                     //敵の弱点アイテムを持っていればダメージアップの処理
                     if (Monster.Weak != Weak.None)
                     {
-                        string itemName = Monster.Weak switch
-                        {
-                            Weak.Fire => Const.fireWepon,
-                            Weak.Ice => Const.iceWepon,
-                            Weak.Thunder => Const.thunderWepon,
-                            Weak.Heavy => Const.heavyWepon,
-                            Weak.Holy => Const.holyWepon,
-                            _ => ""
-                        };
-                        if (Player.Inventry.Any(item => item.Name == itemName))
-                        {
-                            int extraDamage = Player.Attack * 3;
-                            Monster.TakeDamage(extraDamage);
-                            await message.ShowAsync($"{Player.Name}は{itemName}で攻撃！${Monster.Name}に {extraDamage} の大ダメージ！");
-                            if (CallShaker != null) await CallShaker.Invoke(2, 2, 400, 30);
-                            break;
-                        }
+                        string itemName = weakToItemMap.TryGetValue(Monster.Weak, out var name) ? name : "";
+                        if (await PlayerWeakAttack(itemName)) break;
                     }
 
                     Monster.TakeDamage(Player.Attack);
-                    await message.ShowAsync($"{Player.Name}の攻撃！{Monster.Name}に {Player.Attack} ダメージ！");
-                    if (CallShaker != null) await CallShaker.Invoke(2, 1, 400, 30);
+                    await Message.ShowAsync($"{Player.Name}の攻撃！{Monster.Name}に {Player.Attack} ダメージ！");
+                    if (CallShaker != null) await CallShaker.Invoke(Target.enemy, Shake.normal, 400, 30);
                     break;
                 case Const.CommandDef:
                     _isDefending = true;
-                    await message.ShowAsync($"{Player.Name}は防御の体勢を取った！");
+                    await Message.ShowAsync($"{Player.Name}は防御の体勢を取った！");
                     break;
                 case Const.CommandHeal:
                     if (Player.Inventry.Find(item => item.Name == Const.potion) != null)
@@ -119,18 +101,22 @@ namespace EscapeFromDungeon
                         point = Math.Min(point, Player.MaxHp - Player.Hp);
                         Player.Heal(point);
                         Player.UseItem(Const.potion);
-                        await message.ShowAsync($"{Player.Name}は{point}回復した！");
+                        await Message.ShowAsync($"{Player.Name}は{point}回復した！");
+                        break;
                     }
                     else
                     {
-                        await message.ShowAsync($"{Const.potion}を持っていなかった！");
+                        await Message.ShowAsync($"{Const.potion}を持っていない！");
+                        await Task.Delay(400);
+                        await BattleLoopAsync();
+                        return;
                     }
-                    break;
                 case Const.CommandEsc:
                     GameManager.gameMode = GameMode.Escaped;
                     SetLabelVisible?.Invoke(true);
                     if (CallShrink != null) await CallShrink.Invoke(30, 2);
-                    await message.ShowAsync($"{Player.Name}は逃げ出した！");
+                    await Message.ShowAsync($"{Player.Name}は逃げ出した！");
+                    Player.Limit--;
                     return;
             }
 
@@ -139,86 +125,57 @@ namespace EscapeFromDungeon
             if (Monster.Hp > 0) await EnemyTurnAsync();
             else
             {
+                Player.Limit--;
                 _battleTurn++;
                 await BattleLoopAsync();
             }
 
         }//PlayerTurn
 
+        private async Task<bool> PlayerWeakAttack(string itemName)
+        {
+            if (Player.Inventry.Any(item => item.Name == itemName))
+            {
+                int extraDamage = Player.Attack * 3;
+                Monster.TakeDamage(extraDamage);
+                await Message.ShowAsync($"{Player.Name}は{itemName}で攻撃！${Monster.Name}に {extraDamage} の大ダメージ！");
+                if (CallShaker != null) await CallShaker.Invoke(Target.enemy, Shake.weak, 400, 30);
+                return true;
+            }
+
+            return false;
+        }
+
         private async Task EnemyTurnAsync()
         {
-            if (_isDefending)
+            var behavior = MonsterBehaviorRegistry.GetBehavior(Monster.Name);
+            var action = behavior.DecideAction(_battleTurn, Monster, Player);
+
+            if (action.SkipDamage)
             {
-                await message.ShowAsync($"{Monster.Name}の攻撃！{Player.Name}は防御した！");
+                await Message.ShowAsync(action.Message);
             }
             else
             {
-                int damage = Monster.Attack;
-                string attackMessage = $"{Monster.Name}の攻撃！{Player.Name}は {damage} のダメージ！";
-                bool skipDamage = false;
-                int shakeType = 1;
-
-                // 特殊処理：モンスターごとの演出
-                switch (Monster.Name)
+                if (_isDefending)
                 {
-                    case Const.demon:
-                        if (_battleTurn % 5 == 4)
-                        {
-                            damage *= 3;
-                            attackMessage = $"{Monster.Name}の強力な攻撃！${Player.Name}は {damage} の大ダメージ！";
-                        }
-                        else if (_battleTurn == 3)
-                        {
-                            attackMessage = $"{Monster.Name}は力をためている！";
-                            skipDamage = true;
-                        }
-                        break;
-
-                    case Const.fireSlime:
-                    case Const.iceSlime:
-                    case Const.thunderSlime:
-                        if (_battleTurn % 4 == 3)
-                        {
-                            damage *= 2;
-                            attackMessage = $"{Monster.Name}の強力な攻撃！${Player.Name}は {damage} の大ダメージ！";
-                            shakeType = 2;
-                        }
-                        else if (_battleTurn % 4 == 2)
-                        {
-                            attackMessage = $"{Monster.Name}は力をためている！";
-                            skipDamage = true;
-                        }
-                        break;
-
-                    case Const.fireSlimeG:
-                    case Const.iceSlimeG:
-                    case Const.thunderSlimeG:
-                        if (_battleTurn % 4 == 3)
-                        {
-                            damage *= 2;
-                            attackMessage = $"{Monster.Name}の強力な攻撃！${Player.Name}は {damage} の大ダメージ！";
-                            shakeType = 2;
-                        }
-                        break;
+                    await Message.ShowAsync($"{Monster.Name}の攻撃！{Player.Name}は防御した！");
                 }
-
-                await message.ShowAsync(attackMessage);
-
-                if (!skipDamage)
+                else
                 {
-                    Player.TakeDamage(damage);
-                    if (CallShaker != null)
-                        await CallShaker.Invoke(1, shakeType, 400, 30);
+                    await Message.ShowAsync(action.Message);
+                    Player.TakeDamage(action.Damage);
+                    if (CallShaker != null) await CallShaker.Invoke(Target.player, action.shakeType, 400, 30);
                 }
             }
 
             await Task.Delay(500);
             await IsStatusPoison();
 
+            Player.Limit--;
             _battleTurn++;
             await BattleLoopAsync();
         }
-
 
         private async Task IsStatusPoison()
         {
@@ -226,15 +183,15 @@ namespace EscapeFromDungeon
             {
                 if (Player.GetItemCount(Const.curePoison) > 0)
                 {
-                    await message.ShowAsync($"{Player.Name}は{Const.curePoison}を使った！");
+                    await Message.ShowAsync($"{Player.Name}は{Const.curePoison}を使った！");
                     Player.HealStatus();
                 }
                 else
                 {
                     int poisonDamage = 3;
                     Player.TakeDamage(poisonDamage);
-                    await message.ShowAsync($"{Player.Name}は毒で{poisonDamage}のダメージ！");
-                    if (CallShaker != null) await CallShaker.Invoke(1, 1, 400, 30);
+                    await Message.ShowAsync($"{Player.Name}は毒で{poisonDamage}のダメージ！");
+                    if (CallShaker != null) await CallShaker.Invoke(Target.player, Shake.normal, 400, 30);
                 }
                 await Task.Delay(500);
             }

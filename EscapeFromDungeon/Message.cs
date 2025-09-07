@@ -8,29 +8,28 @@ using System.Windows.Forms;
 
 namespace EscapeFromDungeon
 {
-    internal class Message
+    internal static class Message
     {
         private const int timerInterval = 16;
-        public bool isMessageShowing = false;// メッセージ送り用フィールド
-        private bool isMessageCompleted = false;// メッセージが完了したかどうか
-        private string fullMessage = "";// フルメッセージ（改行を含む）
-        private string currentMessage = "";// 現在表示中のメッセージ
-        private int messageIndex = 0;// メッセージの現在のインデックス
-        private int messageY = 10;
+        public static bool isMessageShowing = false;// メッセージ送り用フィールド
+        private static bool isMessageCompleted = false;// メッセージが完了したかどうか
+        private static string fullMessage = "";// フルメッセージ（改行を含む）
+        private static string currentMessage = "";// 現在表示中のメッセージ
+        private static int messageIndex = 0;// メッセージの現在のインデックス
+        private static int messageY = 10;
         private const int MessageLineMargin = 4; // 行間マージン（ピクセル単位で調整可能）                                      
-        private bool isMessageTicking = false;// メッセージ送り用
-        private System.Windows.Forms.Timer msgTimer;
-        private Queue<string> messageQueue = new Queue<string>();
+        private static bool isMessageTicking = false;// メッセージ送り用
+        private static System.Windows.Forms.Timer msgTimer = new System.Windows.Forms.Timer();
+        private static Queue<string> messageQueue = new Queue<string>();
 
-        public event Action? OnMessageCompleted;
+        public static event Action? OnMessageCompleted;
 
-        public Message()
+        public static void Setup()
         {
-            msgTimer = new System.Windows.Forms.Timer();
             msgTimer.Interval = timerInterval;
             msgTimer.Tick += MsgTimerTick;
         }
-        public void MsgTimerTick(object? sender, EventArgs e)
+        public static void MsgTimerTick(object? sender, EventArgs e)
         {
             if (!isMessageTicking) return;
 
@@ -59,21 +58,7 @@ namespace EscapeFromDungeon
             }
         }
 
-        // メッセージ表示開始メソッド
-        public void Show(string message)
-        {
-            // 複数メッセージをキューに分割（$$で区切る）
-            var messages = message.Split(new[] { "$$" }, StringSplitOptions.None);
-            foreach (var msg in messages) messageQueue.Enqueue(msg);
-
-            if (!isMessageShowing)
-            {
-                ShowNextAsync();
-                msgTimer.Start();
-            }
-        }
-
-        private async void ShowNextAsync()
+        private static async void ShowNextAsync()
         {
             if (messageQueue.Count > 0)
             {
@@ -98,7 +83,7 @@ namespace EscapeFromDungeon
             }
         }
 
-        public void Draw(Graphics g)
+        public static void Draw(Graphics g)
         {
             if (!string.IsNullOrEmpty(currentMessage))
             {
@@ -115,16 +100,31 @@ namespace EscapeFromDungeon
             //Debug.WriteLine($"CurrentMessage: {currentMessage}");
         }
 
-        public async Task ShowAsync(string messageText)
+        // メッセージ表示開始メソッド
+        public static void Show(string message)
         {
-            Show(messageText); // 既存の Show を呼び出す
+            // 複数メッセージをキューに分割（$$で区切る）
+            var messages = message.Split(new[] { "$$" }, StringSplitOptions.None);
+            foreach (var msg in messages) messageQueue.Enqueue(msg);
+
+            if (!isMessageShowing)
+            {
+                ShowNextAsync();
+                msgTimer.Start();
+            }
+        }
+
+        public static async Task ShowAsync(string message)
+        {
+            Show(message);
+
             while (!isMessageCompleted)
             {
                 await Task.Delay(200); // メッセージが完了するまで待機
             }
         }
 
-        public void InputKey()
+        public static void InputKey()
         {
             if (GameManager.gameMode == GameMode.Explore)
             {
@@ -138,7 +138,7 @@ namespace EscapeFromDungeon
             }
         }
 
-        public void Init()
+        public static void Init()
         {
             isMessageShowing = false;
             isMessageCompleted = false;

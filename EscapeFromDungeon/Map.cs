@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace EscapeFromDungeon
 {
-    internal class Map
+    internal static class Map
     {
         enum WalkType
         {
@@ -27,7 +27,7 @@ namespace EscapeFromDungeon
         private static readonly Color color = Color.FromArgb(255, 54, 83, 83);
         private static readonly Brush transWallBrush = new SolidBrush(color);
 
-        public static Point playerPos = new Point(6, 6); // マップ上の座標(map.csvの"S"で変更)
+        public static Point playerPos = new Point(6, 6); // マップ上の座標(map.csvの"SS"で変更)
         public static Point playerDispPos = new Point(6, 6); //プレイヤー表示座標(map中央固定)
 
         private static int viewRadius = 10;// 歩数やアイテムで変化させる
@@ -36,25 +36,33 @@ namespace EscapeFromDungeon
 
         public const int tileSize = 32;
 
-        public int MapX { get; set; }
-        public int MapY { get; set; }
+        public static int MapX { get; set; }
+        public static int MapY { get; set; }
 
-        public int[,] WalkMap { get; private set; }
+        public static int[,] WalkMap { get; private set; }
 
-        public string[,] EventMap { get; private set; }
+        public static string[,] EventMap { get; private set; }
 
-        public int Width { get; private set; }
-        public int Height { get; private set; }
-        public Bitmap MapCanvas { get; private set; }
-        public Bitmap OverrayCanvas { get; private set; }
+        public static int Width { get; private set; }
+        public static int Height { get; private set; }
+        public static Bitmap MapCanvas { get; private set; }
+        public static Bitmap OverrayCanvas { get; private set; }
 
-        Dictionary<string, int> walkMapCodes;
+        public static Dictionary<string, int> walkMapCodes;
 
-        private string[] lines;
+        private static string[] lines;
 
-        public Map(string path)
+        public static void ReadFromCsv(string path)
         {
-            lines = File.ReadAllLines(path);
+            try
+            {
+                lines = File.ReadAllLines(path);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Map.csv読み込みエラー: {ex.Message}");
+            }
+
             //lines = Resources.map.Split(Const.separator, StringSplitOptions.None);
             if (lines.Last().Trim() == "") lines = lines.Take(lines.Length - 1).ToArray();//最終行が空行なら削除
             Height = lines.Length;
@@ -72,10 +80,10 @@ namespace EscapeFromDungeon
                 { "12", 2 }//半透明壁
             };
 
-            InitMap(path);
+            InitMap();
         }
 
-        public void InitMap(string path)
+        public static void InitMap()
         {
             for (int y = 0; y < Height; y++)
             {
@@ -118,7 +126,7 @@ namespace EscapeFromDungeon
             if (viewRadius > maxViewRadius) viewRadius = maxViewRadius;
             if (viewRadius < minViewRadius) viewRadius = minViewRadius;
         }
-        public void Draw(PictureBox mapImage)
+        public static void Draw(PictureBox mapImage)
         {
             using (Graphics g = Graphics.FromImage(MapCanvas))
             {
@@ -160,7 +168,7 @@ namespace EscapeFromDungeon
         }//Draw
 
         //敵シンボル位置を床で上書きする(壁ラインが消えるので、描画サイズは上下左右1ピクセルずつ減らす)
-        public void DelEnemySimbolDraw(int x, int y)
+        public static void DelEnemySimbolDraw(int x, int y)
         {
             using (Graphics g = Graphics.FromImage(MapCanvas))
             {
@@ -170,7 +178,7 @@ namespace EscapeFromDungeon
         }
 
         // 壁ライン描画
-        private void DrawWallLines(Graphics g, int x, int y)
+        private static void DrawWallLines(Graphics g, int x, int y)
         {
             int dx = x * tileSize, dy = y * tileSize;
 
@@ -191,19 +199,23 @@ namespace EscapeFromDungeon
             }
         }//DrawWallLines
 
-        public void DrawBrightness(PictureBox overlayBox)
+        public static void DrawBrightness()
         {
             using (Graphics g = Graphics.FromImage(OverrayCanvas))
             {
-                for (int y = 0; y < Height; y++)
+                int maxWidth  = Map.tileSize * Form1.tilesOfMapWidth;
+                int maxHeight = Map.tileSize * Form1.tilesOfMapHeight;
+
+                for (int y = 0; y < maxHeight; y++)
                 {
-                    for (int x = 0; x < Width; x++)
+                    for (int x = 0; x < maxWidth; x++)
                     {
                         Rectangle rect = new Rectangle(x * Map.tileSize, y * Map.tileSize, Map.tileSize, Map.tileSize);
 
                         // 視界判定
                         int dx = x - playerDispPos.X;
                         int dy = y - playerDispPos.Y;
+
                         double distance = Math.Sqrt(dx * dx + dy * dy);
                         //  視界制限が無効かどうか　もしくは　視界内かどうか
                         bool isVisible = !GameManager.IsVisionEnabled || distance / 2 <= viewRadius;
@@ -234,13 +246,13 @@ namespace EscapeFromDungeon
             }
         }//DrawBrightness
 
-        public void ClearBrightness(PictureBox overlayBox)
+        public static void ClearBrightness(PictureBox overlayBox)
         {
             OverrayCanvas = new Bitmap(Width * tileSize, Height * tileSize);
             overlayBox.Image = OverrayCanvas;
         }
 
-        public bool CanMoveTo(int x, int y)
+        public static bool CanMoveTo(int x, int y)
         {
             if (x < 0 || y < 0 || x >= Width || y >= Height) return false;
 
@@ -248,7 +260,7 @@ namespace EscapeFromDungeon
             return false;
         }
 
-        public void DeleteEvent(int x, int y)
+        public static void DeleteEvent(int x, int y)
         {
             EventMap[x, y] = null!;
         }

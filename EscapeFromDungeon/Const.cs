@@ -6,6 +6,10 @@ using System.Threading.Tasks;
 
 namespace EscapeFromDungeon
 {
+    public enum Target { player, enemy, }
+
+    public enum Shake { normal, weak }
+
     internal static class Const
     {
         public static readonly string mapCsv = "map.csv";
