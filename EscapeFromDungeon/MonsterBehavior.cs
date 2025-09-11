@@ -14,7 +14,7 @@ namespace EscapeFromDungeon
         }
 
         private static Dictionary<string, IMonsterBehavior> behaviors = new()
-            {
+        {
                 { Const.fireSlime, new SlimeBehavior() },
                 { Const.iceSlime, new SlimeBehavior() },
                 { Const.thunderSlime, new SlimeBehavior() },
@@ -22,7 +22,7 @@ namespace EscapeFromDungeon
                 { Const.iceSlimeG, new SlimeGBehavior() },
                 { Const.thunderSlimeG, new SlimeGBehavior() },
                 { Const.demon, new DemonBehavior() }
-            };
+        };
     }
 
     public class MonsterAction

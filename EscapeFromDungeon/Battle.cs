@@ -76,19 +76,22 @@ namespace EscapeFromDungeon
             {
                 case Const.CommandAtk:
 
-                    //最強武器を持っていればすべての敵にダメージアップの処理
-                    if (await PlayerWeakAttack(Const.superWepon)) break;
+                    string itemName = "";
 
-                    //敵の弱点アイテムを持っていればダメージアップの処理
+                    //敵の弱点武器を持っていればダメージアップの処理
                     if (Monster.Weak != Weak.None)
                     {
-                        string itemName = weakToItemMap.TryGetValue(Monster.Weak, out var name) ? name : "";
-                        if (await PlayerWeakAttack(itemName)) break;
+                        weakToItemMap.TryGetValue(Monster.Weak, out var weakWepon);
+                        itemName = Player.Inventry.Any(item => item.Name == weakWepon) ? weakWepon! : "";
                     }
 
-                    Monster.TakeDamage(Player.Attack);
-                    await Message.ShowAsync($"{Player.Name}の攻撃！{Monster.Name}に {Player.Attack} ダメージ！");
-                    if (CallShaker != null) await CallShaker.Invoke(Target.enemy, Shake.normal, 400, 30);
+                    //最強武器を持っていればすべての敵にダメージアップの処理
+                    if (Player.Inventry.Find(item => item.Name == Const.superWepon) != null)
+                    {
+                        itemName = Const.superWepon;
+                    }
+                    
+                    await PlayerWeakAttack(itemName);
                     break;
                 case Const.CommandDef:
                     _isDefending = true;
@@ -132,18 +135,14 @@ namespace EscapeFromDungeon
 
         }//PlayerTurn
 
-        private async Task<bool> PlayerWeakAttack(string itemName)
+        private async Task PlayerWeakAttack(string itemName)
         {
-            if (Player.Inventry.Any(item => item.Name == itemName))
-            {
-                int extraDamage = Player.Attack * 3;
-                Monster.TakeDamage(extraDamage);
-                await Message.ShowAsync($"{Player.Name}は{itemName}で攻撃！${Monster.Name}に {extraDamage} の大ダメージ！");
-                if (CallShaker != null) await CallShaker.Invoke(Target.enemy, Shake.weak, 400, 30);
-                return true;
-            }
+            var behavior = PlayerAttackRegistry.GetBehavior(itemName);
+            var action = behavior.DecideAction(Player, Monster, itemName);
 
-            return false;
+            await Message.ShowAsync(action.Message);
+            Monster.TakeDamage(action.Damage);
+            if (CallShaker != null) await CallShaker.Invoke(Target.enemy, Shake.weak, 400, 30);
         }
 
         private async Task EnemyTurnAsync()
