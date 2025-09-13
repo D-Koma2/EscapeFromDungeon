@@ -38,8 +38,6 @@ namespace EscapeFromDungeon
         public readonly int limitMax = 999;
 
         public Player Player { get; private set; }
-        public Map Map { get; private set; }
-        public Message Message { get; private set; }
         public Battle Battle { get; private set; }
 
         public Action? SetLabelBaseCol;
@@ -48,6 +46,7 @@ namespace EscapeFromDungeon
         public Action? KeyDownPressed;
         public Action? KeyLeftPressed;
         public Action? KeyRightPressed;
+        public Action? SetMapPos;
 
         public Action? KeyIPressed;
         public Action? KeyPPressed;
@@ -57,26 +56,24 @@ namespace EscapeFromDungeon
         public Func<int, int, int, bool, Task>? CallDrop;
         public Action<Image>? SetMonsterImg;
 
-        private EventData _eventData;
-        private MonsterData _monsterData;
-        private ItemData _itemData;
-
         private Point eventPos = Point.Empty;
+        private Point prePos = Point.Empty;
 
         public GameManager()
         {
-            Map = new Map(Const.mapCsv);//最初に生成する事!
+            Map.ReadFromCsv(Const.mapCsv);//最初に実行する事!
 
-            _eventData = new EventData(Const.eventCsv);
-            _monsterData = new MonsterData(Const.monsterCsv);
-            _itemData = new ItemData(Const.itemCsv);
+            EventData.ReadFromCsv(Const.eventCsv);
+            MonsterData.ReadFromCsv(Const.monsterCsv);
+            ItemData.ReadFromCsv(Const.itemCsv);
 
             Player = new Player(_playerName, _playerHp, _playerAttack, limitMax);
-            Message = new Message();
-            Battle = new Battle(Player, Message);
+            Battle = new Battle(Player);
+
+            Message.Setup();
         }
 
-        public void KeyInput(Keys keyCode, PictureBox mapImage, PictureBox overlayBox)
+        public void KeyInput(Keys keyCode)
         {
             if (gameMode == GameMode.Explore)
             {
@@ -89,7 +86,7 @@ namespace EscapeFromDungeon
                         return;
                     }
 
-                    Move(keyCode, mapImage, overlayBox);
+                    Move(keyCode);
                 }
                 else if (keyCode == Keys.P)
                 {
@@ -103,10 +100,10 @@ namespace EscapeFromDungeon
                 {
                     KeyIPressed?.Invoke();
                 }
-                else if (keyCode == Keys.V)
-                {
-                    SwitchView(overlayBox);
-                }
+                //else if (keyCode == Keys.V)//デバッグ用
+                //{
+                //    IsVisionEnabled = !IsVisionEnabled;
+                //}
             }
             else if (gameMode == GameMode.Battle)
             {
@@ -140,6 +137,10 @@ namespace EscapeFromDungeon
         {
             if (gameMode == GameMode.Escaped)
             {
+                Form1.isBattleInputLocked = true;
+                Form1.battleInputUnlockTime = DateTime.Now.AddSeconds(2.5); // 指定秒間キー入力をロック
+                Map.playerPos = prePos;
+                SetMapPos?.Invoke();
                 await Task.Delay(500);
                 gameMode = GameMode.Explore;
                 ChangeLblText?.Invoke();
@@ -149,7 +150,7 @@ namespace EscapeFromDungeon
             {
                 if (Player.Hp > 0)
                 {
-                    Message.Show($"{Player.Name}は勝利した!");
+                    await Message.ShowAsync($"{Player.Name}は勝利した!");
                     await Task.Delay(500);
                     // モンスターを倒したらイベントを消去
                     Map.DeleteEvent(eventPos.X, eventPos.Y);
@@ -164,42 +165,32 @@ namespace EscapeFromDungeon
             if (gameMode == GameMode.Gameover) Gameover();
         }//BattleCheck
 
-        private void Move(Keys keyCode, PictureBox mapImage, PictureBox overlayBox)
+        private async void Move(Keys keyCode)
         {
             Point dir = Point.Empty;
-            int moveAmount = Map.tileSize; // 移動量（ピクセル）
-
-            Point current1 = mapImage.Location;
-            Point current2 = overlayBox.Location;
 
             if (keyCode == Keys.Up)
             {
-                current1.Y += moveAmount;
-                current2.Y -= moveAmount;
                 dir = new Point(0, -1);
                 Player.Dir = Player.Direction.Up;
             }
             else if (keyCode == Keys.Down)
             {
-                current1.Y -= moveAmount;
-                current2.Y += moveAmount;
                 dir = new Point(0, 1);
                 Player.Dir = Player.Direction.Down;
             }
             else if (keyCode == Keys.Left)
             {
-                current1.X += moveAmount;
-                current2.X -= moveAmount;
                 dir = new Point(-1, 0);
                 Player.Dir = Player.Direction.Left;
             }
             else if (keyCode == Keys.Right)
             {
-                current1.X -= moveAmount;
-                current2.X += moveAmount;
                 dir = new Point(1, 0);
                 Player.Dir = Player.Direction.Right;
             }
+
+            prePos = Map.playerPos; // 移動前の位置を保存
 
             Player.SetDirectionImage(Player.Dir);
             Point newPos = new Point(Map.playerPos.X + dir.X, Map.playerPos.Y + dir.Y);
@@ -207,19 +198,17 @@ namespace EscapeFromDungeon
             // 移動可能かチェック
             if (Map.CanMoveTo(newPos.X, newPos.Y))
             {
-                Event? evt = CheckEvent(newPos.X, newPos.Y);
+                eventPos = newPos; // モンスターイベント位置を保存
+
+                Map.playerPos = newPos;
+                SetMapPos?.Invoke();
+
+                Event? evt = await CheckEvent(newPos.X, newPos.Y);
 
                 if (evt == null) Message.Init(); // メッセージリセット
 
-                if (evt != null && evt.EventType == EventType.Encount)
-                {
-                    eventPos = newPos; // モンスターイベント位置を保存
-                    return;
-                }
+                if (evt != null && evt.EventType == EventType.Encount) return;
 
-                Map.playerPos = newPos;
-                mapImage.Location = current1;
-                overlayBox.Location = current2;
                 DamageCheck(newPos.X, newPos.Y);
                 TurnCheck();
             }
@@ -238,18 +227,6 @@ namespace EscapeFromDungeon
             }
         }
 
-        //デバッグ用
-        private void SwitchView(PictureBox overlayBox)
-        {
-            IsVisionEnabled = !IsVisionEnabled;
-            if (IsVisionEnabled)
-                Map.DrawBrightness(overlayBox);
-            else
-            {
-                Map.ClearBrightness(overlayBox);
-            }
-        }
-
         private void TurnCheck()
         {
             Player.Limit--;
@@ -263,23 +240,25 @@ namespace EscapeFromDungeon
             if (invertCount % ViewShrinkInterval == 0) Map.AddViewRadius(-1);
         }
 
-        private Event? CheckEvent(int x, int y)
+        private async Task<Event?> CheckEvent(int x, int y)
         {
             var eventId = Map.EventMap[x, y];
 
             if (eventId == null) return null; // イベントなし
 
-            Event evt = _eventData.Dict[eventId];
+            Event evt = EventData.Dict[eventId];
 
-            if (!_eventData.Dict.ContainsKey(eventId)) return null;
+            if (!EventData.Dict.ContainsKey(eventId)) return null;
 
             switch (evt.EventType)
             {
                 case EventType.Message:
-                    Message.Show(evt.Word);
+                    await Message.ShowAsync(evt.Word);
+                    await Task.Delay(500);
                     break;
                 case EventType.Hint:
-                    Message.Show(evt.Word);
+                    await Message.ShowAsync(evt.Word);
+                    await Task.Delay(500);
                     break;
                 case EventType.ItemGet:
                     ItemGetEvent(evt);
@@ -294,9 +273,11 @@ namespace EscapeFromDungeon
                     EncounterEventAsync(evt);
                     break;
                 case EventType.GameClear:
-                    Message.Show(evt.Word);
+                    await Message.ShowAsync(evt.Word);
+                    SetLabelBaseCol?.Invoke();
+                    await Task.Delay(500);
                     gameMode = GameMode.GameClear;
-                    Gameover();
+                    if (StartFade is not null) StartFade(FadeForm.FadeDir.FadeIn);
                     break;
                 default:
                     break;
@@ -315,10 +296,10 @@ namespace EscapeFromDungeon
         private async void EncounterEventAsync(Event evt)
         {
             Form1.isBattleInputLocked = true;
-            Form1.battleInputUnlockTime = DateTime.Now.AddSeconds(2.5); // 指定秒間キー入力をロック
+            Form1.battleInputUnlockTime = DateTime.Now.AddSeconds(3.0); // 指定秒間キー入力をロック
 
             gameMode = GameMode.Battle;
-            var mon = _monsterData.Dict[evt.Word];
+            var mon = MonsterData.Dict[evt.Word];
             Battle.Monster = new Monster(mon.Name, mon.Hp, mon.Attack, mon.Weak, mon.ImageName);
 
             //モンスターイメージを変更
@@ -337,18 +318,20 @@ namespace EscapeFromDungeon
             Battle.SetLabelVisible?.Invoke(true);
         }
 
-        private void ItemGetEvent(Event evt)
+        private async void ItemGetEvent(Event evt)
         {
-            var item = _itemData.Dict[evt.Word];
+            var item = ItemData.Dict[evt.Word];
             var name = item.Name;
             var dsc = item.Description;
             Player.GetItem(name, dsc);
-            Message.Show($"アイテム「{evt.Word}」を取得！");
+            await Message.ShowAsync($"アイテム「{evt.Word}」を取得！");
+            await Task.Delay(500);
         }
 
-        private void HealEvent(Event evt)
+        private async void HealEvent(Event evt)
         {
-            Message.Show(evt.Word);
+            await Message.ShowAsync(evt.Word);
+            await Task.Delay(500);
 
             switch (evt.Id)
             {
@@ -369,9 +352,10 @@ namespace EscapeFromDungeon
             }
         }
 
-        private void TrapEvent(Event evt)
+        private async void TrapEvent(Event evt)
         {
-            Message.Show(evt.Word);
+            await Message.ShowAsync(evt.Word);
+            await Task.Delay(500);
 
             switch (evt.Id)
             {
@@ -393,20 +377,10 @@ namespace EscapeFromDungeon
         }
         private async void Gameover()
         {
-            await Task.Delay(700);
+            await Message.ShowAsync($"{Player.Name}は力尽きた...");
             SetLabelBaseCol?.Invoke();
+            await Task.Delay(500);
             if (StartFade is not null) StartFade(FadeForm.FadeDir.FadeIn);
-        }
-
-        // マップとプレイヤーの位置調整
-        public void SetMapPos(PictureBox mapImage, PictureBox overlayBox, PictureBox playerImage)
-        {
-            int moveX = Map.tileSize * (Map.playerPos.X - Form1.tilesOfMapWidth / 2);
-            int moveY = Map.tileSize * (Map.playerPos.Y - Form1.tilesOfMapHeight / 2);
-
-            mapImage.Location = new Point(-moveX, -moveY);
-            overlayBox.Location = new Point(moveX, moveY);
-            playerImage.Location = new Point(Map.tileSize * (Form1.tilesOfMapWidth / 2), Map.tileSize * (Form1.tilesOfMapHeight / 2));
         }
 
         public void PlayerVisible(PictureBox playerImage)

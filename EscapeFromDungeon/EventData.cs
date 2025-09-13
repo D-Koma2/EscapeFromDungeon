@@ -8,11 +8,11 @@ using System.Threading.Tasks;
 
 namespace EscapeFromDungeon
 {
-    internal class EventData
+    internal static class EventData
     {
-        public Dictionary<string,Event> Dict { get; private set; } = new Dictionary<string, Event>();
+        public static Dictionary<string, Event> Dict { get; private set; } = new Dictionary<string, Event>();
 
-        public EventData(string path)
+        public static void ReadFromCsv(string path)
         {
             var lines = File.ReadAllLines(path).Skip(1).ToArray();//１行目スキップ
             //var lines = Resources.Event.Split(Const.separator, StringSplitOptions.None).Skip(1).ToArray();//１行目スキップ
@@ -22,16 +22,26 @@ namespace EscapeFromDungeon
             {
                 var cells = item.Split(',');
 
-                var id = cells[0];
-                var eventType = (EventType)Enum.Parse(typeof(EventType), cells[1]);
-                var word = cells[2];
+                try
+                {
+                    var id = cells[0];
+                    var eventType = (EventType)Enum.Parse(typeof(EventType), cells[1]);
+                    var word = cells[2];
 
-                Dict.Add(id, new Event
-                (
-                    id,
-                    eventType,
-                    word
-                ));
+                    if (!Dict.ContainsKey(id))
+                    {
+                        Dict.Add(id, new Event
+                        (
+                            id,
+                            eventType,
+                            word
+                        ));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"EventData読み込みエラー: {ex.Message} 行: {item}");
+                }
             }
         }
     }

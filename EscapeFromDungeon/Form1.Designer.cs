@@ -154,7 +154,7 @@
             lblUsePosion.Anchor = AnchorStyles.None;
             lblUsePosion.BackColor = Color.DarkGray;
             lblUsePosion.Cursor = Cursors.Hand;
-            lblUsePosion.Location = new Point(497, 95);
+            lblUsePosion.Location = new Point(511, 96);
             lblUsePosion.Name = "lblUsePosion";
             lblUsePosion.Size = new Size(62, 21);
             lblUsePosion.TabIndex = 8;
@@ -167,7 +167,7 @@
             lblUseCurePoison.Anchor = AnchorStyles.None;
             lblUseCurePoison.BackColor = Color.DarkGray;
             lblUseCurePoison.Cursor = Cursors.Hand;
-            lblUseCurePoison.Location = new Point(497, 125);
+            lblUseCurePoison.Location = new Point(511, 126);
             lblUseCurePoison.Name = "lblUseCurePoison";
             lblUseCurePoison.Size = new Size(62, 20);
             lblUseCurePoison.TabIndex = 9;
@@ -180,7 +180,7 @@
             lblUseTorch.Anchor = AnchorStyles.None;
             lblUseTorch.BackColor = Color.DarkGray;
             lblUseTorch.Cursor = Cursors.Hand;
-            lblUseTorch.Location = new Point(497, 155);
+            lblUseTorch.Location = new Point(511, 156);
             lblUseTorch.Name = "lblUseTorch";
             lblUseTorch.Size = new Size(62, 23);
             lblUseTorch.TabIndex = 10;

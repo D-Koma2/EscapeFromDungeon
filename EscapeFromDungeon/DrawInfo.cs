@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace EscapeFromDungeon
 {
-    internal class DrawInfo
+    internal static class DrawInfo
     {
         private const int barWidth = 200;
         private const int barHeight = 20;
@@ -19,7 +19,7 @@ namespace EscapeFromDungeon
         private const int limitBarX = 5;
         private const int limitBarY = 50;
 
-        public void DrawStatus(Graphics g, Player player)
+        public static void DrawStatus(Graphics g, Player player)
         {
             float hpRatio = (float)player.Hp / player.MaxHp; // HP割合
 
@@ -40,7 +40,7 @@ namespace EscapeFromDungeon
             g.DrawRectangle(Pens.White, barX, barY, barWidth, barHeight);
 
             // 数値表示
-            string hpText = $"HP: {player.Hp} / {player.MaxHp}";
+            string hpText = $"HP: {player.Hp.ToString("D3")} / {player.MaxHp.ToString("D3")}";
             string inventoryTitle = "所持品:";
             string potionCount = Const.potion + " x " + player.Inventry.Count(item => item.Name == Const.potion).ToString();
             string curePoisonCount = Const.curePoison + " x " + player.Inventry.Count(item => item.Name == Const.curePoison).ToString();
@@ -77,7 +77,7 @@ namespace EscapeFromDungeon
 
         }
 
-        public void DrawLimitBar(Graphics g, Player player, int limitMax)
+        public static void DrawLimitBar(Graphics g, Player player, int limitMax)
         {
             float limitRatio = (float)player.Limit / limitMax; // Limit割合
 
@@ -93,7 +93,7 @@ namespace EscapeFromDungeon
 
             using (Font font = new("Arial", 10))
             {
-                g.DrawString(player.Limit.ToString(), font, Brushes.Wheat, 6, 20);
+                g.DrawString(player.Limit.ToString("D3"), font, Brushes.Wheat, 6, 20);
                 g.DrawString("Limit", font, Brushes.Red, 2, 2);
             }
         }

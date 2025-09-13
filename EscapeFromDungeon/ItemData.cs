@@ -8,11 +8,11 @@ using System.Threading.Tasks;
 
 namespace EscapeFromDungeon
 {
-    internal class ItemData
+    internal static class ItemData
     {
-        public Dictionary<string, Item> Dict { get; private set; } = new Dictionary<string, Item>();
+        public static Dictionary<string, Item> Dict { get; private set; } = new Dictionary<string, Item>();
 
-        public ItemData(string path)
+        public static void ReadFromCsv(string path)
         {
             var lines = File.ReadAllLines(path).Skip(1).ToArray();//１行目スキップ
             //var lines = Resources.Item.Split(Const.separator, StringSplitOptions.None).Skip(1).ToArray();//１行目スキップ
@@ -22,14 +22,25 @@ namespace EscapeFromDungeon
             {
                 var cells = item.Split(',');
 
-                var name = cells[0];
-                var description = cells[1];
+                try
+                {
+                    var name = cells[0];
+                    var description = cells[1];
 
-                Dict.Add(name, new Item
-                (
-                    name,
-                    description
-                ));
+                    if (!Dict.ContainsKey(name))
+                    {
+                        Dict.Add(name, new Item
+                        (
+                            name,
+                            description
+                        ));
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"ItemData読み込みエラー: {ex.Message} 行: {item}");
+                }
             }
         }
 

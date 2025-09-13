@@ -19,12 +19,9 @@ namespace EscapeFromDungeon
         private PictureBox mapImage = default!, overlayImg = default!, playerImg = default!, monsterImg = default!;
         private FadeForm fade = default!;
         private GameManager gameManager;
-        private DrawInfo drawInfo;
 
         private System.Windows.Forms.Timer timer = default!;//画面表示更新用
         private const int timerInterval = 32;
-        private const int targetIsPlayer = 1;
-        private const int targetIsEnemy = 2;
         private Dictionary<Label, string> itemMap;
 
         public static bool isBattleInputLocked = false;
@@ -49,7 +46,6 @@ namespace EscapeFromDungeon
             gameManager = new GameManager();//最初に生成する事!
             SetupGameManagerEvents();//GameManager生成の後に呼ぶ
             InitPictureBoxes();
-            drawInfo = new DrawInfo();
 
             InitDraw();
             TimerSetUp();
@@ -61,11 +57,12 @@ namespace EscapeFromDungeon
         public void InitGame()
         {
             GameManager.gameMode = GameMode.Title;
-            gameManager.Map.InitMap(Const.mapCsv);
+            Map.InitMap();
             gameManager.Init();
-            gameManager.Message.Init();
+            Message.Init();
             Map.AddViewRadius(Map.maxViewRadius);
-            SetLabelBaseCol();
+            SetMonsterImgVisible(false);
+            SetLabelVisible(true);
             InitDraw();
 
             //DispPoint();
@@ -74,9 +71,9 @@ namespace EscapeFromDungeon
         private void InitDraw()
         {
             ChangeLblText();
-            gameManager.Map.Draw(mapImage);
-            gameManager.Map.DrawBrightness(overlayImg);
-            gameManager.SetMapPos(mapImage, overlayImg, playerImg);
+            Map.Draw(mapImage);
+            Map.DrawBrightness();
+            SetMapPos();
         }
 
         private void SetupGameManagerEvents()
@@ -104,6 +101,7 @@ namespace EscapeFromDungeon
             gameManager.Battle.ChangeLblText = ChangeLblText;
 
             gameManager.Player.FlashByDamage = ColorChangeByDamage;
+            gameManager.SetMapPos = SetMapPos;
         }
 
         private void FadeSetup()
@@ -128,8 +126,8 @@ namespace EscapeFromDungeon
         // 画面更新タイマーイベント
         private void Timer_Tick(object? sender, EventArgs e)
         {
-            gameManager.Map.ClearBrightness(overlayImg);
-            gameManager.Map.DrawBrightness(overlayImg);
+            Map.ClearBrightness(overlayImg);
+            Map.DrawBrightness();
             playerImg.Image = gameManager.Player.playerImage;
             gameManager.PlayerVisible(playerImg);
             overlayImg.Invalidate();
@@ -165,9 +163,9 @@ namespace EscapeFromDungeon
             // マップ画像　入れ子の子
             mapImage = new PictureBox
             {
-                Size = new Size(gameManager.Map.Width * Map.tileSize, gameManager.Map.Height * Map.tileSize),
+                Size = new Size(Map.Width * Map.tileSize, Map.Height * Map.tileSize),
                 Location = Point.Empty,
-                Image = gameManager.Map.MapCanvas,
+                Image = Map.MapCanvas,
                 SizeMode = PictureBoxSizeMode.Normal
             };
 
@@ -179,7 +177,7 @@ namespace EscapeFromDungeon
                 Size = mapDrawBox.Size,
                 Location = Point.Empty,
                 BackColor = Color.Transparent,
-                Image = gameManager.Map.OverrayCanvas,
+                Image = Map.OverrayCanvas,
                 Parent = mapImage // mapImageの上に重ねる
             };
 
@@ -189,7 +187,7 @@ namespace EscapeFromDungeon
             playerImg = new PictureBox
             {
                 Size = new(Map.tileSize, Map.tileSize),
-                Location = new Point(Map.playerPos.X * Map.tileSize, Map.playerPos.Y * Map.tileSize),
+                Location = new Point(Map.tileSize * (tilesOfMapWidth / 2), Map.tileSize * (tilesOfMapHeight / 2)),
                 BackColor = Color.Transparent,
                 Image = gameManager.Player.playerImage,
                 Parent = overlayImg
@@ -221,10 +219,21 @@ namespace EscapeFromDungeon
             monsterImg.Size = new Size(Map.tileSize * 8, Map.tileSize * 8);
         }
 
+        // マップとプレイヤーの位置調整
+        public void SetMapPos()
+        {
+            int moveX = Map.tileSize * (Map.playerPos.X - tilesOfMapWidth / 2);
+            int moveY = Map.tileSize * (Map.playerPos.Y - tilesOfMapHeight / 2);
+
+            mapImage.Location = new Point(-moveX, -moveY);
+            overlayImg.Location = new Point(moveX, moveY);
+            //playerImg.Location = new Point(Map.tileSize * (tilesOfMapWidth / 2), Map.tileSize * (tilesOfMapHeight / 2));
+        }
+
         private void MainFormKeyDown(object sender, KeyEventArgs e)
         {
             SetLblCol(e.KeyCode, lblSelectCol);
-            gameManager.KeyInput(e.KeyCode, mapImage, overlayImg);
+            gameManager.KeyInput(e.KeyCode);
         }
 
         private void FormKeyUp(object sender, KeyEventArgs e)
@@ -255,17 +264,17 @@ namespace EscapeFromDungeon
 
         private void StateBoxPaint(object sender, PaintEventArgs e)
         {
-            drawInfo.DrawStatus(e.Graphics, gameManager.Player);
+            DrawInfo.DrawStatus(e.Graphics, gameManager.Player);
         }
 
         private void MsgBoxPaint(object sender, PaintEventArgs e)
         {
-            gameManager.Message.Draw(e.Graphics);
+            Message.Draw(e.Graphics);
         }
 
         private void LimitBoxPaint(object sender, PaintEventArgs e)
         {
-            drawInfo.DrawLimitBar(e.Graphics, gameManager.Player, gameManager.limitMax);
+            DrawInfo.DrawLimitBar(e.Graphics, gameManager.Player, gameManager.limitMax);
         }
 
         private async void lblAttackClickAsync(object sender, EventArgs e)
@@ -301,7 +310,7 @@ namespace EscapeFromDungeon
             }
             else if (GameManager.gameMode == GameMode.Explore)
             {
-                gameManager.KeyInput(exploreKey, mapImage, overlayImg);
+                gameManager.KeyInput(exploreKey);
             }
 
             SetLabelBaseCol();
@@ -309,11 +318,11 @@ namespace EscapeFromDungeon
             _isWaiting = false;
         }
 
-        public async Task ShakeAsync(int shakeTarget, int critical, int durationMs = 500, int intervalMs = 30)
+        public async Task ShakeAsync(Target shakeTarget, Shake shakeType, int durationMs = 500, int intervalMs = 30)
         {
             PictureBox target = default!;
-            if (shakeTarget == targetIsPlayer) target = MsgBox;
-            else if (shakeTarget == targetIsEnemy) target = monsterImg;
+            if (shakeTarget == Target.player) target = MsgBox;
+            else if (shakeTarget == Target.enemy) target = monsterImg;
 
             var originalLocation = target.Location;
             var rand = new Random();
@@ -322,9 +331,9 @@ namespace EscapeFromDungeon
             for (int i = 0; i < shakeCount; i++)
             {
                 int offsetX, offsetY;
-                if (critical == 2)
+                if (shakeType == Shake.weak)
                 {
-                    // クリティカルヒット時は大きく揺らす
+                    // 弱点攻撃時は大きく揺らす
                     offsetX = rand.Next(-12, 13);
                     offsetY = rand.Next(-12, 13);
                 }
@@ -462,7 +471,7 @@ namespace EscapeFromDungeon
                 case Const.potion:
                     if (gameManager.Player.Hp == gameManager.Player.MaxHp)
                     {
-                        gameManager.Message.Show(Const.hpFullMsg);
+                        await Message.ShowAsync(Const.hpFullMsg);
                         await Task.Delay(200);
                         SetUseLabelCol(itemName, lblBaseCol);
                         return;
@@ -479,7 +488,7 @@ namespace EscapeFromDungeon
                     break;
             }
 
-            gameManager.Message.Show($"{itemName}を使った！");
+            await Message.ShowAsync($"{itemName}を使った！");
             gameManager.Player.UseItem(itemName);
             await Task.Delay(200);
             SetUseLabelCol(itemName, lblBaseCol);

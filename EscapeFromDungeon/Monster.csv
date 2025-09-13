@@ -1,4 +1,4 @@
-﻿モンスター名,HP,Atk,Weak
+﻿モンスター名,HP,Atk,Weak,ImageName
 スライム,20,5,None,Enemy01
 強力スライム,90,10,Thunder,Enemy02
 炎スライム,60,8,Ice,Enemy03
