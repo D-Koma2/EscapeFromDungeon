@@ -75,23 +75,19 @@ namespace EscapeFromDungeon
             switch (command)
             {
                 case Const.CommandAtk:
-
-                    string itemName = "";
-
+                    var weponName = "";
                     //敵の弱点武器を持っていればダメージアップの処理
                     if (Monster.Weak != Weak.None)
                     {
                         weakToItemMap.TryGetValue(Monster.Weak, out var weakWepon);
-                        itemName = Player.Inventry.Any(item => item.Name == weakWepon) ? weakWepon! : "";
+                        weponName = Player.Inventry.Any(item => item.Name == weakWepon) ? weakWepon! : "";
                     }
-
                     //最強武器を持っていればすべての敵にダメージアップの処理
                     if (Player.Inventry.Find(item => item.Name == Const.superWepon) != null)
                     {
-                        itemName = Const.superWepon;
+                        weponName = Const.superWepon;
                     }
-                    
-                    await PlayerWeakAttack(itemName);
+                    await PlayerAttack(weponName);
                     break;
                 case Const.CommandDef:
                     _isDefending = true;
@@ -100,11 +96,10 @@ namespace EscapeFromDungeon
                 case Const.CommandHeal:
                     if (Player.Inventry.Find(item => item.Name == Const.potion) != null)
                     {
-                        int point = 30;
-                        point = Math.Min(point, Player.MaxHp - Player.Hp);
-                        Player.Heal(point);
+                        int healPoint = Math.Min(30, Player.MaxHp - Player.Hp);
+                        Player.Heal(healPoint);
                         Player.UseItem(Const.potion);
-                        await Message.ShowAsync($"{Player.Name}は{point}回復した！");
+                        await Message.ShowAsync($"{Player.Name}は{healPoint}回復した！");
                         break;
                     }
                     else
@@ -135,7 +130,7 @@ namespace EscapeFromDungeon
 
         }//PlayerTurn
 
-        private async Task PlayerWeakAttack(string itemName)
+        private async Task PlayerAttack(string itemName)
         {
             var behavior = PlayerAttackRegistry.GetBehavior(itemName);
             var action = behavior.DecideAction(Player, Monster, itemName);

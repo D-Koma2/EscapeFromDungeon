@@ -11,17 +11,17 @@ namespace EscapeFromDungeon
         public static IMonsterBehavior GetBehavior(string monsterName)
         {
             return behaviors.TryGetValue(monsterName, out var behavior) ? behavior : new DefaultBehavior();
-        }
+        } 
 
         private static Dictionary<string, IMonsterBehavior> behaviors = new()
         {
-                { Const.fireSlime, new SlimeBehavior() },
-                { Const.iceSlime, new SlimeBehavior() },
-                { Const.thunderSlime, new SlimeBehavior() },
-                { Const.fireSlimeG, new SlimeGBehavior() },
-                { Const.iceSlimeG, new SlimeGBehavior() },
-                { Const.thunderSlimeG, new SlimeGBehavior() },
-                { Const.demon, new DemonBehavior() }
+            { Const.fireSlime, new SlimeBehavior() },
+            { Const.iceSlime, new SlimeBehavior() },
+            { Const.thunderSlime, new SlimeBehavior() },
+            { Const.fireSlimeG, new SlimeGBehavior() },
+            { Const.iceSlimeG, new SlimeGBehavior() },
+            { Const.thunderSlimeG, new SlimeGBehavior() },
+            { Const.demon, new DemonBehavior() }
         };
     }
 

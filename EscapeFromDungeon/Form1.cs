@@ -62,7 +62,7 @@ namespace EscapeFromDungeon
             Message.Init();
             Map.AddViewRadius(Map.maxViewRadius);
             SetMonsterImgVisible(false);
-            SetLabelBaseCol();
+            SetLabelVisible(true);
             InitDraw();
 
             //DispPoint();

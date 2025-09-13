@@ -274,9 +274,10 @@ namespace EscapeFromDungeon
                     break;
                 case EventType.GameClear:
                     await Message.ShowAsync(evt.Word);
+                    SetLabelBaseCol?.Invoke();
                     await Task.Delay(500);
                     gameMode = GameMode.GameClear;
-                    Gameover();
+                    if (StartFade is not null) StartFade(FadeForm.FadeDir.FadeIn);
                     break;
                 default:
                     break;
@@ -377,11 +378,10 @@ namespace EscapeFromDungeon
         private async void Gameover()
         {
             await Message.ShowAsync($"{Player.Name}は力尽きた...");
-            await Task.Delay(500);
             SetLabelBaseCol?.Invoke();
+            await Task.Delay(500);
             if (StartFade is not null) StartFade(FadeForm.FadeDir.FadeIn);
         }
-
 
         public void PlayerVisible(PictureBox playerImage)
         {
