@@ -35,7 +35,7 @@ namespace EscapeFromDungeon
         public Battle(Player player)
         {
             this.Player = player;
-            Monster = new Monster("仮スライム君", 1, 1, Weak.None, "Enemy01");
+            Monster = new Monster("仮スライム君", 1, 1, Weak.None, "Enemy01", new DefaultBehavior());
         }
 
         public void InitBattleTurn() => _battleTurn = 0;
@@ -83,7 +83,7 @@ namespace EscapeFromDungeon
                         weponName = Player.Inventry.Any(item => item.Name == weakWepon) ? weakWepon! : "";
                     }
                     //最強武器を持っていればすべての敵にダメージアップの処理
-                    if (Player.Inventry.Find(item => item.Name == Const.superWepon) != null)
+                    if (Player.Inventry.Any(item => item.Name == Const.superWepon))
                     {
                         weponName = Const.superWepon;
                     }
@@ -142,8 +142,7 @@ namespace EscapeFromDungeon
 
         private async Task EnemyTurnAsync()
         {
-            var behavior = MonsterBehaviorRegistry.GetBehavior(Monster.Name);
-            var action = behavior.DecideAction(_battleTurn, Monster, Player);
+            var action = Monster.behavior.DecideAction(_battleTurn, Monster, Player);
 
             if (action.SkipDamage)
             {

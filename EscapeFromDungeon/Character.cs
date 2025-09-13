@@ -1,12 +1,5 @@
-﻿using EscapeFromDungeon.Properties;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
+﻿
+using System.Windows.Forms.Design.Behavior;
 
 namespace EscapeFromDungeon
 {
@@ -155,10 +148,13 @@ namespace EscapeFromDungeon
         public Weak Weak { get; set; } = Weak.None;
 
         public string ImageName {  get; set; }
-        public Monster(string name, int hp, int attack, Weak weak, string image) : base(name, hp, attack) 
+
+        public IMonsterBehavior behavior { get; set; }
+        public Monster(string name, int hp, int attack, Weak weak, string image, IMonsterBehavior behavior) : base(name, hp, attack) 
         {
             Weak = weak;
             ImageName = image;
+            this.behavior = behavior;
         }
     }
 }

@@ -1,11 +1,4 @@
 ﻿using EscapeFromDungeon.Properties;
-using Microsoft.VisualBasic;
-using System;
-using System.Drawing.Imaging;
-using System.Reflection;
-using System.Resources;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 using WindowsFormsAppTest2;
 
 namespace EscapeFromDungeon
@@ -300,7 +293,7 @@ namespace EscapeFromDungeon
 
             gameMode = GameMode.Battle;
             var mon = MonsterData.Dict[evt.Word];
-            Battle.Monster = new Monster(mon.Name, mon.Hp, mon.Attack, mon.Weak, mon.ImageName);
+            Battle.Monster = new Monster(mon.Name, mon.Hp, mon.Attack, mon.Weak, mon.ImageName, mon.behavior);
 
             //モンスターイメージを変更
             Image? img = Resources.ResourceManager.GetObject(mon.ImageName) as Image;
