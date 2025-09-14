@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+﻿using EscapeFromDungeon.Core;
 
-namespace EscapeFromDungeon
+namespace EscapeFromDungeon.Services
 {
-    internal static class Message
+    internal static class DrawMessage
     {
         private const int timerInterval = 16;
         public static bool isMessageShowing = false;// メッセージ送り用フィールド

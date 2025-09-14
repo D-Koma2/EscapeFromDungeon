@@ -1,14 +1,8 @@
-﻿using EscapeFromDungeon.Properties;
-using System;
-using System.Collections.Generic;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using EscapeFromDungeon.Core;
+using EscapeFromDungeon.Constants;
+using EscapeFromDungeon.Properties;
 
-namespace EscapeFromDungeon
+namespace EscapeFromDungeon.Models
 {
     internal static class Map
     {
@@ -54,16 +48,16 @@ namespace EscapeFromDungeon
 
         public static void ReadFromCsv(string path)
         {
-            try
-            {
-                lines = File.ReadAllLines(path);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Map.csv読み込みエラー: {ex.Message}");
-            }
+            //try
+            //{
+            //    lines = File.ReadAllLines(path);
+            //}
+            //catch (Exception ex)
+            //{
+            //    Console.WriteLine($"Map.csv読み込みエラー: {ex.Message}");
+            //}
 
-            //lines = Resources.map.Split(Const.separator, StringSplitOptions.None);
+            lines = Resources.map.Split(Const.separator, StringSplitOptions.None);
             if (lines.Last().Trim() == "") lines = lines.Take(lines.Length - 1).ToArray();//最終行が空行なら削除
             Height = lines.Length;
             Width = lines[0].Split(',').Length;
@@ -123,9 +117,9 @@ namespace EscapeFromDungeon
         public static void AddViewRadius(int radius)
         {
             viewRadius += radius;
-            if (viewRadius > maxViewRadius) viewRadius = maxViewRadius;
-            if (viewRadius < minViewRadius) viewRadius = minViewRadius;
+            viewRadius = Math.Clamp(viewRadius, minViewRadius, maxViewRadius);
         }
+
         public static void Draw(PictureBox mapImage)
         {
             using (Graphics g = Graphics.FromImage(MapCanvas))
@@ -185,16 +179,16 @@ namespace EscapeFromDungeon
             if (WalkMap[x, y] == 1 || WalkMap[x, y] == 2)
             {
                 // 上
-                if (y == 0 || (WalkMap[x, y - 1] != 1 && WalkMap[x, y - 1] != 2))
+                if (y == 0 || WalkMap[x, y - 1] != 1 && WalkMap[x, y - 1] != 2)
                     g.DrawLine(Pens.Black, dx, dy, dx + tileSize, dy);
                 // 下
-                if (y == Height - 1 || (WalkMap[x, y + 1] != 1 && WalkMap[x, y + 1] != 2))
+                if (y == Height - 1 || WalkMap[x, y + 1] != 1 && WalkMap[x, y + 1] != 2)
                     g.DrawLine(Pens.Black, dx, dy + tileSize - 1, dx + tileSize, dy + tileSize - 1);
                 // 左
-                if (x == 0 || (WalkMap[x - 1, y] != 1 && WalkMap[x - 1, y] != 2))
+                if (x == 0 || WalkMap[x - 1, y] != 1 && WalkMap[x - 1, y] != 2)
                     g.DrawLine(Pens.Black, dx - 1, dy, dx - 1, dy + tileSize);
                 // 右
-                if (x == Width - 1 || (WalkMap[x + 1, y] != 1 && WalkMap[x + 1, y] != 2))
+                if (x == Width - 1 || WalkMap[x + 1, y] != 1 && WalkMap[x + 1, y] != 2)
                     g.DrawLine(Pens.Black, dx + tileSize - 1, dy, dx + tileSize - 1, dy + tileSize);
             }
         }//DrawWallLines
@@ -203,14 +197,14 @@ namespace EscapeFromDungeon
         {
             using (Graphics g = Graphics.FromImage(OverrayCanvas))
             {
-                int maxWidth  = Map.tileSize * Form1.tilesOfMapWidth;
-                int maxHeight = Map.tileSize * Form1.tilesOfMapHeight;
+                int maxWidth = tileSize * Form1.tilesOfMapWidth;
+                int maxHeight = tileSize * Form1.tilesOfMapHeight;
 
                 for (int y = 0; y < maxHeight; y++)
                 {
                     for (int x = 0; x < maxWidth; x++)
                     {
-                        Rectangle rect = new Rectangle(x * Map.tileSize, y * Map.tileSize, Map.tileSize, Map.tileSize);
+                        Rectangle rect = new Rectangle(x * tileSize, y * tileSize, tileSize, tileSize);
 
                         // 視界判定
                         int dx = x - playerDispPos.X;
@@ -225,9 +219,9 @@ namespace EscapeFromDungeon
                             if (GameManager.IsVisionEnabled)
                             {
                                 // ライト風の暗さを重ねる
-                                double brightness = 1.0 - (distance / viewRadius);
+                                double brightness = 1.0 - distance / viewRadius;
                                 int alpha = (int)((1.0 - brightness) * 255);
-                                alpha = Math.Min(255, Math.Max(0, alpha));// アルファ値を0-255の範囲に制限
+                                alpha = Math.Clamp(alpha, 0, 255);// アルファ値を0-255の範囲に制限
                                 Color overlayColor = Color.FromArgb(alpha, 10, 0, 10);
                                 using (Brush overlayBrush = new SolidBrush(overlayColor))
                                 {

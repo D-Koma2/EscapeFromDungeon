@@ -1,7 +1,9 @@
-﻿using EscapeFromDungeon.Properties;
-using WindowsFormsAppTest2;
+﻿using EscapeFromDungeon.Constants;
+using EscapeFromDungeon.Models;
+using EscapeFromDungeon.Properties;
+using EscapeFromDungeon.Services;
 
-namespace EscapeFromDungeon
+namespace EscapeFromDungeon.Core
 {
     public enum GameMode
     {
@@ -63,7 +65,7 @@ namespace EscapeFromDungeon
             Player = new Player(_playerName, _playerHp, _playerAttack, limitMax);
             Battle = new Battle(Player);
 
-            Message.Setup();
+            DrawMessage.Setup();
         }
 
         public void KeyInput(Keys keyCode)
@@ -73,9 +75,9 @@ namespace EscapeFromDungeon
                 if (keyCode == Keys.Up || keyCode == Keys.Down || keyCode == Keys.Left || keyCode == Keys.Right)
                 {
                     // メッセージ表示中はメッセージ処理優先
-                    if (Message.isMessageShowing)
+                    if (DrawMessage.isMessageShowing)
                     {
-                        Message.InputKey();
+                        DrawMessage.InputKey();
                         return;
                     }
 
@@ -143,7 +145,7 @@ namespace EscapeFromDungeon
             {
                 if (Player.Hp > 0)
                 {
-                    await Message.ShowAsync($"{Player.Name}は勝利した!");
+                    await DrawMessage.ShowAsync($"{Player.Name}は勝利した!");
                     await Task.Delay(500);
                     // モンスターを倒したらイベントを消去
                     Map.DeleteEvent(eventPos.X, eventPos.Y);
@@ -198,7 +200,7 @@ namespace EscapeFromDungeon
 
                 Event? evt = await CheckEvent(newPos.X, newPos.Y);
 
-                if (evt == null) Message.Init(); // メッセージリセット
+                if (evt == null) DrawMessage.Init(); // メッセージリセット
 
                 if (evt != null && evt.EventType == EventType.Encount) return;
 
@@ -246,11 +248,11 @@ namespace EscapeFromDungeon
             switch (evt.EventType)
             {
                 case EventType.Message:
-                    await Message.ShowAsync(evt.Word);
+                    await DrawMessage.ShowAsync(evt.Word);
                     await Task.Delay(500);
                     break;
                 case EventType.Hint:
-                    await Message.ShowAsync(evt.Word);
+                    await DrawMessage.ShowAsync(evt.Word);
                     await Task.Delay(500);
                     break;
                 case EventType.ItemGet:
@@ -266,7 +268,7 @@ namespace EscapeFromDungeon
                     EncounterEventAsync(evt);
                     break;
                 case EventType.GameClear:
-                    await Message.ShowAsync(evt.Word);
+                    await DrawMessage.ShowAsync(evt.Word);
                     SetLabelBaseCol?.Invoke();
                     await Task.Delay(500);
                     gameMode = GameMode.GameClear;
@@ -304,9 +306,9 @@ namespace EscapeFromDungeon
             if (CallDrop != null) await CallDrop.Invoke(600, 10, 4, true);
             ChangeLblText?.Invoke();
 
-            await Message.ShowAsync($"{mon.Name}が現れた！");
+            await DrawMessage.ShowAsync($"{mon.Name}が現れた！");
             await Task.Delay(500);
-            await Message.ShowAsync(Const.commndMsg);
+            await DrawMessage.ShowAsync(Const.commndMsg);
             await Task.Delay(400);
             Battle.SetLabelVisible?.Invoke(true);
         }
@@ -317,13 +319,13 @@ namespace EscapeFromDungeon
             var name = item.Name;
             var dsc = item.Description;
             Player.GetItem(name, dsc);
-            await Message.ShowAsync($"アイテム「{evt.Word}」を取得！");
+            await DrawMessage.ShowAsync($"アイテム「{evt.Word}」を取得！");
             await Task.Delay(500);
         }
 
         private async void HealEvent(Event evt)
         {
-            await Message.ShowAsync(evt.Word);
+            await DrawMessage.ShowAsync(evt.Word);
             await Task.Delay(500);
 
             switch (evt.Id)
@@ -347,7 +349,7 @@ namespace EscapeFromDungeon
 
         private async void TrapEvent(Event evt)
         {
-            await Message.ShowAsync(evt.Word);
+            await DrawMessage.ShowAsync(evt.Word);
             await Task.Delay(500);
 
             switch (evt.Id)
@@ -367,10 +369,12 @@ namespace EscapeFromDungeon
                 default:
                     break;
             }
+
+            TurnCheck();
         }
         private async void Gameover()
         {
-            await Message.ShowAsync($"{Player.Name}は力尽きた...");
+            await DrawMessage.ShowAsync($"{Player.Name}は力尽きた...");
             SetLabelBaseCol?.Invoke();
             await Task.Delay(500);
             if (StartFade is not null) StartFade(FadeForm.FadeDir.FadeIn);

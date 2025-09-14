@@ -1,10 +1,7 @@
-﻿using EscapeFromDungeon;
+﻿using EscapeFromDungeon.Constants;
 using System;
-using System.Diagnostics;
-using System.Drawing;
-using System.Windows.Forms;
 
-namespace WindowsFormsAppTest2
+namespace EscapeFromDungeon.Core
 {
     public partial class FadeForm : Form
     {

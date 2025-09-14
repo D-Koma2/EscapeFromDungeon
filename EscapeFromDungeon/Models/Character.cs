@@ -1,7 +1,6 @@
-﻿
-using System.Windows.Forms.Design.Behavior;
+﻿using EscapeFromDungeon.Behaviors;
 
-namespace EscapeFromDungeon
+namespace EscapeFromDungeon.Models
 {
     public enum Status
     {
@@ -66,7 +65,7 @@ namespace EscapeFromDungeon
         public Player(string name, int hp, int attack, int limit) : base(name, hp, attack) 
         {
             Inventry = new List<Item>();
-            this.Limit = limit;
+            Limit = limit;
         }
 
         public enum Direction { Up, Down, Left, Right }
@@ -112,15 +111,15 @@ namespace EscapeFromDungeon
         {
             switch (dir)
             {
-                case Player.Direction.Down:
+                case Direction.Down:
                     Dir = Direction.Down;
                     playerImage = Properties.Resources.Down;
                     break;
-                case Player.Direction.Left:
+                case Direction.Left:
                     Dir = Direction.Left;
                     playerImage = Properties.Resources.Left;
                     break;
-                case Player.Direction.Right:
+                case Direction.Right:
                     Dir = Direction.Right;
                     playerImage = Properties.Resources.Right;
                     break;

@@ -1,12 +1,8 @@
-﻿
-using EscapeFromDungeon.Properties;
-using System.Diagnostics;
-using System.Drawing;
-using System.Security.Cryptography;
-using System.Threading.Tasks;
-using WindowsFormsAppTest2;
+﻿using EscapeFromDungeon.Constants;
+using EscapeFromDungeon.Models;
+using EscapeFromDungeon.Services;
 
-namespace EscapeFromDungeon
+namespace EscapeFromDungeon.Core
 {
     public partial class Form1 : Form
     {
@@ -59,7 +55,7 @@ namespace EscapeFromDungeon
             GameManager.gameMode = GameMode.Title;
             Map.InitMap();
             gameManager.Init();
-            Message.Init();
+            DrawMessage.Init();
             Map.AddViewRadius(Map.maxViewRadius);
             SetMonsterImgVisible(false);
             SetLabelVisible(true);
@@ -269,7 +265,7 @@ namespace EscapeFromDungeon
 
         private void MsgBoxPaint(object sender, PaintEventArgs e)
         {
-            Message.Draw(e.Graphics);
+            DrawMessage.Draw(e.Graphics);
         }
 
         private void LimitBoxPaint(object sender, PaintEventArgs e)
@@ -464,14 +460,15 @@ namespace EscapeFromDungeon
 
         private async void UseItem(string itemName)
         {
-            SetUseLabelCol(itemName, lblSelectCol);
-
             switch (itemName)
             {
                 case Const.potion:
+                    int potionCount = gameManager.Player.GetItemCount(Const.potion);
+                    if (potionCount == 0) return;
+                    SetUseLabelCol(itemName, lblSelectCol);
                     if (gameManager.Player.Hp == gameManager.Player.MaxHp)
                     {
-                        await Message.ShowAsync(Const.hpFullMsg);
+                        await DrawMessage.ShowAsync(Const.hpFullMsg);
                         await Task.Delay(200);
                         SetUseLabelCol(itemName, lblBaseCol);
                         return;
@@ -480,15 +477,21 @@ namespace EscapeFromDungeon
                     break;
 
                 case Const.curePoison:
+                    int curePoisonCount = gameManager.Player.GetItemCount(Const.curePoison);
+                    if (curePoisonCount == 0) return;
+                    SetUseLabelCol(itemName, lblSelectCol);
                     gameManager.Player.HealStatus();
                     break;
 
                 case Const.torch:
+                    int torchCount = gameManager.Player.GetItemCount(Const.torch);
+                    if (torchCount == 0) return;
+                    SetUseLabelCol(itemName, lblSelectCol);
                     Map.AddViewRadius(4);
                     break;
             }
 
-            await Message.ShowAsync($"{itemName}を使った！");
+            await DrawMessage.ShowAsync($"{itemName}を使った！");
             gameManager.Player.UseItem(itemName);
             await Task.Delay(200);
             SetUseLabelCol(itemName, lblBaseCol);
