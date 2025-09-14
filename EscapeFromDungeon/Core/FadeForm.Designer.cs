@@ -1,4 +1,4 @@
-﻿namespace WindowsFormsAppTest2
+﻿namespace EscapeFromDungeon.Core
 {
     partial class FadeForm
     {

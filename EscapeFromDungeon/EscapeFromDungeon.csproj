@@ -9,22 +9,18 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Update="Event.csv">
+    <None Update="resources\Event.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="item.csv">
+    <None Update="resources\Item.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="map.csv">
+    <None Update="resources\map.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="monster.csv">
+    <None Update="resources\Monster.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="resources\" />
   </ItemGroup>
 
   <ItemGroup>

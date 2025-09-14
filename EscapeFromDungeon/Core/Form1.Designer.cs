@@ -1,4 +1,4 @@
-﻿namespace EscapeFromDungeon
+﻿namespace EscapeFromDungeon.Core
 {
     partial class Form1
     {

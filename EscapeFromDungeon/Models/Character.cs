@@ -1,14 +1,6 @@
-﻿using EscapeFromDungeon.Properties;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
+﻿using EscapeFromDungeon.Behaviors;
 
-namespace EscapeFromDungeon
+namespace EscapeFromDungeon.Models
 {
     public enum Status
     {
@@ -73,7 +65,7 @@ namespace EscapeFromDungeon
         public Player(string name, int hp, int attack, int limit) : base(name, hp, attack) 
         {
             Inventry = new List<Item>();
-            this.Limit = limit;
+            Limit = limit;
         }
 
         public enum Direction { Up, Down, Left, Right }
@@ -119,15 +111,15 @@ namespace EscapeFromDungeon
         {
             switch (dir)
             {
-                case Player.Direction.Down:
+                case Direction.Down:
                     Dir = Direction.Down;
                     playerImage = Properties.Resources.Down;
                     break;
-                case Player.Direction.Left:
+                case Direction.Left:
                     Dir = Direction.Left;
                     playerImage = Properties.Resources.Left;
                     break;
-                case Player.Direction.Right:
+                case Direction.Right:
                     Dir = Direction.Right;
                     playerImage = Properties.Resources.Right;
                     break;
@@ -155,10 +147,13 @@ namespace EscapeFromDungeon
         public Weak Weak { get; set; } = Weak.None;
 
         public string ImageName {  get; set; }
-        public Monster(string name, int hp, int attack, Weak weak, string image) : base(name, hp, attack) 
+
+        public IMonsterBehavior behavior { get; set; }
+        public Monster(string name, int hp, int attack, Weak weak, string image, IMonsterBehavior behavior) : base(name, hp, attack) 
         {
             Weak = weak;
             ImageName = image;
+            this.behavior = behavior;
         }
     }
 }

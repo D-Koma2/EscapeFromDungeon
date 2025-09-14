@@ -1,20 +1,10 @@
-﻿using EscapeFromDungeon;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms.Design.Behavior;
+﻿using EscapeFromDungeon.Constants;
+using EscapeFromDungeon.Models;
 
-namespace EscapeFromDungeon
+namespace EscapeFromDungeon.Behaviors
 {
     public static class PlayerAttackRegistry
     {
-        public static IPlayerAttack GetBehavior(string itemName)
-        {
-            return behaviors.TryGetValue(itemName, out var behavior) ? behavior : new DefaultAttack();
-        }
-
         private static Dictionary<string, IPlayerAttack> behaviors = new()
         {
             { Const.superWepon, new SuperWeponAttack() },
@@ -24,6 +14,11 @@ namespace EscapeFromDungeon
             { Const.heavyWepon, new HeavyWeponAttack() },
             { Const.holyWepon, new HolyWeponAttack() },
         };
+
+        public static IPlayerAttack GetBehavior(string itemName)
+        {
+            return behaviors.TryGetValue(itemName, out var behavior) ? behavior : new DefaultAttack();
+        }
     }
 
     public class PlayerAttack

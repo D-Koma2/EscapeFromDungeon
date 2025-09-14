@@ -1,12 +1,7 @@
-﻿using Microsoft.VisualBasic;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
+﻿using EscapeFromDungeon.Constants;
+using EscapeFromDungeon.Models;
 
-namespace EscapeFromDungeon
+namespace EscapeFromDungeon.Services
 {
     internal static class DrawInfo
     {

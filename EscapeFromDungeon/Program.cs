@@ -1,3 +1,5 @@
+using EscapeFromDungeon.Core;
+
 namespace EscapeFromDungeon
 {
     internal static class Program

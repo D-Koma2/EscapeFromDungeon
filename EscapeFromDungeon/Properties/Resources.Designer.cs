@@ -171,16 +171,6 @@ namespace EscapeFromDungeon.Properties {
         }
         
         /// <summary>
-        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
-        /// </summary>
-        internal static System.Drawing.Bitmap EnemySimbol2 {
-            get {
-                object obj = ResourceManager.GetObject("EnemySimbol2", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
         ///   ID,EventType,message
         ///I0,ItemGet,ポーション
         ///I1,ItemGet,毒消し草
@@ -257,16 +247,16 @@ namespace EscapeFromDungeon.Properties {
         }
         
         /// <summary>
-        ///   モンスター名,HP,Atk,Weak
-        ///スライム,20,1,None,Enemy01
-        ///強力スライム,40,5,Thunder,Enemy02
-        ///炎スライム,30,8,Ice,Enemy03
-        ///氷スライム,30,9,Fire,Enemy04
-        ///雷スライム,30,10,Heavy,Enemy05
-        ///強力炎スライム,80,10,Ice,Enemy06
-        ///強力氷スライム,80,10,Fire,Enemy07
-        ///強力雷スライム,90,15,Heavy,Enemy08
-        ///デーモン,200,20,Holy,Enemy09 に類似しているローカライズされた文字列を検索します。
+        ///   モンスター名,HP,Atk,Weak,ImageName,BehaviorType
+        ///スライム,20,5,None,Enemy01,Default
+        ///強力スライム,90,10,Thunder,Enemy02,SlimeS
+        ///炎スライム,60,8,Ice,Enemy03,Slime
+        ///氷スライム,60,9,Fire,Enemy04,Slime
+        ///雷スライム,60,11,Heavy,Enemy05,Slime
+        ///強力炎スライム,120,12,Ice,Enemy06,SlimeG
+        ///強力氷スライム,120,13,Fire,Enemy07,SlimeG
+        ///強力雷スライム,120,14,Heavy,Enemy08,SlimeG
+        ///デーモン,270,15,Holy,Enemy09,Demon に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string Monster {
             get {

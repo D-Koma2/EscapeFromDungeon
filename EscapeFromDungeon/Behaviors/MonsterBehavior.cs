@@ -1,30 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using EscapeFromDungeon.Constants;
+using EscapeFromDungeon.Models;
 
-namespace EscapeFromDungeon
+namespace EscapeFromDungeon.Behaviors
 {
-    public static class MonsterBehaviorRegistry
-    {
-        public static IMonsterBehavior GetBehavior(string monsterName)
-        {
-            return behaviors.TryGetValue(monsterName, out var behavior) ? behavior : new DefaultBehavior();
-        } 
-
-        private static Dictionary<string, IMonsterBehavior> behaviors = new()
-        {
-            { Const.fireSlime, new SlimeBehavior() },
-            { Const.iceSlime, new SlimeBehavior() },
-            { Const.thunderSlime, new SlimeBehavior() },
-            { Const.fireSlimeG, new SlimeGBehavior() },
-            { Const.iceSlimeG, new SlimeGBehavior() },
-            { Const.thunderSlimeG, new SlimeGBehavior() },
-            { Const.demon, new DemonBehavior() }
-        };
-    }
-
     public class MonsterAction
     {
         public string Message { get; set; }
@@ -51,6 +29,22 @@ namespace EscapeFromDungeon
         public MonsterAction DecideAction(int turn, Monster monster, Player player)
         {
             return new MonsterAction($"{monster.Name}の攻撃！{player.Name}は {monster.Attack} のダメージ！", monster.Attack, false);
+        }
+    }
+
+    public class SlimeSBehavior : IMonsterBehavior
+    {
+        public MonsterAction DecideAction(int turn, Monster monster, Player player)
+        {
+            if (turn > 7)
+            {
+                int damage = monster.Attack * 5;
+                return new MonsterAction($"{monster.Name}の超強力な攻撃！${player.Name}は {damage} の大ダメージ！", damage, false, Shake.weak);
+            }
+            else
+            {
+                return new MonsterAction($"{monster.Name}の攻撃！{player.Name}は {monster.Attack} のダメージ！", monster.Attack, false);
+            }
         }
     }
 
