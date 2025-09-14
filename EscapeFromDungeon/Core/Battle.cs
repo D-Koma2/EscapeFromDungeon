@@ -1,6 +1,7 @@
 ﻿using EscapeFromDungeon.Behaviors;
 using EscapeFromDungeon.Constants;
 using EscapeFromDungeon.Models;
+using EscapeFromDungeon.Properties;
 using EscapeFromDungeon.Services;
 
 namespace EscapeFromDungeon.Core
@@ -43,6 +44,7 @@ namespace EscapeFromDungeon.Core
             {
                 GameManager.gameMode = GameMode.BattleEnd;
                 await DrawMessage.ShowAsync($"{Monster.Name}を倒した！");
+                GameManager.sePlayer.PlayOnce(Resources.maou_se_8bit27);
                 await Task.Delay(500);
                 var duration = Monster.Name == Const.demon ? 2 : 16;
                 if (CallDrop != null) await CallDrop.Invoke(600, duration, 8, false);
@@ -96,6 +98,7 @@ namespace EscapeFromDungeon.Core
                         int healPoint = Math.Min(30, Player.MaxHp - Player.Hp);
                         Player.Heal(healPoint);
                         Player.UseItem(Const.potion);
+                        GameManager.sePlayer.PlayOnce(Resources.maou_se_magical15);
                         await DrawMessage.ShowAsync($"{Player.Name}は{healPoint}回復した！");
                         break;
                     }
@@ -108,10 +111,12 @@ namespace EscapeFromDungeon.Core
                     }
                 case Const.CommandEsc:
                     GameManager.gameMode = GameMode.Escaped;
+                    GameManager.sePlayer.PlayOnce(Properties.Resources.maou_se_battle19);
                     SetLabelVisible?.Invoke(true);
                     if (CallShrink != null) await CallShrink.Invoke(30, 2);
                     await DrawMessage.ShowAsync($"{Player.Name}は逃げ出した！");
                     Player.Limit--;
+                    GameManager.bgmPlayer.PlayLoop(Properties.Resources.maou_bgm_8bit04);
                     return;
             }
 
@@ -133,6 +138,7 @@ namespace EscapeFromDungeon.Core
             var action = behavior.DecideAction(Player, Monster, itemName);
 
             await DrawMessage.ShowAsync(action.Message);
+            GameManager.sePlayer.PlayOnce(Resources.maou_se_battle06);
             Monster.TakeDamage(action.Damage);
             if (CallShaker != null) await CallShaker.Invoke(Target.enemy, Shake.weak, 400, 30);
         }
@@ -154,6 +160,7 @@ namespace EscapeFromDungeon.Core
                 else
                 {
                     await DrawMessage.ShowAsync(action.Message);
+                    GameManager.sePlayer.PlayOnce(Resources.maou_se_8bit22);
                     Player.TakeDamage(action.Damage);
                     if (CallShaker != null) await CallShaker.Invoke(Target.player, action.shakeType, 400, 30);
                 }

@@ -35,6 +35,8 @@ namespace EscapeFromDungeon.Core
         public Player Player { get; private set; }
         public Battle Battle { get; private set; }
 
+        public static MusicPlayer bgmPlayer, sePlayer;
+
         public Action? SetLabelBaseCol;
         public Action? ChangeLblText;
         public Action? KeyUpPressed;
@@ -64,6 +66,9 @@ namespace EscapeFromDungeon.Core
 
             Player = new Player(_playerName, _playerHp, _playerAttack, limitMax);
             Battle = new Battle(Player);
+
+            bgmPlayer = new MusicPlayer();
+            sePlayer = new MusicPlayer();
 
             DrawMessage.Setup();
         }
@@ -154,6 +159,7 @@ namespace EscapeFromDungeon.Core
                     eventPos = Point.Empty;
                     gameMode = GameMode.Explore;
                     ChangeLblText?.Invoke();
+                    bgmPlayer.PlayLoop(Resources.maou_bgm_8bit04);
                 }
             }
 
@@ -211,14 +217,26 @@ namespace EscapeFromDungeon.Core
 
         private void DamageCheck(int x, int y)
         {
+            var isDamaged = false;
             // ダメージ床
             if (Map.WalkMap[x, y] == 3)
             {
                 Player.TakeDamage(DamageFloorValue);
+                isDamaged = true;
             }
             if (Player.Status == Status.Poison)
             {
                 Player.TakeDamage(PoisonDamageValue);
+                isDamaged = true;
+            }
+
+            if(isDamaged)
+            {
+                sePlayer.PlayOnce(Resources.maou_se_8bit22);
+            }
+            else
+            {
+                sePlayer.PlayOnce(Resources.maou_se_sound_footstep02);
             }
         }
 
@@ -268,6 +286,7 @@ namespace EscapeFromDungeon.Core
                     EncounterEventAsync(evt);
                     break;
                 case EventType.GameClear:
+                    bgmPlayer.PlayLoop(Resources.maou_bgm_8bit06);
                     await DrawMessage.ShowAsync(evt.Word);
                     SetLabelBaseCol?.Invoke();
                     await Task.Delay(500);
@@ -290,6 +309,8 @@ namespace EscapeFromDungeon.Core
 
         private async void EncounterEventAsync(Event evt)
         {
+            GameManager.bgmPlayer.PlayLoop(Properties.Resources.maou_bgm_8bit08);
+
             Form1.isBattleInputLocked = true;
             Form1.battleInputUnlockTime = DateTime.Now.AddSeconds(3.0); // 指定秒間キー入力をロック
 
@@ -320,12 +341,14 @@ namespace EscapeFromDungeon.Core
             var dsc = item.Description;
             Player.GetItem(name, dsc);
             await DrawMessage.ShowAsync($"アイテム「{evt.Word}」を取得！");
+            sePlayer.PlayOnce(Resources.maou_se_onepoint09);
             await Task.Delay(500);
         }
 
         private async void HealEvent(Event evt)
         {
             await DrawMessage.ShowAsync(evt.Word);
+            sePlayer.PlayOnce(Resources.maou_se_magical15);
             await Task.Delay(500);
 
             switch (evt.Id)
@@ -350,6 +373,7 @@ namespace EscapeFromDungeon.Core
         private async void TrapEvent(Event evt)
         {
             await DrawMessage.ShowAsync(evt.Word);
+            sePlayer.PlayOnce(Resources.maou_se_battle12);
             await Task.Delay(500);
 
             switch (evt.Id)
@@ -374,6 +398,7 @@ namespace EscapeFromDungeon.Core
         }
         private async void Gameover()
         {
+            GameManager.bgmPlayer.PlayLoop(Properties.Resources.maou_bgm_8bit20);
             await DrawMessage.ShowAsync($"{Player.Name}は力尽きた...");
             SetLabelBaseCol?.Invoke();
             await Task.Delay(500);

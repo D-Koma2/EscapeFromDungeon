@@ -1,5 +1,6 @@
 ﻿using EscapeFromDungeon.Constants;
 using EscapeFromDungeon.Models;
+using EscapeFromDungeon.Properties;
 using EscapeFromDungeon.Services;
 
 namespace EscapeFromDungeon.Core
@@ -26,6 +27,9 @@ namespace EscapeFromDungeon.Core
         private DateTime lastInputTime = DateTime.MinValue;
         private readonly TimeSpan inputCooldown = TimeSpan.FromMilliseconds(300);
 
+        private DateTime lastInputTimeExplor = DateTime.MinValue;
+        private readonly TimeSpan inputCooldownExplor = TimeSpan.FromMilliseconds(125);
+
         private bool _isWaiting = false;
 
         public Form1()
@@ -46,7 +50,6 @@ namespace EscapeFromDungeon.Core
             InitDraw();
             TimerSetUp();
             FadeSetup();
-
             //DispPoint();
         }
 
@@ -60,7 +63,6 @@ namespace EscapeFromDungeon.Core
             SetMonsterImgVisible(false);
             SetLabelVisible(true);
             InitDraw();
-
             //DispPoint();
         }
 
@@ -228,6 +230,9 @@ namespace EscapeFromDungeon.Core
 
         private void MainFormKeyDown(object sender, KeyEventArgs e)
         {
+            if (DateTime.Now - lastInputTimeExplor < inputCooldownExplor) return;
+            lastInputTimeExplor = DateTime.Now;
+
             SetLblCol(e.KeyCode, lblSelectCol);
             gameManager.KeyInput(e.KeyCode);
         }
@@ -492,6 +497,7 @@ namespace EscapeFromDungeon.Core
             }
 
             await DrawMessage.ShowAsync($"{itemName}を使った！");
+            GameManager.sePlayer.PlayOnce(Resources.maou_se_magical15);
             gameManager.Player.UseItem(itemName);
             await Task.Delay(200);
             SetUseLabelCol(itemName, lblBaseCol);

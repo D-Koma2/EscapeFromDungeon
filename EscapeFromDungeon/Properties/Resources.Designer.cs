@@ -234,6 +234,123 @@ namespace EscapeFromDungeon.Properties {
         }
         
         /// <summary>
+        ///   System.IO.MemoryStream に類似した型 System.IO.UnmanagedMemoryStream のローカライズされたリソースを検索します。
+        /// </summary>
+        internal static System.IO.UnmanagedMemoryStream maou_bgm_8bit04 {
+            get {
+                return ResourceManager.GetStream("maou_bgm_8bit04", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   System.IO.MemoryStream に類似した型 System.IO.UnmanagedMemoryStream のローカライズされたリソースを検索します。
+        /// </summary>
+        internal static System.IO.UnmanagedMemoryStream maou_bgm_8bit06 {
+            get {
+                return ResourceManager.GetStream("maou_bgm_8bit06", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   System.IO.MemoryStream に類似した型 System.IO.UnmanagedMemoryStream のローカライズされたリソースを検索します。
+        /// </summary>
+        internal static System.IO.UnmanagedMemoryStream maou_bgm_8bit08 {
+            get {
+                return ResourceManager.GetStream("maou_bgm_8bit08", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   System.IO.MemoryStream に類似した型 System.IO.UnmanagedMemoryStream のローカライズされたリソースを検索します。
+        /// </summary>
+        internal static System.IO.UnmanagedMemoryStream maou_bgm_8bit20 {
+            get {
+                return ResourceManager.GetStream("maou_bgm_8bit20", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   System.IO.MemoryStream に類似した型 System.IO.UnmanagedMemoryStream のローカライズされたリソースを検索します。
+        /// </summary>
+        internal static System.IO.UnmanagedMemoryStream maou_se_8bit22 {
+            get {
+                return ResourceManager.GetStream("maou_se_8bit22", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   System.IO.MemoryStream に類似した型 System.IO.UnmanagedMemoryStream のローカライズされたリソースを検索します。
+        /// </summary>
+        internal static System.IO.UnmanagedMemoryStream maou_se_8bit27 {
+            get {
+                return ResourceManager.GetStream("maou_se_8bit27", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   System.IO.MemoryStream に類似した型 System.IO.UnmanagedMemoryStream のローカライズされたリソースを検索します。
+        /// </summary>
+        internal static System.IO.UnmanagedMemoryStream maou_se_battle06 {
+            get {
+                return ResourceManager.GetStream("maou_se_battle06", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   System.IO.MemoryStream に類似した型 System.IO.UnmanagedMemoryStream のローカライズされたリソースを検索します。
+        /// </summary>
+        internal static System.IO.UnmanagedMemoryStream maou_se_battle12 {
+            get {
+                return ResourceManager.GetStream("maou_se_battle12", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   System.IO.MemoryStream に類似した型 System.IO.UnmanagedMemoryStream のローカライズされたリソースを検索します。
+        /// </summary>
+        internal static System.IO.UnmanagedMemoryStream maou_se_battle17 {
+            get {
+                return ResourceManager.GetStream("maou_se_battle17", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   System.IO.MemoryStream に類似した型 System.IO.UnmanagedMemoryStream のローカライズされたリソースを検索します。
+        /// </summary>
+        internal static System.IO.UnmanagedMemoryStream maou_se_battle19 {
+            get {
+                return ResourceManager.GetStream("maou_se_battle19", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   System.IO.MemoryStream に類似した型 System.IO.UnmanagedMemoryStream のローカライズされたリソースを検索します。
+        /// </summary>
+        internal static System.IO.UnmanagedMemoryStream maou_se_magical15 {
+            get {
+                return ResourceManager.GetStream("maou_se_magical15", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   System.IO.MemoryStream に類似した型 System.IO.UnmanagedMemoryStream のローカライズされたリソースを検索します。
+        /// </summary>
+        internal static System.IO.UnmanagedMemoryStream maou_se_onepoint09 {
+            get {
+                return ResourceManager.GetStream("maou_se_onepoint09", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   System.IO.MemoryStream に類似した型 System.IO.UnmanagedMemoryStream のローカライズされたリソースを検索します。
+        /// </summary>
+        internal static System.IO.UnmanagedMemoryStream maou_se_sound_footstep02 {
+            get {
+                return ResourceManager.GetStream("maou_se_sound_footstep02", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11
         ///11,00,00,00,11,00,T2,11,00,00,00,00,00,00,00,00,00,00,00,12,E4,00,00,00,00,00,I0,11,00,00,00,00,00,00,00,XX,00,00,00,11
         ///11,00,11,00,11,00,11,11,00,11,11,XX,XX,11,00,11,00,11,00,11,11,00,00,11,00,11,11,11,00,11,11,XX,00,11,00,11,00,11,00,11

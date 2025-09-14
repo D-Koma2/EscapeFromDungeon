@@ -8,14 +8,15 @@ namespace EscapeFromDungeon.Models
         Poison,
     }
 
+    [Flags]
     public enum Weak
     {
-        None,
-        Fire,
-        Ice,
-        Thunder,
-        Heavy,
-        Holy
+        None = 0,
+        Fire = 1 << 0, // 1
+        Ice = 1 << 1, // 2
+        Thunder = 1 << 2, // 4
+        Heavy = 1 << 3, // 8
+        Holy = 1 << 4  // 16
     }
 
     public class Character

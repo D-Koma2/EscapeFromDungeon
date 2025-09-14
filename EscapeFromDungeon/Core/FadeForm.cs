@@ -1,5 +1,4 @@
 ﻿using EscapeFromDungeon.Constants;
-using System;
 
 namespace EscapeFromDungeon.Core
 {
@@ -34,15 +33,20 @@ namespace EscapeFromDungeon.Core
 
             fadeTimer = new System.Windows.Forms.Timer { Interval = timerInterval };
             fadeTimer.Tick += FadeTimer_Tick;
+
+            GameManager.bgmPlayer.PlayLoop(Properties.Resources.maou_bgm_8bit06);
         }
 
         public void StartFade(FadeDir direction)
         {
+            CautionLbl.Visible = false;
             this.fadeDirection = direction;
             if (this.fadeDirection == FadeDir.FadeIn) { this.Opacity = 0.0; }
             else { this.Opacity = 1.0; }
             fadeTimer.Start();
             this.Show();
+            if(GameManager.gameMode == GameMode.Title)
+                GameManager.bgmPlayer.PlayLoop(Properties.Resources.maou_bgm_8bit04);
         }
 
         private void FadeTimer_Tick(object? sender, EventArgs e)
@@ -82,10 +86,6 @@ namespace EscapeFromDungeon.Core
                         TitleLbl.Visible = true;
                         StartBtn.Visible = true;
                         ExitBtn.Visible = true;
-                        this.Activate();
-                        this.KeyPreview = true;
-                        this.Focus();
-                        StartBtn.Focus();
                         GameManager.gameMode = GameMode.Reset;
                     }
                 }
@@ -118,7 +118,7 @@ namespace EscapeFromDungeon.Core
 
         private void ExitButtonClick(object sender, EventArgs e) => Application.Exit();
 
-        private void FadeForm_Shown(object sender, EventArgs e)
+        private void FadeForm_Show(object sender, EventArgs e)
         {
             this.Activate();
             this.KeyPreview = true;
