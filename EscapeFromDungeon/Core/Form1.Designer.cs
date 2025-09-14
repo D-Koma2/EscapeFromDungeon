@@ -105,7 +105,7 @@
             lblAttack.TabIndex = 4;
             lblAttack.Text = "[↑] 攻撃";
             lblAttack.TextAlign = ContentAlignment.MiddleCenter;
-            lblAttack.Click += lblAttackClickAsync;
+            lblAttack.Click += MovelblClickAsync;
             // 
             // lblHeal
             // 
@@ -119,7 +119,7 @@
             lblHeal.TabIndex = 5;
             lblHeal.Text = "[→] 回復";
             lblHeal.TextAlign = ContentAlignment.MiddleCenter;
-            lblHeal.Click += lblHealClickAsync;
+            lblHeal.Click += MovelblClickAsync;
             // 
             // lblDefence
             // 
@@ -133,7 +133,7 @@
             lblDefence.TabIndex = 6;
             lblDefence.Text = "[←] 防御";
             lblDefence.TextAlign = ContentAlignment.MiddleCenter;
-            lblDefence.Click += lblDefenceClickAsync;
+            lblDefence.Click += MovelblClickAsync;
             // 
             // lblEscape
             // 
@@ -147,7 +147,7 @@
             lblEscape.TabIndex = 7;
             lblEscape.Text = "[↓] 逃げる";
             lblEscape.TextAlign = ContentAlignment.MiddleCenter;
-            lblEscape.Click += lblEscapeClickAsync;
+            lblEscape.Click += MovelblClickAsync;
             // 
             // lblUsePosion
             // 

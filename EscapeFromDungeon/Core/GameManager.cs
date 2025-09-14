@@ -5,82 +5,57 @@ using EscapeFromDungeon.Services;
 
 namespace EscapeFromDungeon.Core
 {
-    public enum GameMode
-    {
-        Title,
-        Explore,
-        Battle,
-        Escaped,
-        BattleEnd,
-        Gameover,
-        GameClear,
-        Reset
-    }
-
     internal class GameManager
     {
-        public static GameMode gameMode { get; set; } = GameMode.Title;
-        // true: 視界制限あり、false: 全体表示デバッグ用
-        public static bool IsVisionEnabled { get; set; } = true;
+        private const int _ViewShrinkInterval = 33;
+        private const int _DamageFloorValue = 3;
+        private const int _PoisonDamageValue = 1;
 
-        private const int ViewShrinkInterval = 33;
-        private const int DamageFloorValue = 3;
-        private const int PoisonDamageValue = 1;
-
-        private const string _playerName = "あなた";
-        private const int _playerHp = 100;
-        private const int _playerAttack = 10;
-        public readonly int limitMax = 999;
+        private Point _eventPos = Point.Empty;
+        private Point _prePos = Point.Empty;
 
         public Player Player { get; private set; }
         public Battle Battle { get; private set; }
 
-        public static MusicPlayer bgmPlayer, sePlayer;
+        public static MusicPlayer bgmPlayer = new MusicPlayer();
+        public static MusicPlayer sePlayer = new MusicPlayer();
 
+        public Action? SetMapPos;
         public Action? SetLabelBaseCol;
         public Action? ChangeLblText;
-        public Action? KeyUpPressed;
-        public Action? KeyDownPressed;
-        public Action? KeyLeftPressed;
-        public Action? KeyRightPressed;
-        public Action? SetMapPos;
 
-        public Action? KeyIPressed;
-        public Action? KeyPPressed;
-        public Action? KeyOPressed;
-        public Action<FadeForm.FadeDir>? StartFade;
+        public Func<string, Keys, Task>? MoveKeyPressed;
+        public Action<string>? ItemKeyPressed;
 
-        public Func<int, int, int, bool, Task>? CallDrop;
         public Action<Image>? SetMonsterImg;
+        public Action<FadeForm.FadeDir>? StartFade;
+        public Func<int, int, int, bool, Task>? CallDrop;
 
-        private Point eventPos = Point.Empty;
-        private Point prePos = Point.Empty;
+        private const string _playerName = "あなた";
+        private const int _playerHp = 100;
+        private const int _playerAttack = 10;
+
+        public readonly int limitMax = 999;
 
         public GameManager()
         {
             Map.ReadFromCsv(Const.mapCsv);//最初に実行する事!
-
             EventData.ReadFromCsv(Const.eventCsv);
             MonsterData.ReadFromCsv(Const.monsterCsv);
             ItemData.ReadFromCsv(Const.itemCsv);
-
+            DrawMessage.timerSetup();
             Player = new Player(_playerName, _playerHp, _playerAttack, limitMax);
             Battle = new Battle(Player);
-
-            bgmPlayer = new MusicPlayer();
-            sePlayer = new MusicPlayer();
-
-            DrawMessage.Setup();
         }
 
         public void KeyInput(Keys keyCode)
         {
-            if (gameMode == GameMode.Explore)
+            if (GameStateManager.Instance.CurrentMode == GameMode.Explore)
             {
                 if (keyCode == Keys.Up || keyCode == Keys.Down || keyCode == Keys.Left || keyCode == Keys.Right)
                 {
                     // メッセージ表示中はメッセージ処理優先
-                    if (DrawMessage.isMessageShowing)
+                    if (DrawMessage.IsMessageShowing)
                     {
                         DrawMessage.InputKey();
                         return;
@@ -90,38 +65,39 @@ namespace EscapeFromDungeon.Core
                 }
                 else if (keyCode == Keys.P)
                 {
-                    KeyPPressed?.Invoke();
+                    ItemKeyPressed?.Invoke(Const.potion);
                 }
                 else if (keyCode == Keys.O)
                 {
-                    KeyOPressed?.Invoke();
+                    ItemKeyPressed?.Invoke(Const.curePoison);
                 }
                 else if (keyCode == Keys.I)
                 {
-                    KeyIPressed?.Invoke();
+                    ItemKeyPressed?.Invoke(Const.torch);
                 }
                 //else if (keyCode == Keys.V)//デバッグ用
                 //{
-                //    IsVisionEnabled = !IsVisionEnabled;
+                //    if (Map.IsVisionEnabled) Map.SetIsVisionEnable(false);
+                //    else Map.SetIsVisionEnable(true);
                 //}
             }
-            else if (gameMode == GameMode.Battle)
+            else if (GameStateManager.Instance.CurrentMode == GameMode.Battle)
             {
                 if (keyCode == Keys.Up)
                 {
-                    KeyUpPressed?.Invoke();
+                    MoveKeyPressed?.Invoke(Const.CommandAtk, Keys.Up);
                 }
                 else if (keyCode == Keys.Down)
                 {
-                    KeyDownPressed?.Invoke();
+                    MoveKeyPressed?.Invoke(Const.CommandEsc, Keys.Down);
                 }
                 else if (keyCode == Keys.Left)
                 {
-                    KeyLeftPressed?.Invoke();
+                    MoveKeyPressed?.Invoke(Const.CommandDef, Keys.Left);
                 }
                 else if (keyCode == Keys.Right)
                 {
-                    KeyRightPressed?.Invoke();
+                    MoveKeyPressed?.Invoke(Const.CommandHeal, Keys.Right);
                 }
             }
         }
@@ -129,79 +105,79 @@ namespace EscapeFromDungeon.Core
         public void Init()
         {
             Player.Init(_playerHp, limitMax);
-            eventPos = Point.Empty;
-            IsVisionEnabled = true;
+            _eventPos = Point.Empty;
         }
 
         public async Task BattleCheckAsync()
         {
-            if (gameMode == GameMode.Escaped)
+            if (GameStateManager.Instance.CurrentMode == GameMode.Escaped)
             {
                 Form1.isBattleInputLocked = true;
                 Form1.battleInputUnlockTime = DateTime.Now.AddSeconds(2.5); // 指定秒間キー入力をロック
-                Map.playerPos = prePos;
+                Map.PlayerPos = _prePos;
                 SetMapPos?.Invoke();
                 await Task.Delay(500);
-                gameMode = GameMode.Explore;
+                GameStateManager.Instance.ChangeMode(GameMode.Explore);
                 ChangeLblText?.Invoke();
             }
 
-            if (gameMode == GameMode.BattleEnd)
+            if (GameStateManager.Instance.CurrentMode == GameMode.BattleEnd)
             {
                 if (Player.Hp > 0)
                 {
                     await DrawMessage.ShowAsync($"{Player.Name}は勝利した!");
                     await Task.Delay(500);
                     // モンスターを倒したらイベントを消去
-                    Map.DeleteEvent(eventPos.X, eventPos.Y);
+                    Map.DeleteEvent(_eventPos.X, _eventPos.Y);
                     //マップ上の敵シンボルを消す
-                    Map.DelEnemySimbolDraw(eventPos.X, eventPos.Y);
-                    eventPos = Point.Empty;
-                    gameMode = GameMode.Explore;
+                    Map.DelEnemySimbolDraw(_eventPos.X, _eventPos.Y);
+                    _eventPos = Point.Empty;
+                    GameStateManager.Instance.ChangeMode(GameMode.Explore);
                     ChangeLblText?.Invoke();
                     bgmPlayer.PlayLoop(Resources.maou_bgm_8bit04);
                 }
             }
 
-            if (gameMode == GameMode.Gameover) Gameover();
+            if (GameStateManager.Instance.CurrentMode == GameMode.Gameover) Gameover();
         }//BattleCheck
 
         private async void Move(Keys keyCode)
         {
             Point dir = Point.Empty;
+            var playerDir = Player.Direction.Up;
 
             if (keyCode == Keys.Up)
             {
                 dir = new Point(0, -1);
-                Player.Dir = Player.Direction.Up;
+                playerDir = Player.Direction.Up;
             }
             else if (keyCode == Keys.Down)
             {
                 dir = new Point(0, 1);
-                Player.Dir = Player.Direction.Down;
+                playerDir = Player.Direction.Down;
             }
             else if (keyCode == Keys.Left)
             {
                 dir = new Point(-1, 0);
-                Player.Dir = Player.Direction.Left;
+                playerDir = Player.Direction.Left;
             }
             else if (keyCode == Keys.Right)
             {
                 dir = new Point(1, 0);
-                Player.Dir = Player.Direction.Right;
+                playerDir = Player.Direction.Right;
             }
 
-            prePos = Map.playerPos; // 移動前の位置を保存
+            _prePos = Map.PlayerPos; // 移動前の位置を保存
 
-            Player.SetDirectionImage(Player.Dir);
-            Point newPos = new Point(Map.playerPos.X + dir.X, Map.playerPos.Y + dir.Y);
+            Player.SetDirectionImage(playerDir);
+            Point newPos = new Point(Map.PlayerPos.X + dir.X, Map.PlayerPos.Y + dir.Y);
 
             // 移動可能かチェック
             if (Map.CanMoveTo(newPos.X, newPos.Y))
             {
-                eventPos = newPos; // モンスターイベント位置を保存
+                _eventPos = newPos; // モンスターイベント位置を保存
 
-                Map.playerPos = newPos;
+                Map.PlayerPos = newPos;
                 SetMapPos?.Invoke();
 
                 Event? evt = await CheckEvent(newPos.X, newPos.Y);
@@ -221,16 +197,16 @@ namespace EscapeFromDungeon.Core
             // ダメージ床
             if (Map.WalkMap[x, y] == 3)
             {
-                Player.TakeDamage(DamageFloorValue);
+                Player.TakeDamage(_DamageFloorValue);
                 isDamaged = true;
             }
             if (Player.Status == Status.Poison)
             {
-                Player.TakeDamage(PoisonDamageValue);
+                Player.TakeDamage(_PoisonDamageValue);
                 isDamaged = true;
             }
 
-            if(isDamaged)
+            if (isDamaged)
             {
                 sePlayer.PlayOnce(Resources.maou_se_8bit22);
             }
@@ -246,11 +222,11 @@ namespace EscapeFromDungeon.Core
 
             if (Player.Limit <= 0 || Player.Hp <= 0)
             {
-                gameMode = GameMode.Gameover; Gameover();
+                GameStateManager.Instance.ChangeMode(GameMode.Gameover); Gameover();
             }
 
             var invertCount = limitMax - Player.Limit;
-            if (invertCount % ViewShrinkInterval == 0) Map.AddViewRadius(-1);
+            if (invertCount % _ViewShrinkInterval == 0) Map.AddViewRadius(-1);
         }
 
         private async Task<Event?> CheckEvent(int x, int y)
@@ -290,7 +266,7 @@ namespace EscapeFromDungeon.Core
                     await DrawMessage.ShowAsync(evt.Word);
                     SetLabelBaseCol?.Invoke();
                     await Task.Delay(500);
-                    gameMode = GameMode.GameClear;
+                    GameStateManager.Instance.ChangeMode(GameMode.GameClear);
                     if (StartFade is not null) StartFade(FadeForm.FadeDir.FadeIn);
                     break;
                 default:
@@ -309,14 +285,14 @@ namespace EscapeFromDungeon.Core
 
         private async void EncounterEventAsync(Event evt)
         {
-            GameManager.bgmPlayer.PlayLoop(Properties.Resources.maou_bgm_8bit08);
+            bgmPlayer.PlayLoop(Resources.maou_bgm_8bit08);
 
             Form1.isBattleInputLocked = true;
             Form1.battleInputUnlockTime = DateTime.Now.AddSeconds(3.0); // 指定秒間キー入力をロック
 
-            gameMode = GameMode.Battle;
+            GameStateManager.Instance.ChangeMode(GameMode.Battle);
             var mon = MonsterData.Dict[evt.Word];
-            Battle.Monster = new Monster(mon.Name, mon.Hp, mon.Attack, mon.Weak, mon.ImageName, mon.behavior);
+            Battle.SetMonster(new Monster(mon.Name, mon.Hp, mon.Attack, mon.Weak, mon.ImageName, mon.behavior));
 
             //モンスターイメージを変更
             Image? img = Resources.ResourceManager.GetObject(mon.ImageName) as Image;
@@ -407,7 +383,7 @@ namespace EscapeFromDungeon.Core
 
         public void PlayerVisible(PictureBox playerImage)
         {
-            playerImage.Visible = Map.WalkMap[Map.playerPos.X, Map.playerPos.Y] != 2 ? true : false;
+            playerImage.Visible = Map.WalkMap[Map.PlayerPos.X, Map.PlayerPos.Y] != 2 ? true : false;
         }
 
     }//class

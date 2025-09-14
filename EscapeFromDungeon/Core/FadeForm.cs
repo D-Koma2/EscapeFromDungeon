@@ -45,7 +45,7 @@ namespace EscapeFromDungeon.Core
             else { this.Opacity = 1.0; }
             fadeTimer.Start();
             this.Show();
-            if(GameManager.gameMode == GameMode.Title)
+            if(GameStateManager.Instance.CurrentMode == GameMode.Title)
                 GameManager.bgmPlayer.PlayLoop(Properties.Resources.maou_bgm_8bit04);
         }
 
@@ -58,9 +58,9 @@ namespace EscapeFromDungeon.Core
                 {
                     fadeTimer.Stop();
 
-                    if (GameManager.gameMode == GameMode.Title)
+                    if (GameStateManager.Instance.CurrentMode == GameMode.Title)
                     {
-                        GameManager.gameMode = GameMode.Explore;
+                        GameStateManager.Instance.ChangeMode(GameMode.Explore);
                         TitleLbl.Visible = false;
                         this.Hide();
                     }
@@ -73,20 +73,20 @@ namespace EscapeFromDungeon.Core
                 {
                     fadeTimer.Stop();
 
-                    if (GameManager.gameMode == GameMode.Title)
+                    if (GameStateManager.Instance.CurrentMode == GameMode.Title)
                     {
-                        GameManager.gameMode = GameMode.Explore;
+                        GameStateManager.Instance.ChangeMode(GameMode.Explore);
                         this.Hide();
                     }
-                    else if (GameManager.gameMode == GameMode.Gameover || GameManager.gameMode == GameMode.GameClear)
+                    else if (GameStateManager.Instance.CurrentMode == GameMode.Gameover || GameStateManager.Instance.CurrentMode == GameMode.GameClear)
                     {
-                        TitleLbl.Text = GameManager.gameMode == GameMode.Gameover ? Const.gameOver : Const.gameClear;
+                        TitleLbl.Text = GameStateManager.Instance.CurrentMode == GameMode.Gameover ? Const.gameOver : Const.gameClear;
                         this.KeyPreview = true;
                         StartBtn.Text = Const.retry;
                         TitleLbl.Visible = true;
                         StartBtn.Visible = true;
                         ExitBtn.Visible = true;
-                        GameManager.gameMode = GameMode.Reset;
+                        GameStateManager.Instance.ChangeMode(GameMode.Reset);
                     }
                 }
             }

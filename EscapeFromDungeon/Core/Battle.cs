@@ -8,8 +8,8 @@ namespace EscapeFromDungeon.Core
 {
     internal class Battle
     {
-        public Monster Monster { get; set; }
-        public Player Player { get; set; }
+        public Monster Monster { get; private set; } = new Monster("名無し", 1, 1, Weak.None, "Enemy01", new DefaultBehavior());
+        public Player Player { get; private set; }
 
         private int _battleTurn = 0;
         private bool _isDefending = false;
@@ -30,11 +30,9 @@ namespace EscapeFromDungeon.Core
             { Weak.Holy, Const.holyWepon }
         };
 
-        public Battle(Player player)
-        {
-            Player = player;
-            Monster = new Monster("仮スライム君", 1, 1, Weak.None, "Enemy01", new DefaultBehavior());
-        }
+        public Battle(Player player) => Player = player;
+
+        public void SetMonster(Monster monster) => this.Monster = monster;
 
         public void InitBattleTurn() => _battleTurn = 0;
 
@@ -42,7 +40,7 @@ namespace EscapeFromDungeon.Core
         {
             if (Monster.Hp <= 0)
             {
-                GameManager.gameMode = GameMode.BattleEnd;
+                GameStateManager.Instance.ChangeMode(GameMode.BattleEnd);
                 await DrawMessage.ShowAsync($"{Monster.Name}を倒した！");
                 GameManager.sePlayer.PlayOnce(Resources.maou_se_8bit27);
                 await Task.Delay(500);
@@ -54,13 +52,13 @@ namespace EscapeFromDungeon.Core
             }
             if (Player.Hp <= 0 || Player.Limit <= 0)
             {
-                GameManager.gameMode = GameMode.Gameover;
+                GameStateManager.Instance.ChangeMode(GameMode.Gameover);
                 await Task.Delay(500);
                 return;
             }
 
             // 戦闘が続いているときはボタンを表示
-            if (GameManager.gameMode == GameMode.Battle)
+            if (GameStateManager.Instance.CurrentMode == GameMode.Battle)
             {
                 await DrawMessage.ShowAsync(Const.commndMsg);
                 SetLabelVisible?.Invoke(true);
@@ -93,8 +91,16 @@ namespace EscapeFromDungeon.Core
                     await DrawMessage.ShowAsync($"{Player.Name}は防御の体勢を取った！");
                     break;
                 case Const.CommandHeal:
-                    if (Player.Inventry.Find(item => item.Name == Const.potion) != null)
+                    if (Player.Inventry.Find(item => item.Name == Const.potion) is not null)
                     {
+                        if(Player.Hp == Player.MaxHp)
+                        {
+                            await DrawMessage.ShowAsync($"{Const.hpFullMsg}");
+                            await Task.Delay(400);
+                            await BattleLoopAsync();
+                            return;
+                        }
+
                         int healPoint = Math.Min(30, Player.MaxHp - Player.Hp);
                         Player.Heal(healPoint);
                         Player.UseItem(Const.potion);
@@ -110,7 +116,7 @@ namespace EscapeFromDungeon.Core
                         return;
                     }
                 case Const.CommandEsc:
-                    GameManager.gameMode = GameMode.Escaped;
+                    GameStateManager.Instance.ChangeMode(GameMode.Escaped);
                     GameManager.sePlayer.PlayOnce(Properties.Resources.maou_se_battle19);
                     SetLabelVisible?.Invoke(true);
                     if (CallShrink != null) await CallShrink.Invoke(30, 2);

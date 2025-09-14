@@ -1,11 +1,15 @@
 ﻿using NAudio.Wave;
+using NAudio.Wave.SampleProviders;
 
 namespace EscapeFromDungeon.Services
 {
-    public class MusicPlayer
+    public class MusicPlayer : IDisposable
     {
-        private WaveOutEvent? outputDevice;
-        private WaveStream? stream;
+        private const float _volumeBgm = 0.6f;
+        private const float _volumeSE = 0.8f;
+
+        private WaveOutEvent? _outputDevice;
+        private WaveStream? _stream;
 
         public void PlayLoop(UnmanagedMemoryStream resourceStream)
         {
@@ -17,11 +21,14 @@ namespace EscapeFromDungeon.Services
             memoryStream.Position = 0;
 
             var reader = new Mp3FileReader(memoryStream);
-            stream = new LoopStream(reader);
+            var volumeProvider = new VolumeSampleProvider(reader.ToSampleProvider());
+            volumeProvider.Volume = _volumeBgm;
 
-            outputDevice = new WaveOutEvent();
-            outputDevice.Init(stream);
-            outputDevice.Play();
+            _stream = new LoopStream(reader);
+
+            _outputDevice = new WaveOutEvent();
+            _outputDevice.Init(volumeProvider);
+            _outputDevice.Play();
         }
 
         public void PlayOnce(UnmanagedMemoryStream resourceStream)
@@ -32,19 +39,23 @@ namespace EscapeFromDungeon.Services
             resourceStream.CopyTo(memoryStream);
             memoryStream.Position = 0;
 
-            stream = new Mp3FileReader(memoryStream);
+            _stream = new Mp3FileReader(memoryStream);
+            var volumeProvider = new VolumeSampleProvider(_stream.ToSampleProvider());
+            volumeProvider.Volume = _volumeSE;
 
-            outputDevice = new WaveOutEvent();
-            outputDevice.Init(stream);
-            outputDevice.Play();
+            _outputDevice = new WaveOutEvent();
+            _outputDevice.Init(volumeProvider);
+            _outputDevice.Play();
         }
 
         public void Stop()
         {
-            outputDevice?.Stop();
-            outputDevice?.Dispose();
-            stream?.Dispose();
+            _outputDevice?.Stop();
+            _outputDevice?.Dispose();
+            _stream?.Dispose();
         }
+
+        public void Dispose() => Stop();
     }
 
     public class LoopStream : WaveStream

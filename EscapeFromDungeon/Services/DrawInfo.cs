@@ -5,14 +5,14 @@ namespace EscapeFromDungeon.Services
 {
     internal static class DrawInfo
     {
-        private const int barWidth = 200;
-        private const int barHeight = 20;
-        private const int barX = 10;
-        private const int barY = 10;
-        private const int limitBarWidth = 36;
-        private const int limitBarHeight = 11 * Map.tileSize + 10;
-        private const int limitBarX = 5;
-        private const int limitBarY = 50;
+        private const int _barWidth = 200;
+        private const int _barHeight = 20;
+        private const int _barX = 10;
+        private const int _barY = 10;
+        private const int _limitBarWidth = 36;
+        private const int _limitBarHeight = 11 * Map.tileSize + 10;
+        private const int _limitBarX = 5;
+        private const int _limitBarY = 50;
 
         public static void DrawStatus(Graphics g, Player player)
         {
@@ -25,14 +25,14 @@ namespace EscapeFromDungeon.Services
             else hpBrush = Brushes.Red;
 
             // 背景（最大HP）
-            g.FillRectangle(Brushes.DarkGray, barX, barY, barWidth, barHeight);
+            g.FillRectangle(Brushes.DarkGray, _barX, _barY, _barWidth, _barHeight);
 
             // 現在のHPバー
-            int currentWidth = (int)(hpRatio * barWidth);
-            g.FillRectangle(hpBrush, barX, barY, currentWidth, barHeight);
+            int currentWidth = (int)(hpRatio * _barWidth);
+            g.FillRectangle(hpBrush, _barX, _barY, currentWidth, _barHeight);
 
             // 枠線
-            g.DrawRectangle(Pens.White, barX, barY, barWidth, barHeight);
+            g.DrawRectangle(Pens.White, _barX, _barY, _barWidth, _barHeight);
 
             // 数値表示
             string hpText = $"HP: {player.Hp.ToString("D3")} / {player.MaxHp.ToString("D3")}";
@@ -43,52 +43,51 @@ namespace EscapeFromDungeon.Services
 
             using (Font font = new("Arial", 10))
             {
-                g.DrawString(hpText, font, Brushes.White, barX + 10, barY + 2);
+                g.DrawString(hpText, font, Brushes.White, _barX + 10, _barY + 2);
                 if (player.Status == Status.Poison)
                 {
-                    g.DrawString("状態：毒", font, Brushes.Yellow, barX + 30, barY + 26);
+                    g.DrawString("状態：毒", font, Brushes.Yellow, _barX + 30, _barY + 26);
                 }
                 else
                 {
-                    g.DrawString("状態：通常", font, Brushes.White, barX + 30, barY + 26);
+                    g.DrawString("状態：通常", font, Brushes.White, _barX + 30, _barY + 26);
                 }
 
-                g.DrawString(inventoryTitle, font, Brushes.White, barX + 30, barY + 48);
+                g.DrawString(inventoryTitle, font, Brushes.White, _barX + 30, _barY + 48);
 
-                g.DrawString(potionCount, font, Brushes.White, barX + 80, barY + 74);
-                g.DrawString(curePoisonCount, font, Brushes.White, barX + 80, barY + 104);
-                g.DrawString(torchCount, font, Brushes.White, barX + 80, barY + 134);
+                g.DrawString(potionCount, font, Brushes.White, _barX + 80, _barY + 74);
+                g.DrawString(curePoisonCount, font, Brushes.White, _barX + 80, _barY + 104);
+                g.DrawString(torchCount, font, Brushes.White, _barX + 80, _barY + 134);
 
-                int num = barY + 134;
-                Font font2 = font;
-
+                int dispY = _barY + 134;
+ 
                 foreach (var item in player.Inventry)
                 {
                     if (item.Name == Const.potion || item.Name == Const.curePoison || item.Name == Const.torch) continue;
-                    num += 30;
-                    g.DrawString(item.Name, font2, Brushes.White, barX + 80, num);
+                    dispY += 30;
+                    g.DrawString(item.Name, font, Brushes.White, _barX + 80, dispY);
                 }
             }
 
         }
 
-        public static void DrawLimitBar(Graphics g, Player player, int limitMax)
+        public static void DrawLimitBar(Graphics g, int limit, int limitMax)
         {
-            float limitRatio = (float)player.Limit / limitMax; // Limit割合
+            float limitRatio = (float)limit / limitMax; // Limit割合
 
             // 背景（最大Limit）
-            g.FillRectangle(Brushes.Red, limitBarX, limitBarY, limitBarWidth, limitBarHeight);
+            g.FillRectangle(Brushes.Red, _limitBarX, _limitBarY, _limitBarWidth, _limitBarHeight);
 
             // 現在のLimitバー
-            int currentHight = (int)(limitRatio * limitBarHeight);
-            g.FillRectangle(Brushes.Wheat, limitBarX, limitBarY, limitBarWidth, currentHight);
+            int currentHight = (int)(limitRatio * _limitBarHeight);
+            g.FillRectangle(Brushes.Wheat, _limitBarX, _limitBarY, _limitBarWidth, currentHight);
 
             // 枠線
-            g.DrawRectangle(Pens.White, limitBarX, limitBarY, limitBarWidth, limitBarHeight);
+            g.DrawRectangle(Pens.White, _limitBarX, _limitBarY, _limitBarWidth, _limitBarHeight);
 
             using (Font font = new("Arial", 10))
             {
-                g.DrawString(player.Limit.ToString("D3"), font, Brushes.Wheat, 6, 20);
+                g.DrawString(limit.ToString("D3"), font, Brushes.Wheat, 6, 20);
                 g.DrawString("Limit", font, Brushes.Red, 2, 2);
             }
         }
