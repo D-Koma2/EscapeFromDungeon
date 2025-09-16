@@ -44,7 +44,7 @@ namespace EscapeFromDungeon.Services
             using (Font font = new("Arial", 10))
             {
                 g.DrawString(hpText, font, Brushes.White, _barX + 10, _barY + 2);
-                if (player.Status == Status.Poison)
+                if (player.Status is Status.Poison)
                 {
                     g.DrawString("状態：毒", font, Brushes.Yellow, _barX + 30, _barY + 26);
                 }
@@ -63,7 +63,7 @@ namespace EscapeFromDungeon.Services
  
                 foreach (var item in player.Inventry)
                 {
-                    if (item.Name == Const.potion || item.Name == Const.curePoison || item.Name == Const.torch) continue;
+                    if (item.Name is (Const.potion or Const.curePoison or Const.torch)) continue;
                     dispY += 30;
                     g.DrawString(item.Name, font, Brushes.White, _barX + 80, dispY);
                 }

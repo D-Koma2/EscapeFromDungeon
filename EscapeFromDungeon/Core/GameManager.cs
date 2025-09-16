@@ -16,6 +16,7 @@ namespace EscapeFromDungeon.Core
 
         public Player Player { get; private set; }
         public Battle Battle { get; private set; }
+        public Map Map { get; private set; }
 
         public static MusicPlayer bgmPlayer = new MusicPlayer();
         public static MusicPlayer sePlayer = new MusicPlayer();
@@ -39,10 +40,10 @@ namespace EscapeFromDungeon.Core
 
         public GameManager()
         {
-            Map.ReadFromCsv(Const.mapCsv);//最初に実行する事!
-            EventData.ReadFromCsv(Const.eventCsv);
-            MonsterData.ReadFromCsv(Const.monsterCsv);
-            ItemData.ReadFromCsv(Const.itemCsv);
+            Map = new Map();//最初に実行する事! Csvファイルから読む場合、引数に (Const.mapCsv)
+            EventData.ReadData(Const.eventCsv);
+            MonsterData.ReadData(Const.monsterCsv);
+            ItemData.ReadData(Const.itemCsv);
             DrawMessage.timerSetup();
             Player = new Player(_playerName, _playerHp, _playerAttack, limitMax);
             Battle = new Battle(Player);
@@ -50,9 +51,9 @@ namespace EscapeFromDungeon.Core
 
         public void KeyInput(Keys keyCode)
         {
-            if (GameStateManager.Instance.CurrentMode == GameMode.Explore)
+            if (GameStateManager.Instance.CurrentMode is GameMode.Explore)
             {
-                if (keyCode == Keys.Up || keyCode == Keys.Down || keyCode == Keys.Left || keyCode == Keys.Right)
+                if (keyCode is (Keys.Up or Keys.Down or Keys.Left or Keys.Right))
                 {
                     // メッセージ表示中はメッセージ処理優先
                     if (DrawMessage.IsMessageShowing)
@@ -63,39 +64,39 @@ namespace EscapeFromDungeon.Core
 
                     Move(keyCode);
                 }
-                else if (keyCode == Keys.P)
+                else if (keyCode is Keys.P)
                 {
                     ItemKeyPressed?.Invoke(Const.potion);
                 }
-                else if (keyCode == Keys.O)
+                else if (keyCode is Keys.O)
                 {
                     ItemKeyPressed?.Invoke(Const.curePoison);
                 }
-                else if (keyCode == Keys.I)
+                else if (keyCode is Keys.I)
                 {
                     ItemKeyPressed?.Invoke(Const.torch);
                 }
-                //else if (keyCode == Keys.V)//デバッグ用
+                //else if (keyCode is Keys.V)//デバッグ用
                 //{
                 //    if (Map.IsVisionEnabled) Map.SetIsVisionEnable(false);
                 //    else Map.SetIsVisionEnable(true);
                 //}
             }
-            else if (GameStateManager.Instance.CurrentMode == GameMode.Battle)
+            else if (GameStateManager.Instance.CurrentMode is GameMode.Battle)
             {
-                if (keyCode == Keys.Up)
+                if (keyCode is Keys.Up)
                 {
                     MoveKeyPressed?.Invoke(Const.CommandAtk, Keys.Up);
                 }
-                else if (keyCode == Keys.Down)
+                else if (keyCode is Keys.Down)
                 {
                     MoveKeyPressed?.Invoke(Const.CommandEsc, Keys.Down);
                 }
-                else if (keyCode == Keys.Left)
+                else if (keyCode is Keys.Left)
                 {
                     MoveKeyPressed?.Invoke(Const.CommandDef, Keys.Left);
                 }
-                else if (keyCode == Keys.Right)
+                else if (keyCode is Keys.Right)
                 {
                     MoveKeyPressed?.Invoke(Const.CommandHeal, Keys.Right);
                 }
@@ -110,10 +111,9 @@ namespace EscapeFromDungeon.Core
 
         public async Task BattleCheckAsync()
         {
-            if (GameStateManager.Instance.CurrentMode == GameMode.Escaped)
+            if (GameStateManager.Instance.CurrentMode is GameMode.Escaped)
             {
-                Form1.isBattleInputLocked = true;
-                Form1.battleInputUnlockTime = DateTime.Now.AddSeconds(2.5); // 指定秒間キー入力をロック
+                InputLockManager.InputLockStart(2.5f); // 指定秒間キー入力をロック
                 Map.PlayerPos = _prePos;
                 SetMapPos?.Invoke();
                 await Task.Delay(500);
@@ -121,7 +121,7 @@ namespace EscapeFromDungeon.Core
                 ChangeLblText?.Invoke();
             }
 
-            if (GameStateManager.Instance.CurrentMode == GameMode.BattleEnd)
+            if (GameStateManager.Instance.CurrentMode is GameMode.BattleEnd)
             {
                 if (Player.Hp > 0)
                 {
@@ -138,7 +138,7 @@ namespace EscapeFromDungeon.Core
                 }
             }
 
-            if (GameStateManager.Instance.CurrentMode == GameMode.Gameover) Gameover();
+            if (GameStateManager.Instance.CurrentMode is GameMode.Gameover) Gameover();
         }//BattleCheck
 
         private async void Move(Keys keyCode)
@@ -146,22 +146,22 @@ namespace EscapeFromDungeon.Core
             Point dir = Point.Empty;
             var playerDir = Player.Direction.Up;
 
-            if (keyCode == Keys.Up)
+            if (keyCode is Keys.Up)
             {
                 dir = new Point(0, -1);
                 playerDir = Player.Direction.Up;
             }
-            else if (keyCode == Keys.Down)
+            else if (keyCode is Keys.Down)
             {
                 dir = new Point(0, 1);
                 playerDir = Player.Direction.Down;
             }
-            else if (keyCode == Keys.Left)
+            else if (keyCode is Keys.Left)
             {
                 dir = new Point(-1, 0);
                 playerDir = Player.Direction.Left;
             }
-            else if (keyCode == Keys.Right)
+            else if (keyCode is Keys.Right)
             {
                 dir = new Point(1, 0);
                 playerDir = Player.Direction.Right;
@@ -182,9 +182,9 @@ namespace EscapeFromDungeon.Core
 
                 Event? evt = await CheckEvent(newPos.X, newPos.Y);
 
-                if (evt == null) DrawMessage.Init(); // メッセージリセット
+                if (evt is null) DrawMessage.Init(); // メッセージリセット
 
-                if (evt != null && evt.EventType == EventType.Encount) return;
+                if (evt is not null && evt.EventType is EventType.Encount) return;
 
                 DamageCheck(newPos.X, newPos.Y);
                 TurnCheck();
@@ -195,12 +195,12 @@ namespace EscapeFromDungeon.Core
         {
             var isDamaged = false;
             // ダメージ床
-            if (Map.WalkMap[x, y] == 3)
+            if (Map.WalkMap[x, y] is 3)
             {
                 Player.TakeDamage(_DamageFloorValue);
                 isDamaged = true;
             }
-            if (Player.Status == Status.Poison)
+            if (Player.Status is Status.Poison)
             {
                 Player.TakeDamage(_PoisonDamageValue);
                 isDamaged = true;
@@ -226,14 +226,14 @@ namespace EscapeFromDungeon.Core
             }
 
             var invertCount = limitMax - Player.Limit;
-            if (invertCount % _ViewShrinkInterval == 0) Map.AddViewRadius(-1);
+            if (invertCount % _ViewShrinkInterval is 0) Map.AddViewRadius(-1);
         }
 
         private async Task<Event?> CheckEvent(int x, int y)
         {
             var eventId = Map.EventMap[x, y];
 
-            if (eventId == null) return null; // イベントなし
+            if (eventId is null) return null; // イベントなし
 
             Event evt = EventData.Dict[eventId];
 
@@ -274,7 +274,7 @@ namespace EscapeFromDungeon.Core
             }
 
             // ヒント以外は一度きり,バトルは逃げた場合残すのでここでは消去しない
-            if (evt.EventType != EventType.Hint && evt.EventType != EventType.Encount)
+            if (evt.EventType is not (EventType.Hint or EventType.Encount))
             {
                 Map.DeleteEvent(x, y); // イベントを消去
             }
@@ -285,10 +285,9 @@ namespace EscapeFromDungeon.Core
 
         private async void EncounterEventAsync(Event evt)
         {
-            bgmPlayer.PlayLoop(Resources.maou_bgm_8bit08);
+            InputLockManager.InputLockStart(4.0f); // 指定秒間キー入力をロック
 
-            Form1.isBattleInputLocked = true;
-            Form1.battleInputUnlockTime = DateTime.Now.AddSeconds(3.0); // 指定秒間キー入力をロック
+            bgmPlayer.PlayLoop(Resources.maou_bgm_8bit08);
 
             GameStateManager.Instance.ChangeMode(GameMode.Battle);
             var mon = MonsterData.Dict[evt.Word];
@@ -296,11 +295,11 @@ namespace EscapeFromDungeon.Core
 
             //モンスターイメージを変更
             Image? img = Resources.ResourceManager.GetObject(mon.ImageName) as Image;
-            if (img != null) SetMonsterImg?.Invoke(img);
+            if (img is not null) SetMonsterImg?.Invoke(img);
 
             Battle.InitBattleTurn();
 
-            if (CallDrop != null) await CallDrop.Invoke(600, 10, 4, true);
+            if (CallDrop is not null) await CallDrop.Invoke(600, 10, 4, true);
             ChangeLblText?.Invoke();
 
             await DrawMessage.ShowAsync($"{mon.Name}が現れた！");
@@ -375,7 +374,15 @@ namespace EscapeFromDungeon.Core
         private async void Gameover()
         {
             GameManager.bgmPlayer.PlayLoop(Properties.Resources.maou_bgm_8bit20);
-            await DrawMessage.ShowAsync($"{Player.Name}は力尽きた...");
+            if (Player.Limit is 0)
+            {
+                await DrawMessage.ShowAsync($"期限内に脱出出来なかった...");
+            }
+            else
+            {
+                await DrawMessage.ShowAsync($"{Player.Name}は力尽きた...");
+            }
+
             SetLabelBaseCol?.Invoke();
             await Task.Delay(500);
             if (StartFade is not null) StartFade(FadeForm.FadeDir.FadeIn);
@@ -383,7 +390,7 @@ namespace EscapeFromDungeon.Core
 
         public void PlayerVisible(PictureBox playerImage)
         {
-            playerImage.Visible = Map.WalkMap[Map.PlayerPos.X, Map.PlayerPos.Y] != 2 ? true : false;
+            playerImage.Visible = (Map.WalkMap[Map.PlayerPos.X, Map.PlayerPos.Y] is not 2);
         }
 
     }//class

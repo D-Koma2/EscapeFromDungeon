@@ -19,8 +19,9 @@ namespace EscapeFromDungeon.Core
 
         private System.Windows.Forms.Timer _timer = default!;//画面表示更新用
         private const int _timerInterval = 32;
-        private Dictionary<Label, string> _itemMap;
-        private Dictionary<Label, CmdAndKeySet> _dict;
+
+        private static Dictionary<Label, string> _itemMap = default!;
+        private static Dictionary<Label, CmdAndKeySet> _lblMap = default!;
 
         private DateTime _lastInputTime = DateTime.MinValue;
         private readonly TimeSpan _inputCooldown = TimeSpan.FromMilliseconds(300);
@@ -30,13 +31,31 @@ namespace EscapeFromDungeon.Core
 
         private bool _isWaiting = false;
 
-        public static bool isBattleInputLocked = false;
-        public static DateTime battleInputUnlockTime;
+        public class CmdAndKeySet
+        {
+            public string Cmd { get; private set; }
+            public Keys Keys { get; private set; }
+            public CmdAndKeySet(string cmd, Keys keys) { Cmd = cmd; Keys = keys; }
+        }
 
         public Form1()
         {
             InitializeComponent();
 
+            InitDictionary();// ラベルの名前を使うので InitializeComponent()の後
+
+            _gameManager = new GameManager();//最初に生成する事!
+            SetupGameManagerEvents();//GameManager生成の後に呼ぶ
+
+            InitPictureBoxes();
+            InitDraw();
+            TimerSetUp();
+            FadeSetup();
+            //DispPoint();
+        }
+
+        private void InitDictionary()
+        {
             _itemMap = new Dictionary<Label, string>
             {
                 { lblUsePosion, Const.potion },
@@ -44,22 +63,13 @@ namespace EscapeFromDungeon.Core
                 { lblUseTorch, Const.torch }
             };
 
-            _dict = new Dictionary<Label, CmdAndKeySet>
+            _lblMap = new Dictionary<Label, CmdAndKeySet>
             {
                 { lblAttack, new CmdAndKeySet(Const.CommandAtk, Keys.Up) },
                 { lblEscape, new CmdAndKeySet(Const.CommandEsc, Keys.Down) },
                 { lblDefence, new CmdAndKeySet(Const.CommandDef, Keys.Left) },
                 { lblHeal, new CmdAndKeySet(Const.CommandHeal, Keys.Right) },
             };
-
-            _gameManager = new GameManager();//最初に生成する事!
-            SetupGameManagerEvents();//GameManager生成の後に呼ぶ
-            InitPictureBoxes();
-
-            InitDraw();
-            TimerSetUp();
-            FadeSetup();
-            //DispPoint();
         }
 
         public void InitGame()
@@ -92,6 +102,7 @@ namespace EscapeFromDungeon.Core
             _gameManager.ChangeLblText = ChangeLblText;
             _gameManager.SetMonsterImg = SetMonsterImage;
             _gameManager.SetLabelBaseCol = SetLabelBaseCol;
+            _gameManager.SetMapPos = SetMapPos;
 
             _gameManager.CallDrop = DropEnemyAsync;
             _gameManager.Battle.CallDrop = DropEnemyAsync;
@@ -103,15 +114,14 @@ namespace EscapeFromDungeon.Core
             _gameManager.Battle.ChangeLblText = ChangeLblText;
 
             _gameManager.Player.FlashByDamage = ColorChangeByDamage;
-            _gameManager.SetMapPos = SetMapPos;
         }
 
         private void FadeSetup()
         {
-            _fade = new FadeForm(this, FadeForm.FadeDir.FadeOut); // MainForm を渡す
+            _fade = new FadeForm(this, FadeForm.FadeDir.FadeOut); // Form1 を渡す
             _gameManager.StartFade = _fade.StartFade;
 
-            // MainForm が移動したら FadeForm も追従
+            // Form1 が移動したら FadeForm も追従
             this.LocationChanged += (_, __) => _fade.FollowOwner();
             _fade.InitStart = () => InitGame();
             _fade.Show();
@@ -142,7 +152,7 @@ namespace EscapeFromDungeon.Core
 
         public void ChangeLblText()
         {
-            if (GameStateManager.Instance.CurrentMode == GameMode.Battle)
+            if (GameStateManager.Instance.CurrentMode is GameMode.Battle)
             {
                 lblAttack.Text = Const.attackLabelText;
                 lblDefence.Text = Const.defenceLabelText;
@@ -284,39 +294,34 @@ namespace EscapeFromDungeon.Core
 
         private async void MovelblClickAsync(object sender, EventArgs e)
         {
-            if (sender is Label lbl && _dict.TryGetValue(lbl, out CmdAndKeySet? item))
+            if (sender is Label lbl && _lblMap.TryGetValue(lbl, out CmdAndKeySet? lblName))
             {
-                await HandleBattleOrExploreAsync(item.Cmd, item.Keys);
+                await HandleBattleOrExploreAsync(lblName.Cmd, lblName.Keys);
             }
         }
 
-        public class CmdAndKeySet
-        {
-            public string Cmd { get; private set; }
-            public Keys Keys { get; private set; }
-            public CmdAndKeySet(string cmd, Keys keys) { Cmd = cmd; Keys = keys; }
-        }
-
-        //ここは上下左右ラベルのマウスクリック・対応キー入力時に呼ばれる
+        // 上下左右ラベルのマウスクリック・対応キー入力時の両方から呼ばれる
         private async Task HandleBattleOrExploreAsync(string command, Keys exploreKey)
         {
-            if (isBattleInputLocked && DateTime.Now < battleInputUnlockTime) return;
+            // 探索 <-> バトル移行時に入力をロックする(GameManagerの EncounterEventAsync BattleCheckAsync でロック開始)
+            if (InputLockManager.IsInputLocked()) return;
+
+            // キーの連続入力をロック
             if (_isWaiting) return;
             if (DateTime.Now - _lastInputTime < _inputCooldown) return;
-
-            _isWaiting = true;
             _lastInputTime = DateTime.Now;
+            _isWaiting = true;
 
             SetLblCol(exploreKey, _lblSelectCol);
             await Task.Delay(100);
 
-            if (GameStateManager.Instance.CurrentMode == GameMode.Battle)
+            if (GameStateManager.Instance.CurrentMode is GameMode.Battle)
             {
                 SetLabelVisible(false);
                 await _gameManager.Battle.PlayerTurnAsync(command);
                 await _gameManager.BattleCheckAsync();
             }
-            else if (GameStateManager.Instance.CurrentMode == GameMode.Explore)
+            else if (GameStateManager.Instance.CurrentMode is GameMode.Explore)
             {
                 _gameManager.KeyInput(exploreKey);
             }
@@ -329,8 +334,8 @@ namespace EscapeFromDungeon.Core
         public async Task ShakeAsync(Target shakeTarget, Shake shakeType, int durationMs = 500, int intervalMs = 30)
         {
             PictureBox target = default!;
-            if (shakeTarget == Target.player) target = MsgBox;
-            else if (shakeTarget == Target.enemy) target = _monsterImg;
+            if (shakeTarget is Target.player) target = MsgBox;
+            else if (shakeTarget is Target.enemy) target = _monsterImg;
 
             var originalLocation = target.Location;
             var rand = new Random();
@@ -339,7 +344,7 @@ namespace EscapeFromDungeon.Core
             for (int i = 0; i < shakeCount; i++)
             {
                 int offsetX, offsetY;
-                if (shakeType == Shake.weak)
+                if (shakeType is Shake.weak)
                 {
                     // 弱点攻撃時は大きく揺らす
                     offsetX = rand.Next(-12, 13);
@@ -443,7 +448,7 @@ namespace EscapeFromDungeon.Core
 
         public void LabelHealVisible()
         {
-            if (GameStateManager.Instance.CurrentMode != GameMode.Battle)
+            if (GameStateManager.Instance.CurrentMode is not GameMode.Battle)
             {
                 int potionCount = _gameManager.Player.GetItemCount(Const.potion);
                 lblHeal.Visible = potionCount > 0;

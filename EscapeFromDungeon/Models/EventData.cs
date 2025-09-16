@@ -7,7 +7,7 @@ namespace EscapeFromDungeon.Models
     {
         public static Dictionary<string, Event> Dict { get; private set; } = new Dictionary<string, Event>();
 
-        public static void ReadFromCsv(string path)
+        public static void ReadData(string path)
         {
             //var lines = File.ReadAllLines(path).Skip(1).ToArray();//１行目スキップ
             var lines = Resources.Event.Split(Const.separator, StringSplitOptions.None).Skip(1).ToArray();//１行目スキップ

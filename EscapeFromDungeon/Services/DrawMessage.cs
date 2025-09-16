@@ -123,7 +123,7 @@ namespace EscapeFromDungeon.Services
 
         public static void InputKey()
         {
-            if (GameStateManager.Instance.CurrentMode == GameMode.Explore)
+            if (GameStateManager.Instance.CurrentMode is GameMode.Explore)
             {
                 if (!_isMessageCompleted)
                 {

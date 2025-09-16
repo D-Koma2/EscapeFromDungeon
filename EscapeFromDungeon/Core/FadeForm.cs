@@ -41,24 +41,27 @@ namespace EscapeFromDungeon.Core
         {
             CautionLbl.Visible = false;
             this.fadeDirection = direction;
-            if (this.fadeDirection == FadeDir.FadeIn) { this.Opacity = 0.0; }
+
+            if (this.fadeDirection is FadeDir.FadeIn) { this.Opacity = 0.0; }
             else { this.Opacity = 1.0; }
+
             fadeTimer.Start();
             this.Show();
-            if(GameStateManager.Instance.CurrentMode == GameMode.Title)
+
+            if(GameStateManager.Instance.CurrentMode is GameMode.Title)
                 GameManager.bgmPlayer.PlayLoop(Properties.Resources.maou_bgm_8bit04);
         }
 
         private void FadeTimer_Tick(object? sender, EventArgs e)
         {
-            if (fadeDirection == FadeDir.FadeOut)
+            if (fadeDirection is FadeDir.FadeOut)
             {
                 if (this.Opacity > 0.0) { this.Opacity -= 0.01; }
                 else
                 {
                     fadeTimer.Stop();
 
-                    if (GameStateManager.Instance.CurrentMode == GameMode.Title)
+                    if (GameStateManager.Instance.CurrentMode is GameMode.Title)
                     {
                         GameStateManager.Instance.ChangeMode(GameMode.Explore);
                         TitleLbl.Visible = false;
@@ -73,14 +76,14 @@ namespace EscapeFromDungeon.Core
                 {
                     fadeTimer.Stop();
 
-                    if (GameStateManager.Instance.CurrentMode == GameMode.Title)
+                    if (GameStateManager.Instance.CurrentMode is GameMode.Title)
                     {
                         GameStateManager.Instance.ChangeMode(GameMode.Explore);
                         this.Hide();
                     }
-                    else if (GameStateManager.Instance.CurrentMode == GameMode.Gameover || GameStateManager.Instance.CurrentMode == GameMode.GameClear)
+                    else if (GameStateManager.Instance.CurrentMode is (GameMode.Gameover or GameMode.GameClear))
                     {
-                        TitleLbl.Text = GameStateManager.Instance.CurrentMode == GameMode.Gameover ? Const.gameOver : Const.gameClear;
+                        TitleLbl.Text = GameStateManager.Instance.CurrentMode is GameMode.Gameover ? Const.gameOver : Const.gameClear;
                         this.KeyPreview = true;
                         StartBtn.Text = Const.retry;
                         TitleLbl.Visible = true;
@@ -94,7 +97,7 @@ namespace EscapeFromDungeon.Core
 
         public void FollowOwner()
         {
-            if (this.Owner != null)
+            if (this.Owner is not null)
             {
                 //メインフォームのクライアント領域の左上をスクリーン座標に変換
                 this.Location = Owner.PointToScreen(Point.Empty);

@@ -1,10 +1,11 @@
-﻿using EscapeFromDungeon.Core;
-using EscapeFromDungeon.Constants;
+﻿using EscapeFromDungeon.Constants;
+using EscapeFromDungeon.Core;
 using EscapeFromDungeon.Properties;
+using System.IO;
 
 namespace EscapeFromDungeon.Models
 {
-    internal static class Map
+    internal class Map
     {
         enum WalkType
         {
@@ -15,15 +16,25 @@ namespace EscapeFromDungeon.Models
             Enemy = 9
         }
 
+        private static Map? _instance;
+
+        public static Map? Instance
+        {
+            get => _instance;
+
+            private set
+            {
+                _instance ??= value;
+            }
+        }
+
         private static readonly Brush _passableBrush = Brushes.LightGray;
         private static readonly Brush _blockedBrush = Brushes.DarkSlateGray;
         private static readonly Brush _transWallBrush = new SolidBrush(Color.FromArgb(255, 54, 83, 83));
 
-        private static Point _playerPos = new Point(6, 6); // マップ上の座標(map.csvの"SS"で変更)
-        public static Point PlayerPos { get => _playerPos; set => _playerPos = value; }
+        public static Point PlayerPos { get; set; } = new Point(6, 6); // マップ上の座標(map.csvの"SS"で変更)
 
-        private static Point _playerDispPos = new Point(6, 6); //プレイヤー表示座標(map中央固定)
-        public static Point PlayerDispPos { get => _playerDispPos; private set => _playerDispPos = value; }
+        public static Point PlayerDispPos { get; private set; } = new Point(6, 6); //プレイヤー表示座標(map中央固定)
 
         public static bool IsVisionEnabled { get; private set; } = true; // true: 視界制限あり、false: 全体表示デバッグ用
 
@@ -36,7 +47,7 @@ namespace EscapeFromDungeon.Models
         public static int Width { get; private set; }
         public static int Height { get; private set; }
 
-#pragma warning disable CS8618
+#pragma warning disable CS8618 
         public static int[,] WalkMap { get; private set; }
         public static string[,] EventMap { get; private set; }
         public static Bitmap MapCanvas { get; private set; }
@@ -51,23 +62,38 @@ namespace EscapeFromDungeon.Models
             { "12", 2 }//半透明壁
         };
 
-        private static string[] _readLines = Resources.map.Split(Const.separator, StringSplitOptions.None);
+        private static string[] _readLines = default!;
 
-        public static void ReadFromCsv(string path)
+        public Map(string path)
         {
-            //try
-            //{
-            //    lines = File.ReadAllLines(path);
-            //}
-            //catch (Exception ex)
-            //{
-            //    Console.WriteLine($"Map.csv読み込みエラー: {ex.Message}");
-            //}
+            ReadData(path);
+            StartUp();
+        }
 
-            //_readLines = Resources.map.Split(Const.separator, StringSplitOptions.None);
+        public Map()
+        {
+            _readLines = Resources.map.Split(Const.separator, StringSplitOptions.None);
+            StartUp();
+        }
+
+        public void ReadData(string path)
+        {
+            try
+            {
+                _readLines = File.ReadAllLines(path);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Map.csv読み込みエラー: {ex.Message}");
+            }
+        }
+
+        public void StartUp()
+        {
             if (_readLines.Last().Trim() == "") _readLines = _readLines.Take(_readLines.Length - 1).ToArray();//最終行が空行なら削除
             Height = _readLines.Length;
             Width = _readLines[0].Split(',').Length;
+
             WalkMap = new int[Width, Height];
             EventMap = new string[Width, Height];
             MapCanvas = new Bitmap(Width * tileSize, Height * tileSize);
@@ -90,7 +116,7 @@ namespace EscapeFromDungeon.Models
 
                     if (code == "SS")//スタート地点
                     {
-                        _playerPos = new Point(x, y);
+                        PlayerPos = new Point(x, y);
                         WalkMap[x, y] = 0;
                     }
                     else if (code == "GG")//ゴール地点
@@ -178,7 +204,7 @@ namespace EscapeFromDungeon.Models
         {
             int dx = x * tileSize, dy = y * tileSize;
 
-            if (WalkMap[x, y] == 1 || WalkMap[x, y] == 2)
+            if (WalkMap[x, y] is (1 or 2))
             {
                 // 上
                 if (y == 0 || WalkMap[x, y - 1] != 1 && WalkMap[x, y - 1] != 2)
@@ -252,7 +278,7 @@ namespace EscapeFromDungeon.Models
         {
             if (x < 0 || y < 0 || x >= Width || y >= Height) return false;
 
-            if (WalkMap[x, y] == 0 || WalkMap[x, y] == 2 || WalkMap[x, y] == 3) return true;
+            if (WalkMap[x, y] is (0 or 2 or 3)) return true;
             return false;
         }
 
