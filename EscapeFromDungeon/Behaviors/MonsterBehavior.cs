@@ -5,10 +5,10 @@ namespace EscapeFromDungeon.Behaviors
 {
     public class MonsterAction
     {
-        public string Message { get; set; }
-        public int Damage { get; set; }
-        public bool SkipDamage { get; set; }
-        public Shake shakeType { get; set; }
+        public string Message { get; private set; }
+        public int Damage { get; private set; }
+        public bool SkipDamage { get; private set; }
+        public Shake shakeType { get; private set; }
 
         public MonsterAction(string message, int damage, bool skipDamage = false, Shake shake = Shake.normal)
         {

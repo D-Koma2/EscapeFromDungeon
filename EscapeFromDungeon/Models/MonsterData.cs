@@ -17,7 +17,7 @@ namespace EscapeFromDungeon.Models
             { "Demon", new DemonBehavior() }
         };
 
-        public static void ReadFromCsv(string path)
+        public static void ReadData(string path)
         {
             //var lines = File.ReadAllLines(path).Skip(1).ToArray();//１行目スキップ
             var lines = Resources.Monster.Split(Const.separator, StringSplitOptions.None).Skip(1).ToArray();//１行目スキップ

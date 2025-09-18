@@ -31,6 +31,7 @@
             StartBtn = new Button();
             ExitBtn = new Button();
             TitleLbl = new Label();
+            CautionLbl = new Label();
             SuspendLayout();
             // 
             // StartBtn
@@ -74,12 +75,24 @@
             TitleLbl.Text = "Escape \r\nFrom \r\nDungeon";
             TitleLbl.TextAlign = ContentAlignment.MiddleCenter;
             // 
+            // CautionLbl
+            // 
+            CautionLbl.Anchor = AnchorStyles.Bottom;
+            CautionLbl.ForeColor = Color.Yellow;
+            CautionLbl.Location = new Point(108, 416);
+            CautionLbl.Name = "CautionLbl";
+            CautionLbl.Size = new Size(565, 25);
+            CautionLbl.TabIndex = 3;
+            CautionLbl.Text = "＊音楽・効果音はすべて 魔王魂 (https://maou.audio) のフリー素材を利用しています＊";
+            CautionLbl.TextAlign = ContentAlignment.MiddleCenter;
+            // 
             // FadeForm
             // 
             AutoScaleMode = AutoScaleMode.None;
             BackColor = Color.Black;
             ClientSize = new Size(800, 450);
             ControlBox = false;
+            Controls.Add(CautionLbl);
             Controls.Add(TitleLbl);
             Controls.Add(ExitBtn);
             Controls.Add(StartBtn);
@@ -94,7 +107,7 @@
             StartPosition = FormStartPosition.Manual;
             Text = "FadeForm";
             TopMost = true;
-            Shown += FadeForm_Shown;
+            Shown += FadeForm_Show;
             ResumeLayout(false);
             PerformLayout();
 
@@ -105,5 +118,6 @@
         private Button StartBtn;
         private Button ExitBtn;
         private Label TitleLbl;
+        private Label CautionLbl;
     }
 }

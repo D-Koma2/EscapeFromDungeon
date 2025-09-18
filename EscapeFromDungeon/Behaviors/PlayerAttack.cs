@@ -5,7 +5,7 @@ namespace EscapeFromDungeon.Behaviors
 {
     public static class PlayerAttackRegistry
     {
-        private static Dictionary<string, IPlayerAttack> behaviors = new()
+        private static Dictionary<string, IPlayerAttack> _behaviors = new()
         {
             { Const.superWepon, new SuperWeponAttack() },
             { Const.fireWepon, new FireWeponAttack() },
@@ -17,16 +17,15 @@ namespace EscapeFromDungeon.Behaviors
 
         public static IPlayerAttack GetBehavior(string itemName)
         {
-            return behaviors.TryGetValue(itemName, out var behavior) ? behavior : new DefaultAttack();
+            return _behaviors.TryGetValue(itemName, out var behavior) ? behavior : new DefaultAttack();
         }
     }
 
     public class PlayerAttack
     {
-        public string Message { get; set; }
-
-        public int Damage { get; set; }
-        public Shake shakeType { get; set; }
+        public string Message { get; private set; }
+        public int Damage { get; private set; }
+        public Shake shakeType { get; private set; }
 
         public PlayerAttack(string message, int damage, Shake shake = Shake.normal)
         {

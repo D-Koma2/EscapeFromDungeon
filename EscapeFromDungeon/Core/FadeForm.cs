@@ -1,5 +1,4 @@
 ﻿using EscapeFromDungeon.Constants;
-using System;
 
 namespace EscapeFromDungeon.Core
 {
@@ -34,29 +33,37 @@ namespace EscapeFromDungeon.Core
 
             fadeTimer = new System.Windows.Forms.Timer { Interval = timerInterval };
             fadeTimer.Tick += FadeTimer_Tick;
+
+            GameManager.bgmPlayer.PlayLoop(Properties.Resources.maou_bgm_8bit06);
         }
 
         public void StartFade(FadeDir direction)
         {
+            CautionLbl.Visible = false;
             this.fadeDirection = direction;
-            if (this.fadeDirection == FadeDir.FadeIn) { this.Opacity = 0.0; }
+
+            if (this.fadeDirection is FadeDir.FadeIn) { this.Opacity = 0.0; }
             else { this.Opacity = 1.0; }
+
             fadeTimer.Start();
             this.Show();
+
+            if(GameStateManager.Instance.CurrentMode is GameMode.Title)
+                GameManager.bgmPlayer.PlayLoop(Properties.Resources.maou_bgm_8bit04);
         }
 
         private void FadeTimer_Tick(object? sender, EventArgs e)
         {
-            if (fadeDirection == FadeDir.FadeOut)
+            if (fadeDirection is FadeDir.FadeOut)
             {
                 if (this.Opacity > 0.0) { this.Opacity -= 0.01; }
                 else
                 {
                     fadeTimer.Stop();
 
-                    if (GameManager.gameMode == GameMode.Title)
+                    if (GameStateManager.Instance.CurrentMode is GameMode.Title)
                     {
-                        GameManager.gameMode = GameMode.Explore;
+                        GameStateManager.Instance.ChangeMode(GameMode.Explore);
                         TitleLbl.Visible = false;
                         this.Hide();
                     }
@@ -69,24 +76,20 @@ namespace EscapeFromDungeon.Core
                 {
                     fadeTimer.Stop();
 
-                    if (GameManager.gameMode == GameMode.Title)
+                    if (GameStateManager.Instance.CurrentMode is GameMode.Title)
                     {
-                        GameManager.gameMode = GameMode.Explore;
+                        GameStateManager.Instance.ChangeMode(GameMode.Explore);
                         this.Hide();
                     }
-                    else if (GameManager.gameMode == GameMode.Gameover || GameManager.gameMode == GameMode.GameClear)
+                    else if (GameStateManager.Instance.CurrentMode is (GameMode.Gameover or GameMode.GameClear))
                     {
-                        TitleLbl.Text = GameManager.gameMode == GameMode.Gameover ? Const.gameOver : Const.gameClear;
+                        TitleLbl.Text = GameStateManager.Instance.CurrentMode is GameMode.Gameover ? Const.gameOver : Const.gameClear;
                         this.KeyPreview = true;
                         StartBtn.Text = Const.retry;
                         TitleLbl.Visible = true;
                         StartBtn.Visible = true;
                         ExitBtn.Visible = true;
-                        this.Activate();
-                        this.KeyPreview = true;
-                        this.Focus();
-                        StartBtn.Focus();
-                        GameManager.gameMode = GameMode.Reset;
+                        GameStateManager.Instance.ChangeMode(GameMode.Reset);
                     }
                 }
             }
@@ -94,7 +97,7 @@ namespace EscapeFromDungeon.Core
 
         public void FollowOwner()
         {
-            if (this.Owner != null)
+            if (this.Owner is not null)
             {
                 //メインフォームのクライアント領域の左上をスクリーン座標に変換
                 this.Location = Owner.PointToScreen(Point.Empty);
@@ -118,7 +121,7 @@ namespace EscapeFromDungeon.Core
 
         private void ExitButtonClick(object sender, EventArgs e) => Application.Exit();
 
-        private void FadeForm_Shown(object sender, EventArgs e)
+        private void FadeForm_Show(object sender, EventArgs e)
         {
             this.Activate();
             this.KeyPreview = true;

@@ -1,17 +1,18 @@
 ﻿using EscapeFromDungeon.Behaviors;
 using EscapeFromDungeon.Constants;
 using EscapeFromDungeon.Models;
+using EscapeFromDungeon.Properties;
 using EscapeFromDungeon.Services;
 
 namespace EscapeFromDungeon.Core
 {
     internal class Battle
     {
-        public Monster Monster { get; set; }
-        public Player Player { get; set; }
-
+        private Player _player;
+        private Monster _monster = new Monster("名無し", 1, 1, Weak.None, "Enemy01", new DefaultBehavior());
+        private const int _poisonDamageBattle = 3;
         private int _battleTurn = 0;
-        private bool _isDefending = false;
+        private bool _isPlayerDefend = false;
 
         public Action<bool>? SetLabelVisible;
         public Action<bool>? SetMonsterVisible;
@@ -29,36 +30,37 @@ namespace EscapeFromDungeon.Core
             { Weak.Holy, Const.holyWepon }
         };
 
-        public Battle(Player player)
-        {
-            Player = player;
-            Monster = new Monster("仮スライム君", 1, 1, Weak.None, "Enemy01", new DefaultBehavior());
-        }
+        public Battle(Player player) => _player = player;
+
+        public void SetMonster(Monster monster) => _monster = monster;
 
         public void InitBattleTurn() => _battleTurn = 0;
 
         public async Task BattleLoopAsync()
         {
-            if (Monster.Hp <= 0)
+            if (_monster.Hp <= 0)
             {
-                GameManager.gameMode = GameMode.BattleEnd;
-                await DrawMessage.ShowAsync($"{Monster.Name}を倒した！");
+                GameStateManager.Instance.ChangeMode(GameMode.BattleEnd);
+                await DrawMessage.ShowAsync($"{_monster.Name}を倒した！");
+                GameManager.sePlayer.PlayOnce(Resources.maou_se_8bit27);
                 await Task.Delay(500);
-                var duration = Monster.Name == Const.demon ? 2 : 16;
-                if (CallDrop != null) await CallDrop.Invoke(600, duration, 8, false);
+
+                var duration = _monster.Name is Const.demon ? 2 : 16;
+                if (CallDrop is not null) await CallDrop.Invoke(600, duration, 8, false);
+
                 SetLabelVisible?.Invoke(true);
                 ChangeLblText?.Invoke();
                 return;
             }
-            if (Player.Hp <= 0 || Player.Limit <= 0)
+            if (_player.Hp <= 0 || _player.Limit <= 0)
             {
-                GameManager.gameMode = GameMode.Gameover;
+                GameStateManager.Instance.ChangeMode(GameMode.Gameover);
                 await Task.Delay(500);
                 return;
             }
 
             // 戦闘が続いているときはボタンを表示
-            if (GameManager.gameMode == GameMode.Battle)
+            if (GameStateManager.Instance.CurrentMode is GameMode.Battle)
             {
                 await DrawMessage.ShowAsync(Const.commndMsg);
                 SetLabelVisible?.Invoke(true);
@@ -67,36 +69,45 @@ namespace EscapeFromDungeon.Core
 
         public async Task PlayerTurnAsync(string command)
         {
-            _isDefending = false;
+            _isPlayerDefend = false;
 
             switch (command)
             {
                 case Const.CommandAtk:
                     var weponName = "";
                     //敵の弱点武器を持っていればダメージアップの処理
-                    if (Monster.Weak != Weak.None)
+                    if (_monster.Weak is not Weak.None)
                     {
-                        weakToItemMap.TryGetValue(Monster.Weak, out var weakWepon);
-                        weponName = Player.Inventry.Any(item => item.Name == weakWepon) ? weakWepon! : "";
+                        weakToItemMap.TryGetValue(_monster.Weak, out var weakWepon);
+                        weponName = _player.Inventry.Any(item => item.Name == weakWepon) ? weakWepon! : "";
                     }
                     //最強武器を持っていればすべての敵にダメージアップの処理
-                    if (Player.Inventry.Any(item => item.Name == Const.superWepon))
+                    if (_player.Inventry.Any(item => item.Name == Const.superWepon))
                     {
                         weponName = Const.superWepon;
                     }
                     await PlayerAttack(weponName);
                     break;
                 case Const.CommandDef:
-                    _isDefending = true;
-                    await DrawMessage.ShowAsync($"{Player.Name}は防御の体勢を取った！");
+                    _isPlayerDefend = true;
+                    await DrawMessage.ShowAsync($"{_player.Name}は防御の体勢を取った！");
                     break;
                 case Const.CommandHeal:
-                    if (Player.Inventry.Find(item => item.Name == Const.potion) != null)
+                    if (_player.Inventry.Find(item => item.Name == Const.potion) is not null)
                     {
-                        int healPoint = Math.Min(30, Player.MaxHp - Player.Hp);
-                        Player.Heal(healPoint);
-                        Player.UseItem(Const.potion);
-                        await DrawMessage.ShowAsync($"{Player.Name}は{healPoint}回復した！");
+                        if(_player.Hp == _player.MaxHp)
+                        {
+                            await DrawMessage.ShowAsync($"{Const.hpFullMsg}");
+                            await Task.Delay(400);
+                            await BattleLoopAsync();
+                            return;
+                        }
+
+                        int healPoint = Math.Min(30, _player.MaxHp - _player.Hp);
+                        _player.Heal(healPoint);
+                        _player.UseItem(Const.potion);
+                        GameManager.sePlayer.PlayOnce(Resources.maou_se_magical15);
+                        await DrawMessage.ShowAsync($"{_player.Name}は{healPoint}回復した！");
                         break;
                     }
                     else
@@ -107,39 +118,42 @@ namespace EscapeFromDungeon.Core
                         return;
                     }
                 case Const.CommandEsc:
-                    GameManager.gameMode = GameMode.Escaped;
+                    GameStateManager.Instance.ChangeMode(GameMode.Escaped);
+                    GameManager.sePlayer.PlayOnce(Resources.maou_se_battle19);
                     SetLabelVisible?.Invoke(true);
-                    if (CallShrink != null) await CallShrink.Invoke(30, 2);
-                    await DrawMessage.ShowAsync($"{Player.Name}は逃げ出した！");
-                    Player.Limit--;
+                    if (CallShrink is not null) await CallShrink.Invoke(30, 2);
+                    await DrawMessage.ShowAsync($"{_player.Name}は逃げ出した！");
+                    _player.Limit--;
+                    GameManager.bgmPlayer.PlayLoop(Resources.maou_bgm_8bit04);
                     return;
             }
 
             await Task.Delay(500);
 
-            if (Monster.Hp > 0) await EnemyTurnAsync();
+            if (_monster.Hp > 0) await EnemyTurnAsync();
             else
             {
-                Player.Limit--;
+                _player.Limit--;
                 _battleTurn++;
                 await BattleLoopAsync();
             }
 
-        }//PlayerTurn
+        }//_playerTurn
 
         private async Task PlayerAttack(string itemName)
         {
             var behavior = PlayerAttackRegistry.GetBehavior(itemName);
-            var action = behavior.DecideAction(Player, Monster, itemName);
+            var action = behavior.DecideAction(_player, _monster, itemName);
 
             await DrawMessage.ShowAsync(action.Message);
-            Monster.TakeDamage(action.Damage);
-            if (CallShaker != null) await CallShaker.Invoke(Target.enemy, Shake.weak, 400, 30);
+            GameManager.sePlayer.PlayOnce(Resources.maou_se_battle06);
+            _monster.TakeDamage(action.Damage);
+            if (CallShaker is not null) await CallShaker.Invoke(Target.enemy, Shake.weak, 400, 30);
         }
 
         private async Task EnemyTurnAsync()
         {
-            var action = Monster.behavior.DecideAction(_battleTurn, Monster, Player);
+            var action = _monster.behavior.DecideAction(_battleTurn, _monster, _player);
 
             if (action.SkipDamage)
             {
@@ -147,41 +161,41 @@ namespace EscapeFromDungeon.Core
             }
             else
             {
-                if (_isDefending)
+                if (_isPlayerDefend)
                 {
-                    await DrawMessage.ShowAsync($"{Monster.Name}の攻撃！{Player.Name}は防御した！");
+                    await DrawMessage.ShowAsync($"{_monster.Name}の攻撃！{_player.Name}は防御した！");
                 }
                 else
                 {
                     await DrawMessage.ShowAsync(action.Message);
-                    Player.TakeDamage(action.Damage);
-                    if (CallShaker != null) await CallShaker.Invoke(Target.player, action.shakeType, 400, 30);
+                    GameManager.sePlayer.PlayOnce(Resources.maou_se_8bit22);
+                    _player.TakeDamage(action.Damage);
+                    if (CallShaker is not null) await CallShaker.Invoke(Target.player, action.shakeType, 400, 30);
                 }
             }
 
             await Task.Delay(500);
             await IsStatusPoison();
 
-            Player.Limit--;
+            _player.Limit--;
             _battleTurn++;
             await BattleLoopAsync();
         }
 
         private async Task IsStatusPoison()
         {
-            if (Player.Status == Status.Poison)
+            if (_player.Status is Status.Poison)
             {
-                if (Player.GetItemCount(Const.curePoison) > 0)
+                if (_player.GetItemCount(Const.curePoison) > 0)
                 {
-                    await DrawMessage.ShowAsync($"{Player.Name}は{Const.curePoison}を使った！");
-                    Player.HealStatus();
+                    await DrawMessage.ShowAsync($"{_player.Name}は{Const.curePoison}を使った！");
+                    _player.HealStatus();
                 }
                 else
                 {
-                    int poisonDamage = 3;
-                    Player.TakeDamage(poisonDamage);
-                    await DrawMessage.ShowAsync($"{Player.Name}は毒で{poisonDamage}のダメージ！");
-                    if (CallShaker != null) await CallShaker.Invoke(Target.player, Shake.normal, 400, 30);
+                    _player.TakeDamage(_poisonDamageBattle);
+                    await DrawMessage.ShowAsync($"{_player.Name}は毒で{_poisonDamageBattle}のダメージ！");
+                    if (CallShaker is not null) await CallShaker.Invoke(Target.player, Shake.normal, 400, 30);
                 }
                 await Task.Delay(500);
             }

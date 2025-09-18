@@ -8,10 +8,10 @@ namespace EscapeFromDungeon.Constants
 
     internal static class Const
     {
-        public static readonly string mapCsv = "map.csv";
-        public static readonly string eventCsv = "event.csv";
-        public static readonly string monsterCsv = "monster.csv";
-        public static readonly string itemCsv = "item.csv";
+        public static readonly string mapCsv = @"resources/CSVs/map.csv";
+        public static readonly string eventCsv = @"resources/CSVs/event.csv";
+        public static readonly string monsterCsv = @"resources/CSVs/monster.csv";
+        public static readonly string itemCsv = @"resources/CSVs/item.csv";
 
         public static readonly string[] separator = new[] { "\r\n", "\r", "\n" };
         public static readonly string title = "Escape\nFrom\nDungeon";

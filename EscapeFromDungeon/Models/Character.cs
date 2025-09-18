@@ -8,28 +8,29 @@ namespace EscapeFromDungeon.Models
         Poison,
     }
 
+    [Flags]
     public enum Weak
     {
-        None,
-        Fire,
-        Ice,
-        Thunder,
-        Heavy,
-        Holy
+        None = 0,
+        Fire = 1 << 0, // 1
+        Ice = 1 << 1, // 2
+        Thunder = 1 << 2, // 4
+        Heavy = 1 << 3, // 8
+        Holy = 1 << 4  // 16
     }
 
     public class Character
     {
-        private int hp;
+        private int _hp;
 
         public int Hp
         {
-            get => hp;
+            get => _hp;
             set
             {
-                hp = value;
-                if (hp < 0) hp = 0;
-                if (hp >= MaxHp) hp = MaxHp;
+                _hp = value;
+                if (_hp < 0) _hp = 0;
+                if (_hp >= MaxHp) _hp = MaxHp;
             }
         }
         public int MaxHp { get; private set; }
@@ -60,7 +61,7 @@ namespace EscapeFromDungeon.Models
 
     public class Player : Character
     {
-        public List<Item> Inventry { get; set; }
+        public List<Item> Inventry { get; private set; }
 
         public Player(string name, int hp, int attack, int limit) : base(name, hp, attack) 
         {
@@ -70,18 +71,18 @@ namespace EscapeFromDungeon.Models
 
         public enum Direction { Up, Down, Left, Right }
 
-        public Direction Dir { get; set; } = Direction.Up;
+        public Direction Dir { get; private set; } = Direction.Up;
 
         public Image playerImage { get; private set; } = Properties.Resources.Up;
 
-        private int limit;
+        private int _limit;
         public int Limit
         {
-            get => limit;
+            get => _limit;
             set
             {
-                limit = value;
-                if (limit < 0) limit = 0;
+                _limit = value;
+                if (_limit < 0) _limit = 0;
             }
         }
 
@@ -99,7 +100,7 @@ namespace EscapeFromDungeon.Models
         public void UseItem(string itemName)
         {
             var usedItem = Inventry.Find(item => item.Name == itemName);
-            if (usedItem != null) Inventry.Remove(usedItem);
+            if (usedItem is not null) Inventry.Remove(usedItem);
         }
 
         public int GetItemCount(string itemName)
@@ -110,7 +111,7 @@ namespace EscapeFromDungeon.Models
         public void SetDirectionImage(Direction dir)
         {
             switch (dir)
-            {
+            {   
                 case Direction.Down:
                     Dir = Direction.Down;
                     playerImage = Properties.Resources.Down;
@@ -144,11 +145,12 @@ namespace EscapeFromDungeon.Models
 
     public class Monster : Character
     {
-        public Weak Weak { get; set; } = Weak.None;
+        public Weak Weak { get; private set; } = Weak.None;
 
-        public string ImageName {  get; set; }
+        public string ImageName {  get; private set; }
 
-        public IMonsterBehavior behavior { get; set; }
+        public IMonsterBehavior behavior { get; private set; }
+
         public Monster(string name, int hp, int attack, Weak weak, string image, IMonsterBehavior behavior) : base(name, hp, attack) 
         {
             Weak = weak;
