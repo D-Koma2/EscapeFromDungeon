@@ -105,6 +105,8 @@ namespace EscapeFromDungeon.Models
 
         public static void SetIsVisionEnable(bool value) => IsVisionEnabled = value;
 
+        public static void ToggleVisionEnable() => IsVisionEnabled = !IsVisionEnabled;
+
         public static void InitMap()
         {
             for (int y = 0; y < Height; y++)

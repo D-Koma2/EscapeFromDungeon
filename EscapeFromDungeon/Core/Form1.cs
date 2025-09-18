@@ -45,7 +45,7 @@ namespace EscapeFromDungeon.Core
             InitDictionary();// ラベルの名前を使うので InitializeComponent()の後
 
             _gameManager = new GameManager();//最初に生成する事!
-            SetupGameManagerEvents();//GameManager生成の後に呼ぶ
+            SetupHandleEvents();//GameManager生成の後に呼ぶ
 
             InitPictureBoxes();
             InitDraw();
@@ -94,10 +94,10 @@ namespace EscapeFromDungeon.Core
             SetMapPos();
         }
 
-        private void SetupGameManagerEvents()
+        private void SetupHandleEvents()
         {
-            _gameManager.MoveKeyPressed = HandleBattleOrExploreAsync;
-            _gameManager.ItemKeyPressed = UseItem;
+            InputManager.MoveKeyPressed = HandleBattleOrExploreAsync;
+            InputManager.ItemKeyPressed = UseItem;
 
             _gameManager.ChangeLblText = ChangeLblText;
             _gameManager.SetMonsterImg = SetMonsterImage;
@@ -113,7 +113,7 @@ namespace EscapeFromDungeon.Core
             _gameManager.Battle.SetMonsterVisible = SetMonsterImgVisible;
             _gameManager.Battle.ChangeLblText = ChangeLblText;
 
-            _gameManager.Player.FlashByDamage = ColorChangeByDamage;
+            _gameManager.Player.FlashByDamage = FlashByDamage;
         }
 
         private void FadeSetup()
@@ -248,7 +248,7 @@ namespace EscapeFromDungeon.Core
             _lastInputTimeExplor = DateTime.Now;
 
             SetLblCol(e.KeyCode, _lblSelectCol);
-            _gameManager.KeyInput(e.KeyCode);
+            InputManager.KeyInput(e.KeyCode);
         }
 
         private void FormKeyUp(object sender, KeyEventArgs e)
@@ -323,7 +323,7 @@ namespace EscapeFromDungeon.Core
             }
             else if (GameStateManager.Instance.CurrentMode is GameMode.Explore)
             {
-                _gameManager.KeyInput(exploreKey);
+                InputManager.KeyInput(exploreKey);
             }
 
             SetLabelBaseCol();
@@ -533,7 +533,7 @@ namespace EscapeFromDungeon.Core
             }
         }
 
-        public async void ColorChangeByDamage()
+        public async void FlashByDamage()
         {
             int red = 0;
             Color color = Color.FromArgb(255, red, 0, 0);
