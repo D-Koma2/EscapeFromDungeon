@@ -26,12 +26,9 @@ namespace EscapeFromDungeon.Models
         public int Hp
         {
             get => _hp;
-            set
-            {
-                _hp = value;
-                Hp = Math.Clamp(Hp, 0, MaxHp);
-            }
+            set => _hp = Math.Clamp(value, 0, MaxHp);
         }
+
         public int MaxHp { get; private set; }
         public string Name { get; private set; }
         public int Attack { get; private set; }
@@ -50,7 +47,6 @@ namespace EscapeFromDungeon.Models
         public void TakeDamage(int damage)
         {
             Hp -= damage;
-            Hp = Math.Clamp(Hp, 0, MaxHp);
             FlashByDamage?.Invoke();
         }
 
@@ -81,11 +77,7 @@ namespace EscapeFromDungeon.Models
             set => _limit = Math.Max(0, value);
         }
 
-        public void Heal(int amount)
-        {
-            Hp += amount;
-            Hp = Math.Clamp(Hp, 0, MaxHp);
-        }
+        public void Heal(int amount) => Hp += amount;
 
         public void GetItem(string name, string dsc)
         {
@@ -128,7 +120,6 @@ namespace EscapeFromDungeon.Models
 
         public void Init(int hp, int limit)
         {
-            Hp = MaxHp;
             Hp = hp;
             Limit = limit;
             HealStatus();

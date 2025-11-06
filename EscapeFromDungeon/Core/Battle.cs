@@ -175,6 +175,13 @@ namespace EscapeFromDungeon.Core
             }
 
             await Task.Delay(500);
+
+            if (_player.Hp <= 0)
+            {
+                await BattleLoopAsync();
+                return;
+            }
+
             await IsStatusPoison();
 
             _player.Limit--;
