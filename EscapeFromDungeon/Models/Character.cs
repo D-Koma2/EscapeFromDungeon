@@ -29,8 +29,7 @@ namespace EscapeFromDungeon.Models
             set
             {
                 _hp = value;
-                if (_hp < 0) _hp = 0;
-                if (_hp >= MaxHp) _hp = MaxHp;
+                Hp = Math.Clamp(Hp, 0, MaxHp);
             }
         }
         public int MaxHp { get; private set; }
@@ -51,7 +50,7 @@ namespace EscapeFromDungeon.Models
         public void TakeDamage(int damage)
         {
             Hp -= damage;
-            if (Hp < 0) Hp = 0;
+            Hp = Math.Clamp(Hp, 0, MaxHp);
             FlashByDamage?.Invoke();
         }
 
@@ -63,7 +62,7 @@ namespace EscapeFromDungeon.Models
     {
         public List<Item> Inventry { get; private set; }
 
-        public Player(string name, int hp, int attack, int limit) : base(name, hp, attack) 
+        public Player(string name, int hp, int attack, int limit) : base(name, hp, attack)
         {
             Inventry = new List<Item>();
             Limit = limit;
@@ -79,17 +78,13 @@ namespace EscapeFromDungeon.Models
         public int Limit
         {
             get => _limit;
-            set
-            {
-                _limit = value;
-                if (_limit < 0) _limit = 0;
-            }
+            set => _limit = Math.Max(0, value);
         }
 
         public void Heal(int amount)
         {
             Hp += amount;
-            if (Hp > MaxHp) Hp = MaxHp;
+            Hp = Math.Clamp(Hp, 0, MaxHp);
         }
 
         public void GetItem(string name, string dsc)
@@ -111,7 +106,7 @@ namespace EscapeFromDungeon.Models
         public void SetDirectionImage(Direction dir)
         {
             switch (dir)
-            {   
+            {
                 case Direction.Down:
                     Dir = Direction.Down;
                     playerImage = Properties.Resources.Down;
@@ -147,11 +142,11 @@ namespace EscapeFromDungeon.Models
     {
         public Weak Weak { get; private set; } = Weak.None;
 
-        public string ImageName {  get; private set; }
+        public string ImageName { get; private set; }
 
         public IMonsterBehavior behavior { get; private set; }
 
-        public Monster(string name, int hp, int attack, Weak weak, string image, IMonsterBehavior behavior) : base(name, hp, attack) 
+        public Monster(string name, int hp, int attack, Weak weak, string image, IMonsterBehavior behavior) : base(name, hp, attack)
         {
             Weak = weak;
             ImageName = image;
