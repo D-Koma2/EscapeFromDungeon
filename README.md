@@ -1,4 +1,6 @@
 # Escape From Dungeon
+<img width="800" height="565" alt="EFD_SHOT" src="https://github.com/user-attachments/assets/0ce26eb4-d1d8-45c2-be63-23f3456e3b50" />
+
 - BGM・効果音素材はすべて魔王魂さん( https://maou.audio )からお借りしています。
 
 ## YouTube プレイ動画
