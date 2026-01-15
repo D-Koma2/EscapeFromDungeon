@@ -1,5 +1,5 @@
 # Escape From Dungeon
-<img width="800" height="565" alt="EFD_SHOT" src="https://github.com/user-attachments/assets/0ce26eb4-d1d8-45c2-be63-23f3456e3b50" />
+<img width="800" height="565" alt="EFD_SHOT" src="https://github.com/user-attachments/assets/72ec3f5a-7711-4eed-a21d-798718a539e5" />
 
 - BGM・効果音素材はすべて魔王魂さん( https://maou.audio )からお借りしています。
 
@@ -130,9 +130,10 @@ https://youtu.be/sdqMlVHUhMc
 | L | 0～3 | 回復イベント(一度きり) |
 | G | G | ゴール地点(ゲームクリア) |
 
-<img width="600" height="945" alt="EFD_csv" src="https://github.com/user-attachments/assets/7330e05c-c9e4-4e01-9735-e38c44c139d3" />
+<img width="600" height="945" alt="EFD_csv" src="https://github.com/user-attachments/assets/00823d3c-171d-4b9a-97a5-771b44642402" />
 
-<img width="913" height="767" alt="EFD_map1" src="https://github.com/user-attachments/assets/2846c482-e194-4e80-91b9-ce8c629ba9e1" />
+<img width="913" height="767" alt="EFD_map1" src="https://github.com/user-attachments/assets/a50b4e26-7656-4c31-bd6f-54c31df3c080" />
 
 - マップのCSVは LibreOffice を使用し、マクロでセルの色を変え視覚的にわかりやすくして編集を行いました。
-<img width="551" height="667" alt="EFD_map1macro" src="https://github.com/user-attachments/assets/c6a38e6e-a4c6-4f0b-ab29-7aa4d4e26549" />
+<img width="551" height="667" alt="EFD_map1macro" src="https://github.com/user-attachments/assets/7c555ce9-c9a2-49a9-b3ec-f9f32fae0c6d" />
+
